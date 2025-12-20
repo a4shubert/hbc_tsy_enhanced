@@ -1,10 +1,12 @@
 import datetime
 import json
 import math
+import os
 import tempfile
 from collections import namedtuple
 from pathlib import Path
 from typing import Any
+from typing import Iterable, List, Optional, Union
 
 import pandas as pd
 import yaml
@@ -175,14 +177,14 @@ def _autofit_columns(xlsx_path, sheet_name, max_width=80):
 
 
 def save_dataframe_as_sheet(
-    dir_path,
-    filename,
-    df,
-    sheet_name,
-    replace=False,
-    index=True,
-    autofit=True,
-    max_width=80,
+        dir_path,
+        filename,
+        df,
+        sheet_name,
+        replace=False,
+        index=True,
+        autofit=True,
+        max_width=80,
 ):
     """
     Append DataFrame as a sheet to an Excel file, creating the file if needed.
@@ -205,7 +207,7 @@ def save_dataframe_as_sheet(
 
         if replace and sheet in existing:
             with pd.ExcelWriter(
-                xlsx, engine="openpyxl", mode="a", if_sheet_exists="replace"
+                    xlsx, engine="openpyxl", mode="a", if_sheet_exists="replace"
             ) as w:
                 df.to_excel(w, sheet_name=sheet, index=index)
             if autofit:
@@ -224,3 +226,41 @@ def save_dataframe_as_sheet(
 
     if autofit:
         _autofit_columns(xlsx, sheet, max_width=max_width)
+
+
+PathLikeStr = Union[str, os.PathLike]
+
+def path_to_str(p: Optional[PathLikeStr]) -> Optional[str]:
+    """
+    Convert a single Path/PathLike/str to a str.
+
+    Parameters
+    ----------
+    p : Optional[PathLikeStr]
+        A pathlib.Path, any os.PathLike, plain str, or None.
+
+    Returns
+    -------
+    Optional[str]
+        String path, or None if input was None.
+
+    Raises
+    ------
+    TypeError
+        If `p` is not str or PathLike.
+    """
+    if p is None:
+        return None
+    # Why: supports any os.PathLike (not only pathlib.Path).
+    return os.fspath(p)
+
+
+def paths_to_str(seq: Iterable[PathLikeStr]) -> List[str]:
+    """
+    Convert an iterable of Path/PathLike/str to a list[str].
+
+    Notes
+    -----
+    - Fails fast if any element isn't a valid PathLike or str.
+    """
+    return [os.fspath(x) for x in seq]

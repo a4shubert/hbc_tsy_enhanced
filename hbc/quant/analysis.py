@@ -4,97 +4,97 @@ import pandas as pd
 
 class AnalyticalEngine:
     @staticmethod
-    def _validate_inputs(df, metric_col, group):
-        cols = [metric_col] + (group or [])
+    def _validate_inputs(df, col_metric, group):
+        cols = [col_metric] + (group or [])
         missing = [c for c in cols if c not in df.columns]
         if missing:
             raise KeyError("Missing columns: %r" % missing)
 
     @classmethod
-    def top_n_best(cls, n, df, metric_col, group=None):
+    def top_n_best(cls, n, df, col_metric, group=None):
         # ensure numeric if it accidentally became strings
-        if df[metric_col].dtype == "object":
+        if df[col_metric].dtype == "object":
             df = df.copy()
-            df[metric_col] = pd.to_numeric(df[metric_col], errors="coerce")
+            df[col_metric] = pd.to_numeric(df[col_metric], errors="coerce")
 
         if group:
             s = (
-                df[group + [metric_col]]
-                .dropna(subset=[metric_col])
-                .groupby(group, observed=True, dropna=False)[metric_col]
+                df[group + [col_metric]]
+                .dropna(subset=[col_metric])
+                .groupby(group, observed=True, dropna=False)[col_metric]
                 .min()
             )
             return (
-                s.sort_values(ascending=True).head(n).to_frame(name=metric_col)
+                s.sort_values(ascending=True).head(n).to_frame(name=col_metric)
             )
 
-        base = df[[metric_col]].dropna(subset=[metric_col])
+        base = df[[col_metric]].dropna(subset=[col_metric])
         # nsmallest already returns ascending; keep it ascending
-        return base.nsmallest(n, metric_col).sort_values(
-            metric_col, ascending=True
+        return base.nsmallest(n, col_metric).sort_values(
+            col_metric, ascending=True
         )
 
     @classmethod
-    def top_n_worst(cls, n, df, metric_col, group=None):
-        cls._validate_inputs(df, metric_col, group)
+    def top_n_worst(cls, n, df, col_metric, group=None):
+        cls._validate_inputs(df, col_metric, group)
         if group:
             s = (
-                df[group + [metric_col]]
-                .dropna(subset=[metric_col])
-                .groupby(group, observed=True, dropna=False)[metric_col]
+                df[group + [col_metric]]
+                .dropna(subset=[col_metric])
+                .groupby(group, observed=True, dropna=False)[col_metric]
                 .max()
             )
-            out = s.to_frame(name=metric_col)
-            return out.sort_values(metric_col, ascending=False).head(n)
-        base = df[[metric_col]].dropna(subset=[metric_col])
-        return base.nlargest(n, metric_col).sort_values(
-            metric_col, ascending=False
+            out = s.to_frame(name=col_metric)
+            return out.sort_values(col_metric, ascending=False).head(n)
+        base = df[[col_metric]].dropna(subset=[col_metric])
+        return base.nlargest(n, col_metric).sort_values(
+            col_metric, ascending=False
         )
 
     @classmethod
-    def median(cls, df, metric_col, group=None):
-        cls._validate_inputs(df, metric_col, group)
+    def median(cls, df, col_metric, group=None):
+        cls._validate_inputs(df, col_metric, group)
         if group:
             s = (
-                df[group + [metric_col]]
-                .dropna(subset=[metric_col])
-                .groupby(group, observed=True, dropna=False)[metric_col]
+                df[group + [col_metric]]
+                .dropna(subset=[col_metric])
+                .groupby(group, observed=True, dropna=False)[col_metric]
                 .median()
             )
-            return s.to_frame(name=metric_col).sort_values(
-                metric_col, ascending=False
+            return s.to_frame(name=col_metric).sort_values(
+                col_metric, ascending=False
             )
-        val = df[metric_col].median(skipna=True)
-        return pd.DataFrame({metric_col: [float(val)]}).sort_values(
-            metric_col, ascending=False
+        val = df[col_metric].median(skipna=True)
+        return pd.DataFrame({col_metric: [float(val)]}).sort_values(
+            col_metric, ascending=False
         )
 
     @classmethod
-    def mean(cls, df, metric_col, group=None):
-        cls._validate_inputs(df, metric_col, group)
+    def mean(cls, df, col_metric, group=None):
+        cls._validate_inputs(df, col_metric, group)
         if group:
             s = (
-                df[group + [metric_col]]
-                .dropna(subset=[metric_col])
-                .groupby(group, observed=True, dropna=False)[metric_col]
+                df[group + [col_metric]]
+                .dropna(subset=[col_metric])
+                .groupby(group, observed=True, dropna=False)[col_metric]
                 .mean()
             )
-            return s.to_frame(name=metric_col).sort_values(
-                metric_col, ascending=False
+            return s.to_frame(name=col_metric).sort_values(
+                col_metric, ascending=False
             )
-        val = df[metric_col].mean(skipna=True)
-        return pd.DataFrame({metric_col: [float(val)]}).sort_values(
-            metric_col, ascending=False
+        val = df[col_metric].mean(skipna=True)
+        return pd.DataFrame({col_metric: [float(val)]}).sort_values(
+            col_metric, ascending=False
         )
 
     @classmethod
-    def descriptive_stats(cls, n_best, n_worst, df, metric_col, group=None):
+    def descriptive_stats(cls, n_best, n_worst, df, col_metric, group=None):
         n_best = int(n_best)
         n_worst = int(n_worst)
-        cls._validate_inputs(df, metric_col, group)
+        cls._validate_inputs(df, col_metric, group)
         return {
-            "best": cls.top_n_best(n_best, df, metric_col, group=group),
-            "worst": cls.top_n_worst(n_worst, df, metric_col, group=group),
-            "median": cls.median(df, metric_col, group=group),
-            "mean": cls.mean(df, metric_col, group=group),
+            "best": cls.top_n_best(n_best, df, col_metric, group=group),
+            "worst": cls.top_n_worst(n_worst, df, col_metric, group=group),
+            "median": cls.median(df, col_metric, group=group),
+            "mean": cls.mean(df, col_metric, group=group),
         }
