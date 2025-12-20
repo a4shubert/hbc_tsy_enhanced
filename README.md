@@ -42,21 +42,23 @@ csv, and xml. Optionally, specify a keyword arg to filter results:
 
 #### For data-pipeline structure:
 
-- we impelent `yaml` based configs and for now do not validate the completeness of the keys, we take [] operator assuming all the keys are present in the config
+- we implement `yaml` based configs and for now do not validate the completeness of the keys, we take [] operator assuming all the keys are present in the config
 - `fetch` method on Fetcher will return pandas DataFrame just as a short-cut for the time being, subsequently more nuanced data structures can be implemented
+- we organize CACHE for now as simply .csv files each of which is persisted in a designated folder parametrized by `as_of` date
 
-#### For an incremental retrieving:
+**For an incremental retrieval:**
 
-we notice the ordering of `unique_key` does not correspond to the ordering of `created_date`, thus,
+we notice the ordering of `unique_key` does not correspond to the ordering of `created_date`, thus
 
-- at a regular intervals we
-  - given the latest persisted `unique_key` we find it's record in the dataset and take it's `created_date`
-  - we find all the unique keys with the `created_date` greater than found
-  - we retrieve all the data for the found unique keys
-- at a less frequent intervals we
-  - get all the unique keys in the dataset (e.g. for the last 2 years)
-  - identify if any are missing in our cache
-  - retrieve the missing records if any
+- at a daily intervals (perhaps for as_of=T we download T-1 data):
+  - we download the `created_date` = T-1
+
+**For an consistency retrieval:**
+
+- at less frequent intervals we restore consistency to CACHE by
+  - obtaining all the unique `created_dates` in dataset
+  - comparing with the dates available in CACHE
+  - retrieving all the missing dates
 
 ## Transform:
 

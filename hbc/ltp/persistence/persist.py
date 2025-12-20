@@ -8,7 +8,7 @@ import pandas as pd
 from hbc import utils as ul, app_context
 
 if TYPE_CHECKING:
-    from hbc.abstract.container import DataContainer
+    from hbc.api.container import DataContainer
 
 
 class Persistence:
@@ -24,7 +24,6 @@ class Persistence:
             / f"{dc.moniker}.csv"
         )
         dc.df.to_csv(path_cache, index=False)
-        print("ok")
 
     @classmethod
     def from_cache(cls, dc: "DataContainer", as_of: datetime):

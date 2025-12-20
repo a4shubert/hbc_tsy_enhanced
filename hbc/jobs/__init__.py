@@ -2,7 +2,7 @@ import argparse
 from typing import Any, Sequence
 
 from hbc import app_context, utils as ul
-from hbc.jobs.pipeline.job_nyc_open_data import job_poll_nyc_open_data
+from hbc.jobs.pipeline.job_nyc_open_data import job_poll_nyc_open_data_311
 from hbc.jobs.registry import JOB_REGISTRY
 
 
@@ -80,3 +80,11 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     job_fn = JOB_REGISTRY[args.job_name]
     job_fn(**run_kwargs)
+
+
+if __name__ == '__main__':
+    main ([
+        '--as-of=20090102',
+        '--job-name=job_poll_nyc_open_data_311'
+
+    ])

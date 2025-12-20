@@ -1,4 +1,5 @@
-moniker: 'fetcher_nyc_open_data'
+moniker: 'nyc_open_data_311_service_requests'
+fetcher: FetcherNYCOpenData
 token: ERZjPaQcb5J6iJOZeF1BDu4hd
 base_url: data.cityofnewyork.us
 url: '3rfa-3xsf'
@@ -7,7 +8,7 @@ kwargs:
   where:
   order:
   group:
-  limit:
+  limit: 20000
   offset:
   q:
   query:

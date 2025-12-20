@@ -1,0 +1,58 @@
+import datetime
+from typing import Any, Union
+
+from hbc import utils as ul
+
+
+class AppContext:
+
+    def __init__(self) -> None:
+        # why: keep storage private so validation runs via the property
+        self._as_of: datetime.date = datetime.date.today()
+
+    def __str__(self) -> str:
+        def fmt(v: Any) -> str:
+            if isinstance(v, (datetime.date, datetime.datetime)):  # why: human-friendly ISO
+                return v.isoformat()
+            return repr(v)
+
+        body = ", ".join(f"{k}={fmt(v)}" for k, v in sorted(self.__dict__.items()))
+        return f"{self.__class__.__name__}({body})"
+
+    __repr__ = __str__
+
+    @property
+    def as_of(self) -> datetime.date:
+        """Get the current logical business date."""
+        return self._as_of
+
+    @as_of.setter
+    def as_of(self, value: Union[datetime.date, datetime.datetime, str]) -> None:
+        """
+        Set the logical business date.
+        Accepts `date`, `datetime` (converted to date), or ISO `YYYY-MM-DD` string.
+        """
+        if isinstance(value, datetime.datetime):
+            self._as_of = value.date()
+            return
+        if isinstance(value, datetime.date):
+            self._as_of = value
+            return
+        if isinstance(value, str):
+            try:
+                self._as_of = ul.str_as_date(value)
+                return
+            except ValueError as exc:
+                raise ValueError(f"Invalid ISO date string for as_of: {value!r}") from exc
+        raise TypeError(
+            "as_of must be a datetime.date, datetime.datetime, or ISO 'YYYY-MM-DD' string"
+        )
+
+    def update(self, **kwargs: Any) -> "AppContext":
+        for k, v in kwargs.items():
+            if hasattr(self, k):
+                setattr(self, k, v)
+        return self
+
+
+app_context = AppContext()

@@ -4,7 +4,6 @@ import pandas as pd
 
 from hbc import utils as ul
 from hbc.ltp.fetching import Fetcher
-from hbc.ltp.fetching import fetchers_registry
 from hbc.ltp.persistence.persist import Persistence
 
 
@@ -15,7 +14,8 @@ class DataContainer:
         self.df: pd.DataFrame = pd.DataFrame()
 
     def get(self):
-        fetcher: Fetcher = fetchers_registry[self.moniker]
+        fetcher_name: str = self.config['fetcher']
+        fetcher: Fetcher = Fetcher.from_name(fetcher_name)
         self.df = fetcher.get(self.config)
 
     def to_cache(self, as_of: datetime.date = None):

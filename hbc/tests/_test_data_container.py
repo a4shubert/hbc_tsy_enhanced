@@ -1,5 +1,5 @@
-from hbc.abstract.container import DataContainer
+from hbc.api.container import DataContainer
 
 if __name__ == "__main__":
-    dc = DataContainer("fetcher_nyc_open_data")
+    dc = DataContainer("nyc_open_data_311_service_requests")
     dc.get()

@@ -5,7 +5,7 @@ import pandas as pd
 from hbc import app_context, DataContainer, utils as ul
 
 
-def job_poll_nyc_open_data(as_of: datetime.date = None, incremental=True):
+def job_poll_nyc_open_data_311(as_of: datetime.date = None, incremental=True):
     """
     Job for polling nyc_open_data
     :param as_of:
@@ -13,7 +13,7 @@ def job_poll_nyc_open_data(as_of: datetime.date = None, incremental=True):
     one created_date at a time
     :return:
     """
-    dc = DataContainer("fetcher_nyc_open_data")
+    dc = DataContainer("nyc_open_data_311_service_requests")
 
     if as_of:
         app_context.update(as_of=as_of)
@@ -43,7 +43,7 @@ def job_poll_nyc_open_data(as_of: datetime.date = None, incremental=True):
             print(
                 f"Running job_poll_nyc_open_data for {len(missing_dates)} dates:"
             )
-            for as_of in sorted(list(missing_dates))[:5]:
+            for as_of in sorted(list(missing_dates)):
                 print(f"working {as_of}")
                 dc.config["kwargs"].update(
                     {
