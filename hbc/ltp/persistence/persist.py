@@ -36,7 +36,7 @@ class Persistence:
         )
         if os.path.exists(path_cache):
             print(f'Retrieved from cache: {path_cache}')
-            return pd.read_csv(path_cache)
+            return pd.read_csv(path_cache, keep_default_na=False)
         else:
             print(f'Path {path_cache} does not exist')
             return pd.DataFrame()
@@ -44,4 +44,4 @@ class Persistence:
     @classmethod
     def get_all_cache_dates(cls, dc: "DataContainer") -> list[str]:
         path_cache: Path = ul.get_dir_cache(dc.moniker)  # ensures base exists
-        return sorted(p.name for p in path_cache.iterdir() if p.is_dir())
+        return sorted((p.name for p in path_cache.iterdir() if p.is_dir()), reverse=True)

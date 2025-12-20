@@ -8,12 +8,13 @@ LIMIT_MISS_DATES = 10
 
 
 def job_poll_nyc_open_data_311(
-    as_of: datetime.date = None,
-    incremental=True,
-    last_missing_dates=LIMIT_MISS_DATES,
+        as_of: str = None,
+        incremental=True,
+        last_missing_dates=LIMIT_MISS_DATES,
 ):
     """
     Job for polling nyc_open_data
+    :param last_missing_dates:
     :param as_of:
     :param incremental: if True we only poll the missing data, otherwise we retrieve entire dataset
     one created_date at a time
@@ -21,25 +22,24 @@ def job_poll_nyc_open_data_311(
     """
     print(f"\n\nRunning job_poll_nyc_open_data\n\n")
 
-    dc = DataContainer("nyc_open_data_311_service_requests")
-
-    if as_of:
-        app_context.update(as_of=as_of)
+    if not as_of:
+        as_of = app_context.as_of
 
     if incremental:
         print(
-            f"Running job_poll_nyc_open_data for {app_context.as_of} and incremental={incremental}"
+            f"Running job_poll_nyc_open_data for {as_of} and incremental={incremental}"
         )
-        # we do not have data, thus
+        dc = DataContainer("nyc_open_data_311_service_requests")
         dc.config["kwargs"].update(
             {
-                "where": f"created_date = '{ul.date_as_iso_format(app_context.as_of)}' "
+                "where": f"created_date = '{ul.date_as_iso_format(ul.str_as_date(as_of))}' "
             }
         )
-        dc.get()
-        dc.to_cache()
+        dc.get(as_of)
+        dc.to_cache(as_of)
     else:
         # we are going to identify all the created_date(s) in the database that are missing in cache
+        dc = DataContainer("nyc_open_data_311_service_requests")
         dc.config["kwargs"].update(
             {"select": "created_date", "group": "created_date"}
         )
@@ -52,13 +52,14 @@ def job_poll_nyc_open_data_311(
                 f"Running job_poll_nyc_open_data for the last {last_missing_dates} dates:"
             )
             for as_of in sorted(list(missing_dates), reverse=True)[
-                :last_missing_dates
-            ]:
+                         :last_missing_dates
+                         ]:
                 print(f"working {as_of}")
+                dc = DataContainer("nyc_open_data_311_service_requests")
                 dc.config["kwargs"].update(
                     {
                         "where": f"created_date = '{ul.date_as_iso_format(as_of.date())}' "
                     }
                 )
-                dc.get()
+                dc.get(as_of)
                 dc.to_cache(as_of)

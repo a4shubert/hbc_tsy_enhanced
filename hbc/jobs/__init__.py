@@ -83,4 +83,4 @@ def main(argv: Sequence[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    main(["--as-of=20090105", "--job-name=job_poll_nyc_open_data_311"])
+    main(["--as-of=20090105", "--job-name=job_poll_nyc_open_data_311", '--incremental=False'])
