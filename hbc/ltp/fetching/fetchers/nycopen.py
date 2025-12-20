@@ -82,7 +82,7 @@ class FetcherNYCOpenData(Fetcher):
             )
 
         if {"created_date", "resolution_action_updated_date"} <= set(
-                df.columns
+            df.columns
         ):
             cd = _parse_dt(df["created_date"])
             rd = _parse_dt(df["resolution_action_updated_date"])
@@ -220,9 +220,7 @@ class FetcherNYCOpenData(Fetcher):
         client = Socrata(base_url, app_token=token)
 
         if not query_kwargs:
-            print(
-                f"added filter: created_date = {as_of}"
-            )
+            print(f"added filter: created_date = {as_of}")
             query_kwargs["where"] = (
                 f"created_date = '{ul.date_as_iso_format(as_of)}'"
             )
@@ -231,15 +229,13 @@ class FetcherNYCOpenData(Fetcher):
             paged_kwargs["limit"] = page_size
             rows = list(client.get_all(dataset, **paged_kwargs))
         else:
-            if 'limit' not in query_kwargs:
+            if "limit" not in query_kwargs:
                 page_size = int(config.get("page_size", CONST_PAGE_SIZE))
                 paged_kwargs = dict(query_kwargs)
                 paged_kwargs["limit"] = page_size
                 rows = list(client.get_all(dataset, **paged_kwargs))
             else:
-                rows = client.get(
-                    dataset, **query_kwargs
-                )
+                rows = client.get(dataset, **query_kwargs)
 
         df = pd.DataFrame.from_records(rows)
         print(f"Fetched {len(df)} rows")
@@ -247,6 +243,6 @@ class FetcherNYCOpenData(Fetcher):
 
     @staticmethod
     def finalize(df: pd.DataFrame) -> pd.DataFrame:
-        if 'DROP_REASON' in df.columns:
-            df['DROP_REASON'] = df['DROP_REASON'].fillna('')
+        if "DROP_REASON" in df.columns:
+            df["DROP_REASON"] = df["DROP_REASON"].fillna("")
         return df

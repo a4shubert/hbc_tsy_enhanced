@@ -8,9 +8,9 @@ LIMIT_MISS_DATES = 10
 
 
 def job_poll_nyc_open_data_311(
-        as_of: str = None,
-        incremental=True,
-        last_missing_dates=LIMIT_MISS_DATES,
+    as_of: str = None,
+    incremental=True,
+    last_missing_dates=LIMIT_MISS_DATES,
 ):
     """
     Job for polling nyc_open_data
@@ -52,8 +52,8 @@ def job_poll_nyc_open_data_311(
                 f"Running job_poll_nyc_open_data for the last {last_missing_dates} dates:"
             )
             for as_of in sorted(list(missing_dates), reverse=True)[
-                         :last_missing_dates
-                         ]:
+                :last_missing_dates
+            ]:
                 print(f"working {as_of}")
                 dc = DataContainer("nyc_open_data_311_service_requests")
                 dc.config["kwargs"].update(

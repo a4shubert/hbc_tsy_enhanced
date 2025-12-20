@@ -74,7 +74,6 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     args, rest = parser.parse_known_args(argv)
     run_kwargs = _parse_extra_kwargs(list(rest))
-
     if args.as_of:
         app_context.update(as_of=ul.str_as_date(args.as_of))
 
@@ -83,4 +82,10 @@ def main(argv: Sequence[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    main(["--as-of=20090105", "--job-name=job_poll_nyc_open_data_311", '--incremental=False'])
+    main(
+        [
+            "--as-of=20090105",
+            "--job-name=job_poll_nyc_open_data_311",
+            "--incremental=False",
+        ]
+    )

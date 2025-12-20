@@ -21,10 +21,15 @@ class DataContainer:
     def to_cache(self, as_of: datetime.date = None):
         Persistence.to_cache(self, as_of)
 
-    def from_cache(self, as_of: datetime.date = None):
+    def from_cache(
+        self, as_of: datetime.date = None, retrieve_if_missing=False
+    ):
         self.df = Persistence.from_cache(self, as_of)
+        if not len(self.df) and retrieve_if_missing:
+            self.get(as_of)
+            self.to_cache(as_of)
         return self.df
 
     @property
     def all_cached_dates(self):
-        return Persistence.get_all_cache_dates(self)
+        return Persistence.get_all_cached_dates(self)

@@ -24,7 +24,7 @@ class Persistence:
             / f"{dc.moniker}.csv"
         )
         dc.df.to_csv(path_cache, index=False)
-        print(f'Cached: {path_cache}')
+        print(f"Cached: {path_cache}")
 
     @classmethod
     def from_cache(cls, dc: "DataContainer", as_of: datetime):
@@ -35,13 +35,15 @@ class Persistence:
             / f"{dc.moniker}.csv"
         )
         if os.path.exists(path_cache):
-            print(f'Retrieved from cache: {path_cache}')
+            print(f"Retrieved from cache: {path_cache}")
             return pd.read_csv(path_cache, keep_default_na=False)
         else:
-            print(f'Path {path_cache} does not exist')
+            print(f"Path {path_cache} does not exist")
             return pd.DataFrame()
 
     @classmethod
-    def get_all_cache_dates(cls, dc: "DataContainer") -> list[str]:
+    def get_all_cached_dates(cls, dc: "DataContainer") -> list[str]:
         path_cache: Path = ul.get_dir_cache(dc.moniker)  # ensures base exists
-        return sorted((p.name for p in path_cache.iterdir() if p.is_dir()), reverse=True)
+        return sorted(
+            (p.name for p in path_cache.iterdir() if p.is_dir()), reverse=True
+        )

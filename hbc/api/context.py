@@ -14,14 +14,14 @@ class AppContext:
 
     def __str__(self) -> str:
         def fmt(v: Any) -> str:
-            if isinstance(
-                v, (datetime.date, datetime.datetime)
-            ):
+            if isinstance(v, (datetime.date, datetime.datetime)):
                 return v.isoformat()
             return repr(v)
 
         body = ",\n".join(
-            f"{k}: {fmt(v)}" for k, v in sorted(self.__dict__.items() ) if not k.startswith('_')
+            f"{k}: {fmt(v)}"
+            for k, v in sorted(self.__dict__.items())
+            if not k.startswith("_")
         )
         return f"{self.__class__.__name__}\nas_of : {self.as_of}\n{body}"
 
