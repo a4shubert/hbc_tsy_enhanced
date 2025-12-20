@@ -5,7 +5,7 @@ import hbc.ltp.fetching
 
 class Fetcher(ABC):
     @abstractmethod
-    def fetch(self, config) -> pd.DataFrame:
+    def fetch(self, config, as_of=None) -> pd.DataFrame:
         raise NotImplementedError()
 
     @staticmethod
@@ -28,10 +28,10 @@ class Fetcher(ABC):
         # why: hook for dedupe/sort/reorder after validation without changing normalize()
         return df
 
-    def get(self, config) -> pd.DataFrame:
+    def get(self, config, as_of=None) -> pd.DataFrame:
         print(f"config={config}")
         print("fetching...")
-        df = self.fetch(config)
+        df = self.fetch(config, as_of)
         if len(df):
             print("cleaning...")
             df = self.clean(df)

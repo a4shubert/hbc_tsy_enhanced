@@ -9,19 +9,21 @@ class AppContext:
     def __init__(self) -> None:
         # why: keep storage private so validation runs via the property
         self._as_of: datetime.date = datetime.date.today()
+        self.dir_cache = ul.get_dir_cache()
+        self.dir_analytics = ul.get_dir_analytics()
 
     def __str__(self) -> str:
         def fmt(v: Any) -> str:
             if isinstance(
                 v, (datetime.date, datetime.datetime)
-            ):  # why: human-friendly ISO
+            ):
                 return v.isoformat()
             return repr(v)
 
-        body = ", ".join(
-            f"{k}={fmt(v)}" for k, v in sorted(self.__dict__.items())
+        body = ",\n".join(
+            f"{k}: {fmt(v)}" for k, v in sorted(self.__dict__.items() ) if not k.startswith('_')
         )
-        return f"{self.__class__.__name__}({body})"
+        return f"{self.__class__.__name__}\nas_of : {self.as_of}\n{body}"
 
     __repr__ = __str__
 

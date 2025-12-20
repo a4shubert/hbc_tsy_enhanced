@@ -208,7 +208,9 @@ class FetcherNYCOpenData(Fetcher):
         return df
 
     @classmethod
-    def fetch(cls, config: Dict) -> pd.DataFrame:
+    def fetch(cls, config: Dict, as_of=None) -> pd.DataFrame:
+        if not as_of:
+            as_of = app_context.as_of
         token = config["token"]
         base_url = config["base_url"]  # e.g., "data.cityofnewyork.us"
         dataset = config["url"]  # e.g., "3rfa-3xsf"
@@ -223,10 +225,10 @@ class FetcherNYCOpenData(Fetcher):
             )  # respect caller's limit/offset
         if not query_kwargs:
             print(
-                f"empty query fetching is amended by created_date = {app_context.as_of}"
+                f"empty query fetching is amended by created_date = {as_of}"
             )
             query_kwargs["where"] = (
-                f"created_date = '{ul.date_as_iso_format(app_context.as_of)}'"
+                f"created_date = '{ul.date_as_iso_format(as_of)}'"
             )
         page_size = int(config.get("page_size", CONST_PAGE_SIZE))
         paged_kwargs = dict(query_kwargs)

@@ -27,17 +27,23 @@ def get_config(config_name: str) -> dict[str, Any] | list[dict[str, Any]]:
     return docs[0] if len(docs) == 1 else docs
 
 
-def get_base_dir() -> Path:
+def get_dir_base() -> Path:
     base = Path(tempfile.gettempdir()) / "hbc_nyc_dp"
     base.mkdir(parents=True, exist_ok=True)
     return base
 
 
-def get_cache_dir(postfix: str | None = None) -> Path:
-    base = get_base_dir() / "CACHE"
+def get_dir_cache(postfix: str | None = None) -> Path:
+    base = get_dir_base() / "CACHE"
     cache = base / postfix if postfix else base
     cache.mkdir(parents=True, exist_ok=True)
     return cache
+
+
+def get_dir_analytics() -> Path:
+    analytics = get_dir_base() / "ANALYTICS"
+    analytics.mkdir(parents=True, exist_ok=True)
+    return analytics
 
 
 def mk_dir(path: Path) -> Path:
@@ -56,6 +62,8 @@ def date_as_iso_format(dt: datetime.date) -> str:
 
 
 def str_as_date(dt: str):
+    if dt is None:
+        return
     if isinstance(dt, datetime.date):
         return dt
     return pd.to_datetime(dt).date()
