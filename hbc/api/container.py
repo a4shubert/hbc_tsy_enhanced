@@ -14,7 +14,7 @@ class DataContainer:
         self.df: pd.DataFrame = pd.DataFrame()
 
     def get(self):
-        fetcher_name: str = self.config['fetcher']
+        fetcher_name: str = self.config["fetcher"]
         fetcher: Fetcher = Fetcher.from_name(fetcher_name)
         self.df = fetcher.get(self.config)
 

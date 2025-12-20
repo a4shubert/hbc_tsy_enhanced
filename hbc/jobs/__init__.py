@@ -82,9 +82,5 @@ def main(argv: Sequence[str] | None = None) -> None:
     job_fn(**run_kwargs)
 
 
-if __name__ == '__main__':
-    main ([
-        '--as-of=20090102',
-        '--job-name=job_poll_nyc_open_data_311'
-
-    ])
+if __name__ == "__main__":
+    main(["--as-of=20090105", "--job-name=job_poll_nyc_open_data_311"])

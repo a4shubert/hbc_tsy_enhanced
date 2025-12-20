@@ -1,4 +1,6 @@
 import datetime
+import json
+import math
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -57,3 +59,32 @@ def str_as_date(dt: str):
     if isinstance(dt, datetime.date):
         return dt
     return pd.to_datetime(dt).date()
+
+
+def _parse_dt(s: pd.Series) -> pd.Series:
+    return pd.to_datetime(s, errors="coerce")
+
+
+def _nz(series: pd.Series) -> pd.Series:
+    # why: treat empty/whitespace as missing for text fields
+    return series.fillna("").astype(str).str.strip()
+
+
+def _jsonify_unhashable(x: Any) -> Any:
+    # why: make dict/list/tuple/set hashable for duplicate checks
+    if x is None or (isinstance(x, float) and math.isnan(x)):
+        return None
+    if isinstance(x, (dict, list, tuple, set)):
+        try:
+            return json.dumps(x, sort_keys=True, ensure_ascii=False)
+        except Exception:
+            return str(x)
+    return x
+
+
+def _to_hashable_df(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    obj_cols = [c for c in out.columns if out[c].dtype == "O"]
+    for c in obj_cols:
+        out[c] = out[c].map(_jsonify_unhashable)
+    return out

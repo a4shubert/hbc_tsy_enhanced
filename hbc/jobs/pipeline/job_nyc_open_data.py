@@ -4,8 +4,14 @@ import pandas as pd
 
 from hbc import app_context, DataContainer, utils as ul
 
+LIMIT_MISS_DATES = 10
 
-def job_poll_nyc_open_data_311(as_of: datetime.date = None, incremental=True):
+
+def job_poll_nyc_open_data_311(
+    as_of: datetime.date = None,
+    incremental=True,
+    last_missing_dates=LIMIT_MISS_DATES,
+):
     """
     Job for polling nyc_open_data
     :param as_of:
@@ -13,6 +19,8 @@ def job_poll_nyc_open_data_311(as_of: datetime.date = None, incremental=True):
     one created_date at a time
     :return:
     """
+    print(f"\n\nRunning job_poll_nyc_open_data\n\n")
+
     dc = DataContainer("nyc_open_data_311_service_requests")
 
     if as_of:
@@ -41,9 +49,11 @@ def job_poll_nyc_open_data_311(as_of: datetime.date = None, incremental=True):
         missing_dates = set(all_dates).difference(cached_dates)
         if missing_dates:
             print(
-                f"Running job_poll_nyc_open_data for {len(missing_dates)} dates:"
+                f"Running job_poll_nyc_open_data for the last {last_missing_dates} dates:"
             )
-            for as_of in sorted(list(missing_dates)):
+            for as_of in sorted(list(missing_dates), reverse=True)[
+                :last_missing_dates
+            ]:
                 print(f"working {as_of}")
                 dc.config["kwargs"].update(
                     {

@@ -40,6 +40,8 @@ csv, and xml. Optionally, specify a keyword arg to filter results:
         http://dev.socrata.com/docs/system-fields.html
 ```
 
+### DataSet Description
+
 #### For data-pipeline structure:
 
 - we implement `yaml` based configs and for now do not validate the completeness of the keys, we take [] operator assuming all the keys are present in the config
@@ -56,9 +58,17 @@ we notice the ordering of `unique_key` does not correspond to the ordering of `c
 **For an consistency retrieval:**
 
 - at less frequent intervals we restore consistency to CACHE by
+
   - obtaining all the unique `created_dates` in dataset
   - comparing with the dates available in CACHE
   - retrieving all the missing dates
+
+  ```[python]
+  python -m hbc.jobs
+        --job-name=job_poll_nyc_open_data_311
+        --incremental=false
+        --last-missing-dates=7
+  ```
 
 ## Transform:
 

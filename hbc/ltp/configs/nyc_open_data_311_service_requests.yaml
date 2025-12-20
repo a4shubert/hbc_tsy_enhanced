@@ -8,7 +8,7 @@ kwargs:
   where:
   order:
   group:
-  limit: 20000
+  limit:
   offset:
   q:
   query:

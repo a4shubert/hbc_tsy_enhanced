@@ -12,11 +12,15 @@ class AppContext:
 
     def __str__(self) -> str:
         def fmt(v: Any) -> str:
-            if isinstance(v, (datetime.date, datetime.datetime)):  # why: human-friendly ISO
+            if isinstance(
+                v, (datetime.date, datetime.datetime)
+            ):  # why: human-friendly ISO
                 return v.isoformat()
             return repr(v)
 
-        body = ", ".join(f"{k}={fmt(v)}" for k, v in sorted(self.__dict__.items()))
+        body = ", ".join(
+            f"{k}={fmt(v)}" for k, v in sorted(self.__dict__.items())
+        )
         return f"{self.__class__.__name__}({body})"
 
     __repr__ = __str__
@@ -27,7 +31,9 @@ class AppContext:
         return self._as_of
 
     @as_of.setter
-    def as_of(self, value: Union[datetime.date, datetime.datetime, str]) -> None:
+    def as_of(
+        self, value: Union[datetime.date, datetime.datetime, str]
+    ) -> None:
         """
         Set the logical business date.
         Accepts `date`, `datetime` (converted to date), or ISO `YYYY-MM-DD` string.
@@ -43,7 +49,9 @@ class AppContext:
                 self._as_of = ul.str_as_date(value)
                 return
             except ValueError as exc:
-                raise ValueError(f"Invalid ISO date string for as_of: {value!r}") from exc
+                raise ValueError(
+                    f"Invalid ISO date string for as_of: {value!r}"
+                ) from exc
         raise TypeError(
             "as_of must be a datetime.date, datetime.datetime, or ISO 'YYYY-MM-DD' string"
         )

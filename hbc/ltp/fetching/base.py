@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 import hbc.ltp.fetching
 
+
 class Fetcher(ABC):
     @abstractmethod
     def fetch(self, config) -> pd.DataFrame:
@@ -28,21 +29,21 @@ class Fetcher(ABC):
         return df
 
     def get(self, config) -> pd.DataFrame:
-        print(f'config={config}')
+        print(f"config={config}")
         print("fetching...")
         df = self.fetch(config)
+        if len(df):
+            print("cleaning...")
+            df = self.clean(df)
 
-        print("cleaning...")
-        df = self.clean(df)
+            print("normalizing...")
+            df = self.normalize(df)
 
-        print("normalizing...")
-        df = self.normalize(df)
+            print("validating...")
+            df = self.validate(df)
 
-        print("validating...")
-        df = self.validate(df)
-
-        print("finalizing...")
-        df = self.finalize(df)
+            print("finalizing...")
+            df = self.finalize(df)
         return df
 
     @classmethod
