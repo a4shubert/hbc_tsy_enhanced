@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Anaconda
+.idea/
+anaconda_projects/
+*.ipynb
+
 # Distribution / packaging
 .Python
 build/
