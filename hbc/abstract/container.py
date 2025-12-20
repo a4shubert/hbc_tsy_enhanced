@@ -1,8 +1,9 @@
 import pandas as pd
 
 from hbc import utils as ul
-from hbc.ltp.fetchers import fetchers_registry
 from hbc.ltp.fetchers import Fetcher
+from hbc.ltp.fetchers import fetchers_registry
+from hbc.ltp.persist import Persistence
 
 
 class DataContainer:
@@ -14,7 +15,11 @@ class DataContainer:
     def get(self):
         fetcher: Fetcher = fetchers_registry[self.moniker]
         self.df = fetcher.get(self.config)
+        return self.df
 
-    def to_cache(self): pass
+    def to_cache(self):
+        Persistence.to_cache(self)
 
-    def from_cache(self): pass
+    def from_cache(self):
+        self.df = Persistence.from_cache(self)
+        return self.df

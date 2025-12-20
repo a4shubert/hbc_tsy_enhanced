@@ -25,7 +25,6 @@ class FetcherNYCOpenData(Fetcher):
         sub_url = config['url']
         query_kwargs = config['kwargs']
         query_kwargs = {k: v for k, v in query_kwargs.items() if v is not None}
-        print(query_kwargs)
         client = Socrata(base_url, token, None)
         res = client.get(
             sub_url,
