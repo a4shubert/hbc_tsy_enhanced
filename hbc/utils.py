@@ -1,15 +1,19 @@
-# File: app/creds.py
-
+import datetime
 import tempfile
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import yaml
 
 
 def get_config(config_name: str) -> dict[str, Any] | list[dict[str, Any]]:
     base = Path(__file__).resolve().parent / "ltp" / "configs"
-    path = (base / config_name) if Path(config_name).suffix else (base / f"{config_name}.yaml")
+    path = (
+        (base / config_name)
+        if Path(config_name).suffix
+        else (base / f"{config_name}.yaml")
+    )
     if not path.exists() and not Path(config_name).suffix:  # try .yml fallback
         path = base / f"{config_name}.yml"
     if not path.exists():
@@ -32,3 +36,24 @@ def get_cache_dir(postfix: str | None = None) -> Path:
     cache = base / postfix if postfix else base
     cache.mkdir(parents=True, exist_ok=True)
     return cache
+
+
+def mk_dir(path: Path) -> Path:
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def date_as_str(dt: datetime.date, format="%Y%m%d") -> str:
+    if isinstance(dt, str):
+        return dt
+    return dt.strftime(format)
+
+
+def date_as_iso_format(dt: datetime.date) -> str:
+    return f"{dt.isoformat()}T00:00:00"
+
+
+def str_as_date(dt: str):
+    if isinstance(dt, datetime.date):
+        return dt
+    return pd.to_datetime(dt).date()

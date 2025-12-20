@@ -7,7 +7,7 @@ kwargs:
   where:
   order:
   group:
-  limit: 150
+  limit:
   offset:
   q:
   query:

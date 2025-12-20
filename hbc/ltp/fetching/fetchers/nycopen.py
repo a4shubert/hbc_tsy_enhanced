@@ -1,7 +1,7 @@
 import pandas as pd
 from sodapy import Socrata
 
-from hbc.ltp.fetchers import Fetcher
+from hbc.ltp.fetching import Fetcher
 
 
 class FetcherNYCOpenData(Fetcher):
@@ -20,15 +20,11 @@ class FetcherNYCOpenData(Fetcher):
 
     @classmethod
     def fetch(cls, config) -> pd.DataFrame:
-        token = config['token']
-        base_url = config['base_url']
-        sub_url = config['url']
-        query_kwargs = config['kwargs']
+        token = config["token"]
+        base_url = config["base_url"]
+        sub_url = config["url"]
+        query_kwargs = config["kwargs"]
         query_kwargs = {k: v for k, v in query_kwargs.items() if v is not None}
         client = Socrata(base_url, token, None)
-        res = client.get(
-            sub_url,
-            **query_kwargs
-        )
+        res = client.get(sub_url, **query_kwargs)
         return pd.DataFrame.from_records(res)
-
