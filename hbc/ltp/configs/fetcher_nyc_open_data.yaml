@@ -1,0 +1,15 @@
+moniker: 'fetcher_nyc_open_data'
+token: ERZjPaQcb5J6iJOZeF1BDu4hd
+base_url: data.cityofnewyork.us
+url: '3rfa-3xsf'
+kwargs:
+  select:
+  where:
+  order:
+  group:
+  limit: 150
+  offset:
+  q:
+  query:
+  exclude_system_fields:
+
