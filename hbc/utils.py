@@ -29,6 +29,7 @@ def _is_console_handler(h: logging.Handler) -> bool:
 
 
 def _remove_handlers(root: logging.Logger, pred) -> None:
+    """Remove handlers from a logger when predicate returns True."""
     for h in list(root.handlers):
         try:
             if pred(h):
@@ -43,6 +44,7 @@ def _remove_handlers(root: logging.Logger, pred) -> None:
 
 
 def clear_log(file_path: str) -> None:
+    """Truncate a log file if it exists without recreating it."""
     if os.path.exists(file_path):
         with open(file_path, "r+", encoding="utf-8") as f:
             f.truncate(
@@ -157,6 +159,7 @@ def conf_log(
 
 
 def get_config(config_name: str) -> dict[str, Any] | list[dict[str, Any]]:
+    """Load a YAML config (supports .yml/.yaml) from ltp/configs."""
     base = Path(__file__).resolve().parent / "ltp" / "configs"
     path = (
         (base / config_name)
@@ -175,12 +178,14 @@ def get_config(config_name: str) -> dict[str, Any] | list[dict[str, Any]]:
 
 
 def get_dir_base() -> Path:
+    """Return/create the base temp directory used by the package."""
     base = Path(tempfile.gettempdir()) / "hbc_nyc_dp"
     base.mkdir(parents=True, exist_ok=True)
     return base
 
 
 def get_dir_cache(postfix: str | None = None) -> Path:
+    """Return/create cache directory; optionally append a postfix subdir."""
     base = get_dir_base() / "CACHE"
     cache = base / postfix if postfix else base
     cache.mkdir(parents=True, exist_ok=True)
@@ -188,33 +193,39 @@ def get_dir_cache(postfix: str | None = None) -> Path:
 
 
 def get_dir_analytics() -> Path:
+    """Return/create analytics output directory."""
     analytics = get_dir_base() / "ANALYTICS"
     analytics.mkdir(parents=True, exist_ok=True)
     return analytics
 
 
 def get_dir_logging() -> Path:
+    """Return/create log directory."""
     logdir = get_dir_base() / "LOGS"
     logdir.mkdir(parents=True, exist_ok=True)
     return logdir
 
 
 def mk_dir(path: Path) -> Path:
+    """Create directory (parents ok) and return the Path."""
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
 def date_as_str(dt: datetime.date, format="%Y%m%d") -> str:
+    """Format date or pass-through string using provided format."""
     if isinstance(dt, str):
         return dt
     return dt.strftime(format)
 
 
 def date_as_iso_format(dt: datetime.date) -> str:
+    """Return midnight ISO datetime string for a date."""
     return f"{dt.isoformat()}T00:00:00"
 
 
 def str_as_date(dt: str):
+    """Convert string/datetime/date to date; None passes through."""
     if dt is None:
         return
     if isinstance(dt, datetime.date):
@@ -223,16 +234,19 @@ def str_as_date(dt: str):
 
 
 def _parse_dt(s: pd.Series) -> pd.Series:
+    """Parse a Series to datetimes with coercion to NaT on failures."""
     return pd.to_datetime(s, errors="coerce")
 
 
 def _nz(series: pd.Series) -> pd.Series:
     # why: treat empty/whitespace as missing for text fields
+    """Normalize text-like Series by stripping whitespace and filling nulls."""
     return series.fillna("").astype(str).str.strip()
 
 
 def _jsonify_unhashable(x: Any) -> Any:
     # why: make dict/list/tuple/set hashable for duplicate checks
+    """Convert unhashable collections into a stable JSON string."""
     if x is None or (isinstance(x, float) and math.isnan(x)):
         return None
     if isinstance(x, (dict, list, tuple, set)):
@@ -244,6 +258,7 @@ def _jsonify_unhashable(x: Any) -> Any:
 
 
 def _to_hashable_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Return copy of df with object columns converted to hashable values."""
     out = df.copy()
     obj_cols = [c for c in out.columns if out[c].dtype == "O"]
     for c in obj_cols:
@@ -252,6 +267,7 @@ def _to_hashable_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def display_full_df(df):
+    """Display full DataFrame/Series in notebooks by expanding display limits."""
     if isinstance(df, pd.Series):
         df = df.to_frame()
 
@@ -266,6 +282,7 @@ def display_full_df(df):
 
 
 def to_namedtuple(d, recursive=True):
+    """Convert dictionaries (recursively) to namedtuples for attr access."""
     if isinstance(d, dict):
         d = d.copy()
         if recursive:
@@ -277,11 +294,13 @@ def to_namedtuple(d, recursive=True):
 
 
 def cols_as_named_tuple(df: pd.DataFrame):
+    """Return columns as a namedtuple for attribute-style access."""
     dct_col = dict(zip(df.columns, df.columns))
     return to_namedtuple(dct_col)
 
 
 def pretty_columns_names(df):
+    """Normalize column names: strip bracketed suffixes, lower, and snake-case."""
     df.columns = [
         val.split("[")[0].rstrip() if "[" in val else val
         for val in df.columns.values.tolist()
@@ -296,12 +315,14 @@ def pretty_columns_names(df):
 
 def _sheetify(name):
     # Excel forbids : \ / ? * [ ] and max 31 chars
+    """Sanitize an Excel sheet name to be valid and <=31 chars."""
     clean = re.sub(r"[:\\/?*\[\]]", "_", str(name)).strip() or "Sheet1"
     return clean[:31]
 
 
 def _autofit_columns(xlsx_path, sheet_name, max_width=80):
     # Set column widths to max text length in the column (capped)
+    """Resize Excel columns based on content length (bounded by max_width)."""
     from openpyxl import load_workbook
 
     wb = load_workbook(xlsx_path)

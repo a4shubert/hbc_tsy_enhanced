@@ -15,6 +15,7 @@ def job_analysis_nyc_311(
     n_best=10,
     n_days=10,
 ):
+    """Generate analytics outputs (tables, plots) for NYC 311 data as of a date."""
     if not as_of:
         as_of = app_context.as_of
 

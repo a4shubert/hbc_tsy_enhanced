@@ -3,8 +3,11 @@ import pandas as pd
 
 
 class AnalyticalEngine:
+    """Basic analytics helpers for ranking and aggregating metrics."""
+
     @staticmethod
     def _validate_inputs(df, col_metric, group):
+        """Ensure required columns exist before performing analytics."""
         cols = [col_metric] + (group or [])
         missing = [c for c in cols if c not in df.columns]
         if missing:
@@ -12,6 +15,7 @@ class AnalyticalEngine:
 
     @classmethod
     def top_n_best(cls, n, df, col_metric, group=None):
+        """Return smallest metric values overall or per group."""
         # ensure numeric if it accidentally became strings
         if df[col_metric].dtype == "object":
             df = df.copy()
@@ -36,6 +40,7 @@ class AnalyticalEngine:
 
     @classmethod
     def top_n_worst(cls, n, df, col_metric, group=None):
+        """Return largest metric values overall or per group."""
         cls._validate_inputs(df, col_metric, group)
         if group:
             s = (
@@ -53,6 +58,7 @@ class AnalyticalEngine:
 
     @classmethod
     def median(cls, df, col_metric, group=None):
+        """Compute median metric overall or grouped."""
         cls._validate_inputs(df, col_metric, group)
         if group:
             s = (
@@ -71,6 +77,7 @@ class AnalyticalEngine:
 
     @classmethod
     def mean(cls, df, col_metric, group=None):
+        """Compute mean metric overall or grouped."""
         cls._validate_inputs(df, col_metric, group)
         if group:
             s = (
@@ -89,6 +96,7 @@ class AnalyticalEngine:
 
     @classmethod
     def descriptive_stats(cls, n_best, n_worst, df, col_metric, group=None):
+        """Return dict of best/worst/median/mean tables for a metric."""
         n_best = int(n_best)
         n_worst = int(n_worst)
         cls._validate_inputs(df, col_metric, group)

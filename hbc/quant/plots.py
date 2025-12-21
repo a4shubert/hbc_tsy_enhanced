@@ -34,6 +34,7 @@ class _SizeScale:
     power: float = 0.5
 
     def scale(self, values: pd.Series) -> pd.Series:
+        """Transform values to bubble sizes using min-max scaling and exponent."""
         v = values.astype(float).clip(lower=0)
         if v.empty or v.max() == v.min():
             mid = (self.min_size + self.max_size) / 2

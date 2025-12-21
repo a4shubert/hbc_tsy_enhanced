@@ -32,6 +32,8 @@ CONST_PAGE_SIZE = 50_000  # per-page when paging
 
 
 class FetcherNYCOpenData(Fetcher):
+    """Fetcher implementation for NYC Open Data 311 service requests."""
+
     @staticmethod
     def validate(df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -43,6 +45,7 @@ class FetcherNYCOpenData(Fetcher):
         reason_masks: Dict[str, pd.Series] = {}
 
         def mark(cond: pd.Series, reason: str) -> None:
+            """Record a validation mask under a readable reason."""
             if cond is None or cond.empty:
                 return
             cond = cond.fillna(False)
@@ -193,6 +196,7 @@ class FetcherNYCOpenData(Fetcher):
 
     @staticmethod
     def clean(df: pd.DataFrame) -> pd.DataFrame:
+        """Trim whitespace on key categorical columns."""
         for col in ["borough", "status", "agency", "complaint_type"]:
             if col in df:
                 df[col] = df[col].astype(str).str.strip()
@@ -200,6 +204,7 @@ class FetcherNYCOpenData(Fetcher):
 
     @staticmethod
     def normalize(df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize datetime columns to uniform string format."""
         for col in [
             "created_date",
             "closed_date",
@@ -213,6 +218,7 @@ class FetcherNYCOpenData(Fetcher):
 
     @classmethod
     def fetch(cls, config: Dict, as_of=None) -> pd.DataFrame:
+        """Fetch rows from Socrata API, defaulting to the provided as-of date."""
         if not as_of:
             as_of = app_context.as_of
         token = config["token"]
@@ -247,6 +253,7 @@ class FetcherNYCOpenData(Fetcher):
 
     @staticmethod
     def finalize(df: pd.DataFrame) -> pd.DataFrame:
+        """Fill null drop reasons to empty strings for consistency."""
         if "DROP_REASON" in df.columns:
             df["DROP_REASON"] = df["DROP_REASON"].fillna("")
         return df

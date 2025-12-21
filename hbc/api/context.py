@@ -5,8 +5,10 @@ from hbc import utils as ul
 
 
 class AppContext:
+    """Lightweight container for runtime directories and the logical as-of date."""
 
     def __init__(self) -> None:
+        """Initialize default directories and set the logical date to today."""
         # why: keep storage private so validation runs via the property
         self._as_of: datetime.date = datetime.date.today()
         self.dir_cache = ul.get_dir_cache()
@@ -14,6 +16,7 @@ class AppContext:
         self.dir_logging = ul.get_dir_logging()
 
     def __str__(self) -> str:
+        """Pretty string representation for logging/debug output."""
         def fmt(v: Any) -> str:
             if isinstance(v, (datetime.date, datetime.datetime)):
                 return v.isoformat()
@@ -60,6 +63,7 @@ class AppContext:
         )
 
     def update(self, **kwargs: Any) -> "AppContext":
+        """Update allowed attributes in-place; returns self for chaining."""
         for k, v in kwargs.items():
             if hasattr(self, k):
                 setattr(self, k, v)

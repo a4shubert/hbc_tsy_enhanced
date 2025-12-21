@@ -7,6 +7,8 @@ from hbc.jobs.registry import JOB_REGISTRY
 
 
 def ns_to_dict(ns: argparse.Namespace) -> dict[str, Any]:
+    """Recursively convert argparse.Namespace (with nested namespaces) to dict."""
+
     def conv(v: Any) -> Any:
         if isinstance(v, argparse.Namespace):
             return {k: conv(getattr(v, k)) for k in vars(v)}
@@ -18,6 +20,8 @@ def ns_to_dict(ns: argparse.Namespace) -> dict[str, Any]:
 
 
 def _infer_type(s: str) -> Any:
+    """Try to coerce CLI string token to bool/int/float; fallback to str."""
+
     ls = s.lower()
     if ls in {"true", "false"}:
         return ls == "true"
@@ -66,6 +70,7 @@ def _parse_extra_kwargs(rest: list[str]) -> dict[str, Any]:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """Entrypoint for dispatching a registered job with parsed CLI args."""
     parser = argparse.ArgumentParser("hbc.jobs")
     parser.add_argument(
         "--job-name", required=True, choices=sorted(JOB_REGISTRY.keys())

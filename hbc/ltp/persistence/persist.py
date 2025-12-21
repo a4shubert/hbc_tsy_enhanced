@@ -15,8 +15,11 @@ logger = logging.getLogger()
 
 
 class Persistence:
+    """Cache helper for reading/writing DataContainer CSV snapshots."""
+
     @classmethod
     def to_cache(cls, dc: "DataContainer", as_of: datetime):
+        """Write the container DataFrame to cache for the given date."""
         if not as_of:
             as_of = app_context.as_of
         if not len(dc.df):
@@ -31,6 +34,7 @@ class Persistence:
 
     @classmethod
     def from_cache(cls, dc: "DataContainer", as_of: datetime):
+        """Load cached CSV for the date; return empty DataFrame if missing."""
         if not as_of:
             as_of = app_context.as_of
         path_cache = (
@@ -46,6 +50,7 @@ class Persistence:
 
     @classmethod
     def get_all_cached_dates(cls, dc: "DataContainer") -> list[str]:
+        """Return sorted list of cached date directory names (desc)."""
         path_cache: Path = ul.get_dir_cache(dc.moniker)  # ensures base exists
         return sorted(
             (p.name for p in path_cache.iterdir() if p.is_dir()), reverse=True
