@@ -8,6 +8,7 @@ import hbc.ltp.fetching
 
 logger = logging.getLogger()
 
+
 class Fetcher(ABC):
     @abstractmethod
     def fetch(self, config, as_of=None) -> pd.DataFrame:

@@ -1,10 +1,10 @@
-from hbc.jobs.pipeline.job_data import job_poll_nyc_open_data_311
-from hbc.jobs.analytics.job_analytics import (
-    job_nyc_open_data_analysis,
+from hbc.jobs.job_pipeline import job_poll_nyc_311
+from hbc.jobs.job_analytics import (
+    job_analysis_nyc_311,
 )
 
 
 JOB_REGISTRY = {
-    "job_poll_nyc_open_data_311": job_poll_nyc_open_data_311,
-    "job_nyc_open_data_analyse": job_nyc_open_data_analysis,
+    "job_poll_nyc_311": job_poll_nyc_311,
+    "job_analysis_nyc_311": job_analysis_nyc_311,
 }

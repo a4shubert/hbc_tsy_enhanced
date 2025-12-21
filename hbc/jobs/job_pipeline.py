@@ -11,7 +11,7 @@ logger = logging.getLogger()
 LIMIT_MISS_DATES = 10
 
 
-def job_poll_nyc_open_data_311(
+def job_poll_nyc_311(
     as_of: str = None,
     incremental=True,
     last_missing_dates=LIMIT_MISS_DATES,

@@ -8,7 +8,7 @@ from hbc.quant.plots import PlotEngine
 logger = logging.getLogger()
 
 
-def job_nyc_open_data_analysis(
+def job_analysis_nyc_311(
     as_of: str = None,
     n_worst=10,
     n_best=10,

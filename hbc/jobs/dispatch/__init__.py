@@ -3,7 +3,6 @@ import logging
 from typing import Any, Sequence
 
 from hbc import app_context, utils as ul
-from hbc.jobs.pipeline.job_data import job_poll_nyc_open_data_311
 from hbc.jobs.registry import JOB_REGISTRY
 
 
@@ -85,13 +84,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     # we conf log for the job
     ul.conf_log(
         file_path=ul.path_to_str(
-            ul.mk_dir(ul.get_dir_logging() / args.job_name / args.as_of)
-            / f"{args.job_name}.txt"
+            ul.mk_dir(ul.get_dir_logging() / args.job_name)
+            / f"{args.job_name}_{ul.get_id()}.txt"
         ),
         level=log_level,
         console=False,
         file=True,
-        reset_handlers=True
+        reset_handlers=True,
     ),
 
     # we execute job
@@ -105,6 +104,5 @@ if __name__ == "__main__":
             "--as-of=20090105",
             "--job-name=job_poll_nyc_open_data_311",
             "--incremental=False",
-
         ]
     )

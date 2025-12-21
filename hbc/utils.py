@@ -1,12 +1,13 @@
 import datetime
 import json
-
-# path: logging_setup.py
 import logging
 import math
 import os
+import re
 import sys
 import tempfile
+import datetime
+from datetime import timezone
 from collections import namedtuple
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -50,6 +51,13 @@ def clear_log(file_path: str) -> None:
             f.truncate(
                 0
             )  # why: ensure contents are cleared without creating new file
+
+
+def get_id() -> str:
+    """
+    Return a unique string derived from current system time.
+    """
+    return datetime.datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 
 
 def conf_log(
@@ -287,13 +295,6 @@ def pretty_columns_names(df):
     df.columns = [val.replace("(", "") for val in df.columns.tolist()]
     df.columns = [val.replace(")", "") for val in df.columns.tolist()]
     df.columns = [val.replace("&", "") for val in df.columns.tolist()]
-
-
-# file: hbc/quant/io_excel.py
-import re
-from pathlib import Path
-
-import pandas as pd
 
 
 def _sheetify(name):

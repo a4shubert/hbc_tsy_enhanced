@@ -23,8 +23,8 @@ class Persistence:
             logger.info(f"DataFrame is empty in {dc.moniker}")
             return
         path_cache = (
-                ul.mk_dir(ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of))
-                / f"{dc.moniker}.csv"
+            ul.mk_dir(ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of))
+            / f"{dc.moniker}.csv"
         )
         dc.df.to_csv(path_cache, index=False)
         logger.info(f"Cached: {path_cache}")
@@ -34,8 +34,8 @@ class Persistence:
         if not as_of:
             as_of = app_context.as_of
         path_cache = (
-                ul.mk_dir(ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of))
-                / f"{dc.moniker}.csv"
+            ul.mk_dir(ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of))
+            / f"{dc.moniker}.csv"
         )
         if os.path.exists(path_cache):
             logger.info(f"Retrieved from cache: {path_cache}")
