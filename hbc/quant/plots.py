@@ -20,7 +20,16 @@ Notes
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Literal, Optional, Union, Sequence, Tuple
+from typing import (
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Union,
+    Sequence,
+    Tuple,
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,6 +47,7 @@ class _SizeScale:
     Values are min-max normalized to [0, 1], then transformed by `value**power`
     to dampen outliers (e.g., sqrt when power=0.5).
     """
+
     min_size: float = 20.0
     max_size: float = 1000.0
     power: float = 0.5
@@ -48,7 +58,9 @@ class _SizeScale:
             mid = (self.min_size + self.max_size) / 2
             return pd.Series(np.full(len(v), mid), index=v.index)
         v_norm = (v - v.min()) / (v.max() - v.min())
-        return self.min_size + (self.max_size - self.min_size) * (v_norm ** self.power)
+        return self.min_size + (self.max_size - self.min_size) * (
+            v_norm**self.power
+        )
 
 
 class PlotEngine:
@@ -67,13 +79,16 @@ class PlotEngine:
     def _to_datetime(df: pd.DataFrame, col_time: str) -> pd.DataFrame:
         """Coerce `col_time` to datetime, drop NaT rows, and sort ascending."""
         out = df.copy()
-        out[col_time] = pd.to_datetime(out[col_time], errors="coerce", utc=False)
+        out[col_time] = pd.to_datetime(
+            out[col_time], errors="coerce", utc=False
+        )
         out = out.dropna(subset=[col_time]).sort_values(col_time)
         return out
 
     @staticmethod
     def _apply_filters(
-        df: pd.DataFrame, filter_by: Optional[Dict[str, Union[object, Iterable[object]]]]
+        df: pd.DataFrame,
+        filter_by: Optional[Dict[str, Union[object, Iterable[object]]]],
     ) -> pd.DataFrame:
         """
         Apply equality/isin filters mapping column -> value or iterable of values.
@@ -124,7 +139,9 @@ class PlotEngine:
             out = out[lat_ok & lon_ok]
 
         if drop_zeros:
-            not_zero_pair = ~((out[col_latitude] == 0.0) & (out[col_longitude] == 0.0))
+            not_zero_pair = ~(
+                (out[col_latitude] == 0.0) & (out[col_longitude] == 0.0)
+            )
             out = out[not_zero_pair]
 
         return out
@@ -175,7 +192,11 @@ class PlotEngine:
                 .astype(int)
             )
         else:
-            s = df_t.set_index(col_time)[col_metric].resample(freq).agg(aggregation)
+            s = (
+                df_t.set_index(col_time)[col_metric]
+                .resample(freq)
+                .agg(aggregation)
+            )
 
         out = pd.DataFrame({"value": s})
         out.index.name = "time"
@@ -188,7 +209,12 @@ class PlotEngine:
         if add_trend:
             win = trend_window if (trend_window and trend_window > 1) else 7
             if trend_method == "rolling":
-                trend = out["value"].rolling(window=win, min_periods=trend_min_periods).mean().bfill()
+                trend = (
+                    out["value"]
+                    .rolling(window=win, min_periods=trend_min_periods)
+                    .mean()
+                    .bfill()
+                )
                 label = f"Trend (Rolling {win})"
             else:
                 trend = out["value"].ewm(span=win, adjust=False).mean()
@@ -201,7 +227,14 @@ class PlotEngine:
             filt_descr = " | " + ", ".join(parts)
         ax.set_title(title or f"Time Series ({aggregation}){filt_descr}")
         ax.set_xlabel("Time")
-        ax.set_ylabel(ylabel or ("Count" if aggregation == "count" or col_metric is None else aggregation.title()))
+        ax.set_ylabel(
+            ylabel
+            or (
+                "Count"
+                if aggregation == "count" or col_metric is None
+                else aggregation.title()
+            )
+        )
         ax.grid(True, alpha=0.3)
         ax.legend()
 
@@ -251,7 +284,9 @@ class PlotEngine:
         pd.DataFrame
             Group columns + 'value'.
         """
-        groups = [group_cols] if isinstance(group_cols, str) else list(group_cols)
+        groups = (
+            [group_cols] if isinstance(group_cols, str) else list(group_cols)
+        )
         cls._ensure_columns(df, groups)
         if col_metric is not None and aggregation != "count":
             cls._ensure_columns(df, [col_metric])
@@ -261,7 +296,9 @@ class PlotEngine:
         if aggregation == "count" or col_metric is None:
             grouped = dff.groupby(groups).size().rename("value")
         else:
-            grouped = dff.groupby(groups)[col_metric].agg(aggregation).rename("value")
+            grouped = (
+                dff.groupby(groups)[col_metric].agg(aggregation).rename("value")
+            )
 
         out = grouped.reset_index()
         if sort_by_value:
@@ -270,7 +307,9 @@ class PlotEngine:
             out = out.head(top_n)
 
         if percent:
-            denom = grouped.sum() if percent_base == "all" else out["value"].sum()
+            denom = (
+                grouped.sum() if percent_base == "all" else out["value"].sum()
+            )
             if denom > 0:
                 out["value"] = out["value"] / denom * 100.0
 
@@ -285,18 +324,32 @@ class PlotEngine:
 
         if orient == "h":
             ax.barh(out["label"], out["value"])
-            ax.set_xlabel(xlabel or ("Percent" if percent else ("Value" if aggregation != "count" else "Count")))
+            ax.set_xlabel(
+                xlabel
+                or (
+                    "Percent"
+                    if percent
+                    else ("Value" if aggregation != "count" else "Count")
+                )
+            )
             ax.set_ylabel(ylabel or "Group")
 
             # --- NEW: put largest at the top when descending ---
             if largest_on_top is None:
-                largest_on_top = (not ascending)  # auto behavior
+                largest_on_top = not ascending  # auto behavior
             if largest_on_top:
                 ax.invert_yaxis()
 
         else:
             ax.bar(out["label"], out["value"])
-            ax.set_ylabel(ylabel or ("Percent" if percent else ("Value" if aggregation != "count" else "Count")))
+            ax.set_ylabel(
+                ylabel
+                or (
+                    "Percent"
+                    if percent
+                    else ("Value" if aggregation != "count" else "Count")
+                )
+            )
             ax.set_xlabel(xlabel or "Group")
             if rotation:
                 ax.set_xticklabels(out["label"], rotation=rotation, ha="right")
@@ -305,7 +358,10 @@ class PlotEngine:
         if filter_by:
             parts = [f"{k}={v}" for k, v in filter_by.items()]
             filt_descr = " | " + ", ".join(parts)
-        ax.set_title(title or f"Bar Chart ({aggregation}{' %' if percent else ''}){filt_descr}")
+        ax.set_title(
+            title
+            or f"Bar Chart ({aggregation}{' %' if percent else ''}){filt_descr}"
+        )
         ax.grid(True, axis="x" if orient == "h" else "y", alpha=0.3)
 
         if annotate:
@@ -316,7 +372,11 @@ class PlotEngine:
                         if np.isnan(width):
                             continue
                         ax.annotate(
-                            f"{width:.1f}%" if percent else f"{int(width) if float(width).is_integer() else round(width, 2)}",
+                            (
+                                f"{width:.1f}%"
+                                if percent
+                                else f"{int(width) if float(width).is_integer() else round(width, 2)}"
+                            ),
                             xy=(width, rect.get_y() + rect.get_height() / 2),
                             xytext=(5, 0),
                             textcoords="offset points",
@@ -329,7 +389,11 @@ class PlotEngine:
                         if np.isnan(height):
                             continue
                         ax.annotate(
-                            f"{height:.1f}%" if percent else f"{int(height) if float(height).is_integer() else round(height, 2)}",
+                            (
+                                f"{height:.1f}%"
+                                if percent
+                                else f"{int(height) if float(height).is_integer() else round(height, 2)}"
+                            ),
                             xy=(rect.get_x() + rect.get_width() / 2, height),
                             xytext=(0, 3),
                             textcoords="offset points",
@@ -375,7 +439,9 @@ class PlotEngine:
 
         if clean:
             dfg = cls.clean_lat_lon(
-                df, col_latitude, col_longitude,
+                df,
+                col_latitude,
+                col_longitude,
                 drop_out_of_bounds=drop_out_of_bounds,
                 drop_zeros=drop_zeros,
             )
@@ -388,7 +454,11 @@ class PlotEngine:
         if aggregation == "count" or col_metric is None:
             agg = dfg.groupby(["lat_r", "lon_r"]).size().rename("value")
         else:
-            agg = dfg.groupby(["lat_r", "lon_r"])[col_metric].agg(aggregation).rename("value")
+            agg = (
+                dfg.groupby(["lat_r", "lon_r"])[col_metric]
+                .agg(aggregation)
+                .rename("value")
+            )
 
         agg = agg.reset_index().rename(columns={"lat_r": "lat", "lon_r": "lon"})
         agg["size"] = size_scale.scale(agg["value"])
@@ -396,10 +466,20 @@ class PlotEngine:
         if ax is None:
             _, ax = plt.subplots(figsize=(8, 6))
 
-        ax.scatter(agg["lon"], agg["lat"], s=agg["size"], alpha=0.6, edgecolor="white", linewidth=0.5)
+        ax.scatter(
+            agg["lon"],
+            agg["lat"],
+            s=agg["size"],
+            alpha=0.6,
+            edgecolor="white",
+            linewidth=0.5,
+        )
         ax.set_xlabel("Longitude")
         ax.set_ylabel("Latitude")
-        ax.set_title(title or f"Geo Bubble Map ({aggregation}) (rounded {round_precision} dp)")
+        ax.set_title(
+            title
+            or f"Geo Bubble Map ({aggregation}) (rounded {round_precision} dp)"
+        )
         ax.grid(True, alpha=0.2)
         try:
             ax.set_aspect("equal", adjustable="datalim")
@@ -409,8 +489,19 @@ class PlotEngine:
         if annotate_top_n > 0 and not agg.empty:
             top = agg.nlargest(annotate_top_n, "value")
             for _, r in top.iterrows():
-                label = int(r["value"]) if float(r["value"]).is_integer() else round(r["value"], 2)
-                ax.annotate(f"{label}", (r["lon"], r["lat"]), xytext=(3, 3), textcoords="offset points", fontsize=8, alpha=0.8)
+                label = (
+                    int(r["value"])
+                    if float(r["value"]).is_integer()
+                    else round(r["value"], 2)
+                )
+                ax.annotate(
+                    f"{label}",
+                    (r["lon"], r["lat"]),
+                    xytext=(3, 3),
+                    textcoords="offset points",
+                    fontsize=8,
+                    alpha=0.8,
+                )
 
         if savepath:
             plt.savefig(savepath, bbox_inches="tight", dpi=150)
@@ -504,7 +595,9 @@ class PlotEngine:
 
         if clean:
             dff = cls.clean_lat_lon(
-                dff, col_latitude, col_longitude,
+                dff,
+                col_latitude,
+                col_longitude,
                 drop_out_of_bounds=drop_out_of_bounds,
                 drop_zeros=drop_zeros,
             )
@@ -518,16 +611,27 @@ class PlotEngine:
         if aggregation == "count" or col_metric is None:
             agg = dff.groupby(["lat_r", "lon_r"]).size().rename("value")
         else:
-            agg = dff.groupby(["lat_r", "lon_r"])[col_metric].agg(aggregation).rename("value")
+            agg = (
+                dff.groupby(["lat_r", "lon_r"])[col_metric]
+                .agg(aggregation)
+                .rename("value")
+            )
 
         agg = agg.reset_index().rename(columns={"lat_r": "lat", "lon_r": "lon"})
 
         if agg.empty:
             # Create an empty map near (0,0) to avoid crashing.
             center = start_location or (0.0, 0.0)
-            m = folium.Map(location=center, zoom_start=start_zoom, tiles=tiles if tiles_url is None else None, control_scale=True)
+            m = folium.Map(
+                location=center,
+                zoom_start=start_zoom,
+                tiles=tiles if tiles_url is None else None,
+                control_scale=True,
+            )
             if tiles_url:
-                folium.TileLayer(tiles=tiles_url, attr=tiles_attr or "").add_to(m)
+                folium.TileLayer(tiles=tiles_url, attr=tiles_attr or "").add_to(
+                    m
+                )
             m.save(savepath)
             return agg
 
@@ -547,7 +651,12 @@ class PlotEngine:
             center = start_location
 
         # Create map and add tiles
-        m = folium.Map(location=center, zoom_start=start_zoom, tiles=tiles if tiles_url is None else None, control_scale=True)
+        m = folium.Map(
+            location=center,
+            zoom_start=start_zoom,
+            tiles=tiles if tiles_url is None else None,
+            control_scale=True,
+        )
         if tiles_url:
             folium.TileLayer(tiles=tiles_url, attr=tiles_attr or "").add_to(m)
 
@@ -561,8 +670,16 @@ class PlotEngine:
         # Build popups: aggregated view shows count/value; if popup_cols provided and data
         # is not heavily aggregated, you can instead plot *raw* rows (not recommended at scale).
         for _, r in agg.iterrows():
-            lat, lon, val, rad = float(r["lat"]), float(r["lon"]), r["value"], float(r["radius"])
-            popup_html = folium.Html(f"<b>Value:</b> {val}<br><b>Lat:</b> {lat:.6f}<br><b>Lon:</b> {lon:.6f}", script=True)
+            lat, lon, val, rad = (
+                float(r["lat"]),
+                float(r["lon"]),
+                r["value"],
+                float(r["radius"]),
+            )
+            popup_html = folium.Html(
+                f"<b>Value:</b> {val}<br><b>Lat:</b> {lat:.6f}<br><b>Lon:</b> {lon:.6f}",
+                script=True,
+            )
             folium.CircleMarker(
                 location=(lat, lon),
                 radius=rad,  # pixels
@@ -576,5 +693,3 @@ class PlotEngine:
         # Save output
         m.save(savepath)
         return agg
-
-

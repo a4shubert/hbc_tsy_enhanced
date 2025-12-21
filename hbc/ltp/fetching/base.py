@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
 import pandas as pd
+
+import logging
+
+
 import hbc.ltp.fetching
 
+logger = logging.getLogger()
 
 class Fetcher(ABC):
     @abstractmethod
@@ -29,20 +34,20 @@ class Fetcher(ABC):
         return df
 
     def get(self, config, as_of=None) -> pd.DataFrame:
-        print(f"config={config}")
-        print("fetching...")
+        logger.info(f"config={config}")
+        logger.info("fetching...")
         df = self.fetch(config, as_of)
         if len(df):
-            print("cleaning...")
+            logger.info("cleaning...")
             df = self.clean(df)
 
-            print("normalizing...")
+            logger.info("normalizing...")
             df = self.normalize(df)
 
-            print("validating...")
+            logger.info("validating...")
             df = self.validate(df)
 
-            print("finalizing...")
+            logger.info("finalizing...")
             df = self.finalize(df)
         return df
 

@@ -11,6 +11,7 @@ class AppContext:
         self._as_of: datetime.date = datetime.date.today()
         self.dir_cache = ul.get_dir_cache()
         self.dir_analytics = ul.get_dir_analytics()
+        self.dir_logging = ul.get_dir_logging()
 
     def __str__(self) -> str:
         def fmt(v: Any) -> str:

@@ -1,20 +1,23 @@
 import pandas as pd
+import logging
 
 from hbc import DataContainer, app_context, utils as ul
 from hbc.quant.analysis import AnalyticalEngine
 from hbc.quant.plots import PlotEngine
 
+logger = logging.getLogger()
+
 
 def job_nyc_open_data_analysis(
-        as_of: str = None,
-        n_worst=10,
-        n_best=10,
-        n_days=10,
+    as_of: str = None,
+    n_worst=10,
+    n_best=10,
+    n_days=10,
 ):
     if not as_of:
         as_of = app_context.as_of
 
-    print(
+    logger.info(
         f"\n\nRunning job_nyc_open_data_analysis as_of={as_of} n_worst={n_worst} n_best={n_best}  \n\n"
     )
 
@@ -31,12 +34,14 @@ def job_nyc_open_data_analysis(
     )
     # for the moment we'll drop all the DROP_FLAG = TRUE rows
     df_drop = df[df[cols.DROP_FLAG]].copy()
-    df_drop.to_csv(ul.mk_dir(dir_analytics / 'tables') / "df_dropped.csv", index=False)
+    df_drop.to_csv(
+        ul.mk_dir(dir_analytics / "tables") / "df_dropped.csv", index=False
+    )
     df = df[~df[cols.DROP_FLAG]]
 
     df["hbc_days_to_close"] = (
-            pd.to_datetime(df[cols.closed_date])
-            - pd.to_datetime(df[cols.created_date])
+        pd.to_datetime(df[cols.closed_date])
+        - pd.to_datetime(df[cols.created_date])
     ).dt.days.astype("Int64")
     cols = ul.cols_as_named_tuple(df)
 
@@ -53,7 +58,8 @@ def job_nyc_open_data_analysis(
 
     # we will just persist df_closed_same_day as there is no descriptive statistics needed (all 0)
     df_closed_same_day.to_csv(
-        ul.mk_dir(dir_analytics / 'tables') / "df_closed_same_day.csv", index=False
+        ul.mk_dir(dir_analytics / "tables") / "df_closed_same_day.csv",
+        index=False,
     )
 
     # we want to get descriptive statistics for the df_closed_not_same_day
@@ -68,7 +74,10 @@ def job_nyc_open_data_analysis(
             cluster=True,
             start_zoom=11,
             tiles="CartoDB positron",
-            savepath=ul.path_to_str(ul.mk_dir(dir_analytics / 'plots') / "closed_requests_by_location.html"),
+            savepath=ul.path_to_str(
+                ul.mk_dir(dir_analytics / "plots")
+                / "closed_requests_by_location.html"
+            ),
         )
 
         # by agency
@@ -98,13 +107,16 @@ def job_nyc_open_data_analysis(
             percent_base="plotted",
             title=f"Top Worst Agencies by Requests (%)",
             show=False,
-            savepath=ul.path_to_str(ul.mk_dir(dir_analytics / 'plots') / "top_worst_agencies_closed_distro.png"),
+            savepath=ul.path_to_str(
+                ul.mk_dir(dir_analytics / "plots")
+                / "top_worst_agencies_closed_distro.png"
+            ),
         )
 
         xlsx_name = "closed_by_agency.xlsx"
         for name, df_analytics in res.items():
             ul.save_dataframe_as_sheet(
-                ul.mk_dir(dir_analytics / 'tables'),
+                ul.mk_dir(dir_analytics / "tables"),
                 xlsx_name,
                 df_analytics.round(2),
                 name,
@@ -123,7 +135,7 @@ def job_nyc_open_data_analysis(
         xlsx_name = "closed_by_agency_complaint_type.xlsx"
         for name, df_analytics in res.items():
             ul.save_dataframe_as_sheet(
-                ul.mk_dir(dir_analytics / 'tables'),
+                ul.mk_dir(dir_analytics / "tables"),
                 xlsx_name,
                 df_analytics.round(2),
                 name,
@@ -142,7 +154,7 @@ def job_nyc_open_data_analysis(
         xlsx_name = "closed_by_city_agency.xlsx"
         for name, df_analytics in res.items():
             ul.save_dataframe_as_sheet(
-                ul.mk_dir(dir_analytics / 'tables'),
+                ul.mk_dir(dir_analytics / "tables"),
                 xlsx_name,
                 df_analytics.round(2),
                 name,
@@ -168,7 +180,7 @@ def job_nyc_open_data_analysis(
 
         xlsx_name = "open_by_agency_city_complaint_type.xlsx"
         ul.save_dataframe_as_sheet(
-            ul.mk_dir(dir_analytics / 'tables'),
+            ul.mk_dir(dir_analytics / "tables"),
             xlsx_name,
             df_analytics.round(2),
             "grouped",
@@ -190,9 +202,9 @@ def job_nyc_open_data_analysis(
         filter_by={cols.agency_name: worst_agency},
         title=f"Daily Requests for {worst_agency}",
         show=False,
-        savepath=ul.path_to_str(ul.mk_dir(dir_analytics / 'plots') / "worst_agency_ts_analysis.png"),
+        savepath=ul.path_to_str(
+            ul.mk_dir(dir_analytics / "plots") / "worst_agency_ts_analysis.png"
+        ),
     )
 
-    print(f"Saved to {dir_analytics}")
-
-
+    logger.info(f"Saved to {dir_analytics}")

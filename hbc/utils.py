@@ -1,16 +1,154 @@
 import datetime
 import json
+
+# path: logging_setup.py
+import logging
 import math
 import os
+import sys
 import tempfile
 from collections import namedtuple
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any
-from typing import Iterable, List, Optional, Union
+from typing import Any, Tuple
+from typing import Iterable
+from typing import List, Optional, Union
 
 import pandas as pd
 import yaml
 from IPython import display
+
+
+def _is_console_handler(h: logging.Handler) -> bool:
+    """Detect console-like handlers, including third-party ones."""
+    if isinstance(h, logging.StreamHandler) and not isinstance(
+        h, RotatingFileHandler
+    ):
+        return True
+    # Some handlers aren't StreamHandler but still write to stdio.
+    stream = getattr(h, "stream", None)
+    return stream is sys.stdout or stream is sys.stderr
+
+
+def _remove_handlers(root: logging.Logger, pred) -> None:
+    for h in list(root.handlers):
+        try:
+            if pred(h):
+                root.removeHandler(h)
+                try:
+                    h.close()
+                except Exception:
+                    pass
+        except Exception:
+            # why: never let handler cleanup break logging config
+            continue
+
+
+def clear_log(file_path: str) -> None:
+    if os.path.exists(file_path):
+        with open(file_path, "r+", encoding="utf-8") as f:
+            f.truncate(
+                0
+            )  # why: ensure contents are cleared without creating new file
+
+
+def conf_log(
+    file_path: str = None,
+    *,
+    file: bool = True,
+    console: bool = True,
+    level: int = logging.INFO,
+    max_bytes: int = 5 * 1024 * 1024,
+    backup_count: int = 5,
+    reset_handlers: bool = False,
+    # (filename_width, lineno_width, level_width, logger_name_width)
+    field_widths: Tuple[int, int, int, int] = (20, 4, 5, 8),
+) -> logging.Logger:
+    """
+    Configure logging with optional console and/or size-rotating file handler.
+    Format: "%(asctime)s %(levelname)s %(name)s: %(message)s"
+    """
+    logging.disable(logging.NOTSET)  # undo any prior global disable
+    if not file_path:
+        file_path = get_dir_logging() / "hbc_job_generic.txt"
+    clear_log(file_path)
+    if file:
+        print(f"Log file: {file_path}")
+
+    root = logging.getLogger()
+    root.setLevel(level)
+
+    if reset_handlers:
+        # Nuke all handlers first.
+        _remove_handlers(root, lambda h: True)
+
+    fn_w, ln_w, lvl_w, name_w = field_widths
+    # Key: %-Ns for left-align strings; %Nd for right-align ints
+    fmt = (
+        f"%(asctime)s "
+        f"%(filename)-{fn_w}s "
+        f"%(lineno){ln_w}d "
+        f"%(levelname)-{lvl_w}s "
+        f"%(name)-{name_w}s: %(message)s"
+    )
+
+    formatter = logging.Formatter(fmt, "%Y-%m-%d %H:%M:%S")
+
+    # --- FILE HANDLER ---
+    existing_files: Iterable[logging.Handler] = [
+        h for h in root.handlers if isinstance(h, RotatingFileHandler)
+    ]
+    if file:
+        if not existing_files:
+            fh = RotatingFileHandler(
+                filename=file_path,
+                maxBytes=max_bytes,
+                backupCount=backup_count,
+                encoding="utf-8",
+                delay=True,
+            )
+            fh.setLevel(logging.NOTSET)  # root level filters
+            fh.setFormatter(formatter)
+            root.addHandler(fh)
+        else:
+            # Reconfigure all existing rotating file handlers to be consistent.
+            for fh in existing_files:
+                fh.setLevel(logging.NOTSET)
+                fh.setFormatter(formatter)
+    else:
+        # Remove any file handlers when file=False.
+        _remove_handlers(root, lambda h: isinstance(h, RotatingFileHandler))
+
+    # --- CONSOLE HANDLER ---
+    if console:
+        # Ensure exactly one console handler.
+        existing_consoles = [h for h in root.handlers if _is_console_handler(h)]
+        if not existing_consoles:
+            sh = logging.StreamHandler()
+            sh.setLevel(logging.NOTSET)
+            sh.setFormatter(formatter)
+            root.addHandler(sh)
+        else:
+            # Keep the first, normalize it; remove extras to avoid duplicates.
+            keep = existing_consoles[0]
+            keep.setLevel(logging.NOTSET)
+            keep.setFormatter(formatter)
+            for h in existing_consoles[1:]:
+                root.removeHandler(h)
+                try:
+                    h.close()
+                except Exception:
+                    pass
+    else:
+        # Remove ALL console-like handlers to truly silence stdout/stderr.
+        _remove_handlers(root, _is_console_handler)
+
+    # Final normalization: let root level control filtering.
+    for h in root.handlers:
+        if h.level > logging.NOTSET:
+            h.setLevel(logging.NOTSET)
+
+    return root
 
 
 def get_config(config_name: str) -> dict[str, Any] | list[dict[str, Any]]:
@@ -48,6 +186,12 @@ def get_dir_analytics() -> Path:
     analytics = get_dir_base() / "ANALYTICS"
     analytics.mkdir(parents=True, exist_ok=True)
     return analytics
+
+
+def get_dir_logging() -> Path:
+    logdir = get_dir_base() / "LOGS"
+    logdir.mkdir(parents=True, exist_ok=True)
+    return logdir
 
 
 def mk_dir(path: Path) -> Path:
@@ -177,14 +321,14 @@ def _autofit_columns(xlsx_path, sheet_name, max_width=80):
 
 
 def save_dataframe_as_sheet(
-        dir_path,
-        filename,
-        df,
-        sheet_name,
-        replace=False,
-        index=True,
-        autofit=True,
-        max_width=80,
+    dir_path,
+    filename,
+    df,
+    sheet_name,
+    replace=False,
+    index=True,
+    autofit=True,
+    max_width=80,
 ):
     """
     Append DataFrame as a sheet to an Excel file, creating the file if needed.
@@ -207,7 +351,7 @@ def save_dataframe_as_sheet(
 
         if replace and sheet in existing:
             with pd.ExcelWriter(
-                    xlsx, engine="openpyxl", mode="a", if_sheet_exists="replace"
+                xlsx, engine="openpyxl", mode="a", if_sheet_exists="replace"
             ) as w:
                 df.to_excel(w, sheet_name=sheet, index=index)
             if autofit:
@@ -229,6 +373,7 @@ def save_dataframe_as_sheet(
 
 
 PathLikeStr = Union[str, os.PathLike]
+
 
 def path_to_str(p: Optional[PathLikeStr]) -> Optional[str]:
     """

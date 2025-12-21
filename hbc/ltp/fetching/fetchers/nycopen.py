@@ -2,12 +2,16 @@ import datetime as _dt
 import re
 from typing import Dict
 
+import logging
 import pandas as pd
 from sodapy import Socrata
 
 from hbc import app_context, utils as ul
 from hbc.ltp.fetching.base import Fetcher
 from hbc.utils import _parse_dt, _nz, _to_hashable_df
+
+
+logger = logging.getLogger()
 
 NYC_LAT_BOUNDS = (40.0, 41.0)
 NYC_LON_BOUNDS = (-75.0, -72.0)
@@ -178,12 +182,12 @@ class FetcherNYCOpenData(Fetcher):
                 reason: int(mask.sum()) for reason, mask in reason_masks.items()
             }
             parts = [f"{k}: {v}" for k, v in sorted(counts.items())]
-            print(
+            logger.info(
                 f"Validation summary -> flagged {total_flagged} rows. "
                 + "; ".join(parts)
             )
         else:
-            print("Validation summary -> no issues found.")
+            logger.info("Validation summary -> no issues found.")
 
         return df
 
@@ -220,7 +224,7 @@ class FetcherNYCOpenData(Fetcher):
         client = Socrata(base_url, app_token=token)
 
         if not query_kwargs:
-            print(f"added filter: created_date = {as_of}")
+            logger.info(f"added filter: created_date = {as_of}")
             query_kwargs["where"] = (
                 f"created_date = '{ul.date_as_iso_format(as_of)}'"
             )
@@ -238,7 +242,7 @@ class FetcherNYCOpenData(Fetcher):
                 rows = client.get(dataset, **query_kwargs)
 
         df = pd.DataFrame.from_records(rows)
-        print(f"Fetched {len(df)} rows")
+        logger.info(f"Fetched {len(df)} rows")
         return df
 
     @staticmethod

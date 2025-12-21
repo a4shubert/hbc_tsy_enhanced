@@ -1,8 +1,12 @@
 from datetime import datetime
 
 import pandas as pd
+import logging
 
 from hbc import app_context, DataContainer, utils as ul
+
+
+logger = logging.getLogger()
 
 LIMIT_MISS_DATES = 10
 
@@ -20,13 +24,13 @@ def job_poll_nyc_open_data_311(
     one created_date at a time
     :return:
     """
-    print(f"\n\nRunning job_poll_nyc_open_data\n\n")
+    logger.info(f"\n\nRunning job_poll_nyc_open_data\n\n")
 
     if not as_of:
         as_of = app_context.as_of
 
     if incremental:
-        print(
+        logger.info(
             f"Running job_poll_nyc_open_data for {as_of} and incremental={incremental}"
         )
         dc = DataContainer("nyc_open_data_311_service_requests")
@@ -48,13 +52,13 @@ def job_poll_nyc_open_data_311(
         cached_dates = pd.to_datetime(dc.all_cached_dates)
         missing_dates = set(all_dates).difference(cached_dates)
         if missing_dates:
-            print(
+            logger.info(
                 f"Running job_poll_nyc_open_data for the last {last_missing_dates} dates:"
             )
             for as_of in sorted(list(missing_dates), reverse=True)[
                 :last_missing_dates
             ]:
-                print(f"working {as_of}")
+                logger.info(f"working {as_of}")
                 dc = DataContainer("nyc_open_data_311_service_requests")
                 dc.config["kwargs"].update(
                     {
