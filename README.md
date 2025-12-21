@@ -1,6 +1,6 @@
 # NYC 311 Service Requests Data Pipeline
 
-Small helper library + jobs to fetch, cache, and analyze NYC 311 service request data.
+Library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
 ## Install
 
@@ -20,6 +20,9 @@ python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --inc
 
 # Run analytics for that date
 python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+
+# Restore cache integrity for the last few missing dates (fetches multiple days)
+python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
 ```
 
 ### Midnight Scheduler (optional)
