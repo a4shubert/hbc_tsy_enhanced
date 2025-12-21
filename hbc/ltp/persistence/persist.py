@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from hbc import utils as ul, app_context
+from hbc import app_context, utils as ul
 
 if TYPE_CHECKING:
     from hbc.api.container import DataContainer

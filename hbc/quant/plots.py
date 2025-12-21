@@ -1,22 +1,3 @@
-# path: plotting/plot_engine.py
-"""
-PlotEngine
-==========
-
-Quick plotting helpers:
-- plot_ts: time series of counts/aggregations with optional trend (static, Matplotlib).
-- plot_bar: grouped bars with % options (static, Matplotlib).
-- plot_geo_spatial: static geo “bubble” scatter on axes (no map tiles).
-- plot_geo_map: interactive Leaflet map (Folium) with bubbles on real map tiles.
-- clean_lat_lon: sanitize latitude/longitude columns.
-
-Notes
------
-- `plot_geo_map` saves an HTML file that fetches tiles (e.g., OpenStreetMap) when opened.
-  This requires internet *in your browser* (not during Python execution). For Google base
-  maps, use Google Maps JS SDK (not provided via Folium tiles) and a valid API key.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

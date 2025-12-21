@@ -1,23 +1,20 @@
+from collections import namedtuple
 import datetime
+from datetime import timezone
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import math
 import os
+from pathlib import Path
 import re
 import sys
 import tempfile
-import datetime
-from datetime import timezone
-from collections import namedtuple
-from logging.handlers import RotatingFileHandler
-from pathlib import Path
-from typing import Any, Tuple
-from typing import Iterable
-from typing import List, Optional, Union
+from typing import Any, Iterable, List, Optional, Tuple, Union
 
+from IPython import display
 import pandas as pd
 import yaml
-from IPython import display
 
 
 def _is_console_handler(h: logging.Handler) -> bool:

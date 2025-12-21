@@ -1,7 +1,7 @@
 from datetime import datetime
+import logging
 
 import pandas as pd
-import logging
 
 from hbc import app_context, DataContainer, utils as ul
 

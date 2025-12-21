@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-import pandas as pd
-
 import logging
 
+import pandas as pd
 
 import hbc.ltp.fetching
 

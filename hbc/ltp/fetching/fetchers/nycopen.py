@@ -1,8 +1,8 @@
 import datetime as _dt
+import logging
 import re
 from typing import Dict
 
-import logging
 import pandas as pd
 from sodapy import Socrata
 

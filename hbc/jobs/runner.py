@@ -1,6 +1,3 @@
-# File: runner/one_func_midnight_scheduler.py
-# Requires: pip install schedule
-
 import shlex
 import subprocess
 import time

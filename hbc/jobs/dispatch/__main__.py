@@ -1,5 +1,6 @@
-from hbc.jobs.dispatch import main
 import logging
+
+from hbc.jobs.dispatch import main
 
 logger = logging.getLogger()
 if __name__ == "__main__":
