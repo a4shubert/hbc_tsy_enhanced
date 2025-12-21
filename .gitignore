@@ -12,8 +12,6 @@ __pycache__/
 # Anaconda
 .idea/
 anaconda_projects/
-notebooks/
-*.ipynb
 
 # Distribution / packaging
 .Python
