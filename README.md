@@ -1,77 +1,55 @@
 # NYC 311 Service Requests Data Pipeline
 
-<hr>
+Small helper library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
-# Structure
+## Install
 
-## Load:
-
-[Dataset: 311 Service Requests from 2010 to Present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/about_data)
-
-[Alternative dataset: 311 Service Requests for 2009](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-for-2009/3rfa-3xsf/about_data)
-
-App token setup: https://data.cityofnewyork.us/profile/edit/developer_settings
-
-Each column in the dataset is represented by a single field in its SODA API. Using SoQL queries, you can search for records, limit your results, and change the way the data is output.
-
-Help on method get in module sodapy.socrata:
-
-```get(dataset_identifier, content_type='json', **kwargs) method of sodapy.socrata.Socrata instance
-Read data from the requested resource. Options for content_type are json,
-csv, and xml. Optionally, specify a keyword arg to filter results:
-
-        select : the set of columns to be returned, defaults to *
-        where : filters the rows to be returned, defaults to limit
-        order : specifies the order of results
-        group : column to group results on
-        limit : max number of results to return, defaults to 1000
-        offset : offset, used for paging. Defaults to 0
-        q : performs a full text search for a value
-        query : full SoQL query string, all as one parameter
-        exclude_system_fields : defaults to true. If set to false, the
-            response will include system fields (:id, :created_at, and
-            :updated_at)
-
-    More information about the SoQL parameters can be found at the official
-    docs:
-        http://dev.socrata.com/docs/queries.html
-
-    More information about system fields can be found here:
-        http://dev.socrata.com/docs/system-fields.html
+```bash
+pip install git+https://github.com/a4shubert/hbc_tsy.git
+# or, from a checkout:
+# pip install .
 ```
 
-### DataSet Description
+## Running as Jobs
 
-#### For data-pipeline structure:
+Use the job dispatcher to execute the built-in pipelines. Artifacts (cache/logs/analytics) are written under `app_context.dir_base` (see `utils.get_dir_base` for the current location; override as needed). The installed package name is `hbc` (repo: `hbc_tsy`).
 
-- we implement `yaml` based configs and for now do not validate the completeness of the keys, we take [] operator assuming all the keys are present in the config
-- `fetch` method on Fetcher will return pandas DataFrame just as a short-cut for the time being, subsequently more nuanced data structures can be implemented
-- we organize CACHE for now as simply .csv files each of which is persisted in a designated folder parametrized by `as_of` date
+```bash
+# Poll one day of data into cache
+python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=True --log-level=INFO
 
-**For an incremental retrieval:**
+# Run analytics for that date
+python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+```
 
-we notice the ordering of `unique_key` does not correspond to the ordering of `created_date`, thus
+### Midnight Scheduler (optional)
 
-- at a daily intervals (perhaps for as_of=T we download T-1 data):
-  - we download the `created_date` = T-1
+Run both jobs every midnight:
 
-**For an consistency retrieval:**
+```bash
+python -m hbc.jobs.runner
+```
 
-- at less frequent intervals we restore consistency to CACHE by
+## Using as a Library
 
-  - obtaining all the unique `created_dates` in dataset
-  - comparing with the dates available in CACHE
-  - retrieving all the missing dates
+Fetch data programmatically, save to cache, and read it back.
 
-  ```[python]
-  python -m hbc.jobs
-        --job-name=job_poll_nyc_open_data_311
-        --incremental=false
-        --last-missing-dates=7
-  ```
+```python
+from hbc import DataContainer, app_context, utils as ul
 
-## Transform:
+# set logical as-of date (defaults to today)
+app_context.update(as_of=ul.str_as_date("2009-12-31"))
 
-## Persist:
+# Fetch once and cache
+dc = DataContainer("nyc_open_data_311_service_requests")
+dc.get(app_context.as_of)
+dc.to_cache(app_context.as_of)
 
-## Quant:
+# Later: load from cache
+df = dc.from_cache(app_context.as_of, retrieve_if_missing=False)
+print(df.head())
+```
+
+## Demo Notebook
+
+A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying notebook. Open it in your browser or notebook viewer to see end-to-end examples of fetching, cleaning, and plotting the data.
