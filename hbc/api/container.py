@@ -3,12 +3,12 @@ import datetime
 import pandas as pd
 
 from hbc import utils as ul
-from hbc.ltp.fetching import Fetcher
+from hbc.ltp.loading import Fetcher
 from hbc.ltp.persistence.persist import Persistence
 
 
 class DataContainer:
-    """Orchestrates fetching, caching, and retrieving datasets by config name."""
+    """Orchestrates loading, caching, and retrieving datasets by config name."""
 
     def __init__(self, config_name):
         """Load config by name and prepare empty DataFrame for results."""

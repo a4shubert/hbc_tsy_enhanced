@@ -7,7 +7,7 @@ import pandas as pd
 from sodapy import Socrata
 
 from hbc import app_context, utils as ul
-from hbc.ltp.fetching.base import Fetcher
+from hbc.ltp.loading.base import Fetcher
 from hbc.utils import _parse_dt, _nz, _to_hashable_df
 
 

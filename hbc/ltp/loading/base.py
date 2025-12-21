@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 
-import hbc.ltp.fetching
+import hbc.ltp.loading
 
 logger = logging.getLogger()
 
@@ -42,7 +42,7 @@ class Fetcher(ABC):
 
     def get(self, config, as_of=None) -> pd.DataFrame:
         """Full pipeline: fetch -> clean -> normalize -> validate -> finalize."""
-        logger.info("fetching...")
+        logger.info("loading...")
         df = self.fetch(config, as_of)
         if len(df):
             logger.info("cleaning...")
@@ -62,5 +62,7 @@ class Fetcher(ABC):
     def from_name(cls, name):
         """Factory to return a concrete Fetcher by short name."""
         if name == "FetcherNYCOpenData":
-            return hbc.ltp.fetching.FetcherNYCOpenData()
+            from hbc.ltp.loading.fetchers.nycopen import FetcherNYCOpenData
+
+            return FetcherNYCOpenData()
         raise NotImplementedError(f"Fetcher {name} is not implemented")

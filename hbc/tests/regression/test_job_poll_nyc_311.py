@@ -48,7 +48,7 @@ class TestJobPollNYC311(unittest.TestCase):
         # Patch fetch to avoid network and return deterministic data.
         baseline_df = pd.read_csv(self.baseline_path)
         self.fetch_patcher = mock.patch(
-            "hbc.ltp.fetching.fetchers.nycopen.FetcherNYCOpenData.fetch",
+            "hbc.ltp.loading.fetchers.nycopen.FetcherNYCOpenData.fetch",
             return_value=baseline_df,
         )
         self.fetch_patcher.start()
