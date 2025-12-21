@@ -1,3 +1,2 @@
-include README.md
-include LICENSE
-recursive-include hbc/ltp/configs *.yaml
+recursive-include hbc *.yaml
+recursive-include hbc *.yml
