@@ -42,7 +42,6 @@ class Fetcher(ABC):
 
     def get(self, config, as_of=None) -> pd.DataFrame:
         """Full pipeline: fetch -> clean -> normalize -> validate -> finalize."""
-        logger.info(f"config={config}")
         logger.info("fetching...")
         df = self.fetch(config, as_of)
         if len(df):

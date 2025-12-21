@@ -7510,19 +7510,29 @@ a.anchor-link {
 </style>
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
-<main><div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=intro-title">
+<main>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a027f4ec-760d-45c7-9171-ad374a5abb05">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="NYC-311-Demo">NYC 311 Demo<a class="anchor-link" href="#NYC-311-Demo">¶</a></h1>
-<p><i>Library + jobs to fetch, cache, and analyze NYC 311 service request data.</i></p>
+<h1 id="NYC-311-Service-Requests-Data-Pipeline">NYC 311 Service Requests Data Pipeline<a class="anchor-link" href="#NYC-311-Service-Requests-Data-Pipeline">¶</a></h1>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e9476f70-0dfa-4c34-8c4e-f27295cb4bb5">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=021e03a6-0ef1-44d1-af02-f3ff82be510e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><em>Library + jobs to fetch, cache, and analyze NYC 311 service request data.</em></p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e9476f70-0dfa-4c34-8c4e-f27295cb4bb5">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7588,7 +7598,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_poll_nyc_311/job_poll_nyc_311_20251221100134.txt
+<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_poll_nyc_311/job_poll_nyc_311_20251221110536.txt
 </pre>
 </div>
 </div>
@@ -7623,7 +7633,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_poll_nyc_311/job_poll_nyc_311_20251221100140.txt
+<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_poll_nyc_311/job_poll_nyc_311_20251221110543.txt
 </pre>
 </div>
 </div>
@@ -7669,7 +7679,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_analysis_nyc_311/job_analysis_nyc_311_20251221100158.txt
+<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_analysis_nyc_311/job_analysis_nyc_311_20251221110600.txt
 </pre>
 </div>
 </div>
@@ -7930,10 +7940,9 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-21 10:02:06 base.py                45 INFO  root    : config={'moniker': 'nyc_open_data_311_service_requests', 'fetcher': 'FetcherNYCOpenData', 'token': 'ERZjPaQcb5J6iJOZeF1BDu4hd', 'base_url': 'data.cityofnewyork.us', 'url': '3rfa-3xsf', 'schema': ['DROP_FLAG', 'DROP_REASON', 'address_type', 'agency', 'agency_name', 'borough', 'bridge_highway_direction', 'bridge_highway_name', 'bridge_highway_segment', 'city', 'closed_date', 'community_board', 'complaint_type', 'created_date', 'cross_street_1', 'cross_street_2', 'descriptor', 'due_date', 'facility_type', 'ferry_direction', 'ferry_terminal_name', 'garage_lot_name', 'incident_address', 'incident_zip', 'intersection_street_1', 'intersection_street_2', 'landmark', 'latitude', 'location', 'location_type', 'longitude', 'park_borough', 'park_facility_name', 'resolution_action_updated_date', 'road_ramp', 'school_address', 'school_city', 'school_code', 'school_name', 'school_not_found', 'school_number', 'school_or_citywide_complaint', 'school_phone_number', 'school_region', 'school_state', 'school_zip', 'status', 'street_name', 'taxi_company_borough', 'taxi_pick_up_location', 'unique_key', 'vehicle_type', 'x_coordinate_state_plane_', 'y_coordinate_state_plane_'], 'kwargs': {'select': None, 'where': None, 'order': None, 'group': None, 'limit': None, 'offset': None, 'q': None, 'query': None, 'exclude_system_fields': None}}
-2025-12-21 10:02:06 base.py                46 INFO  root    : fetching...
-2025-12-21 10:02:06 nycopen.py            233 INFO  root    : added filter: created_date = 2025-12-21
-2025-12-21 10:02:07 nycopen.py            251 INFO  root    : Fetched 0 rows
+<pre>2025-12-21 11:06:14 base.py                45 INFO  root    : fetching...
+2025-12-21 11:06:14 nycopen.py            233 INFO  root    : added filter: created_date = 2025-12-21
+2025-12-21 11:06:14 nycopen.py            251 INFO  root    : Fetched 0 rows
 </pre>
 </div>
 </div>
@@ -7974,15 +7983,14 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-21 10:02:08 base.py                45 INFO  root    : config={'moniker': 'nyc_open_data_311_service_requests', 'fetcher': 'FetcherNYCOpenData', 'token': 'ERZjPaQcb5J6iJOZeF1BDu4hd', 'base_url': 'data.cityofnewyork.us', 'url': '3rfa-3xsf', 'schema': ['DROP_FLAG', 'DROP_REASON', 'address_type', 'agency', 'agency_name', 'borough', 'bridge_highway_direction', 'bridge_highway_name', 'bridge_highway_segment', 'city', 'closed_date', 'community_board', 'complaint_type', 'created_date', 'cross_street_1', 'cross_street_2', 'descriptor', 'due_date', 'facility_type', 'ferry_direction', 'ferry_terminal_name', 'garage_lot_name', 'incident_address', 'incident_zip', 'intersection_street_1', 'intersection_street_2', 'landmark', 'latitude', 'location', 'location_type', 'longitude', 'park_borough', 'park_facility_name', 'resolution_action_updated_date', 'road_ramp', 'school_address', 'school_city', 'school_code', 'school_name', 'school_not_found', 'school_number', 'school_or_citywide_complaint', 'school_phone_number', 'school_region', 'school_state', 'school_zip', 'status', 'street_name', 'taxi_company_borough', 'taxi_pick_up_location', 'unique_key', 'vehicle_type', 'x_coordinate_state_plane_', 'y_coordinate_state_plane_'], 'kwargs': {'select': None, 'where': None, 'order': None, 'group': None, 'limit': None, 'offset': None, 'q': None, 'query': None, 'exclude_system_fields': None}}
-2025-12-21 10:02:08 base.py                46 INFO  root    : fetching...
-2025-12-21 10:02:08 nycopen.py            233 INFO  root    : added filter: created_date = 2009-12-31
-2025-12-21 10:02:10 nycopen.py            251 INFO  root    : Fetched 4155 rows
-2025-12-21 10:02:10 base.py                49 INFO  root    : cleaning...
-2025-12-21 10:02:10 base.py                52 INFO  root    : normalizing...
-2025-12-21 10:02:11 base.py                55 INFO  root    : validating...
-2025-12-21 10:02:11 nycopen.py            188 INFO  root    : Validation summary -&gt; flagged 311 rows. closed_date before created_date: 52; closed_date set but status not closed: 89; incident_zip outside NYC range: 4; resolution_action_updated_date before created_date: 270
-2025-12-21 10:02:11 base.py                58 INFO  root    : finalizing...
+<pre>2025-12-21 11:06:14 base.py                45 INFO  root    : fetching...
+2025-12-21 11:06:14 nycopen.py            233 INFO  root    : added filter: created_date = 2009-12-31
+2025-12-21 11:06:15 nycopen.py            251 INFO  root    : Fetched 4155 rows
+2025-12-21 11:06:15 base.py                48 INFO  root    : cleaning...
+2025-12-21 11:06:15 base.py                51 INFO  root    : normalizing...
+2025-12-21 11:06:15 base.py                54 INFO  root    : validating...
+2025-12-21 11:06:16 nycopen.py            188 INFO  root    : Validation summary -&gt; flagged 311 rows. closed_date before created_date: 52; closed_date set but status not closed: 89; incident_zip outside NYC range: 4; resolution_action_updated_date before created_date: 270
+2025-12-21 11:06:16 base.py                57 INFO  root    : finalizing...
 </pre>
 </div>
 </div>
@@ -8009,7 +8017,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-21 10:02:11 persist.py             33 INFO  root    : Cached: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE/nyc_open_data_311_service_requests/20091231/nyc_open_data_311_service_requests.csv
+<pre>2025-12-21 11:06:16 persist.py             33 INFO  root    : Cached: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE/nyc_open_data_311_service_requests/20091231/nyc_open_data_311_service_requests.csv
 </pre>
 </div>
 </div>
@@ -8036,7 +8044,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-21 10:02:11 persist.py             45 INFO  root    : Retrieved from cache: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE/nyc_open_data_311_service_requests/20091231/nyc_open_data_311_service_requests.csv
+<pre>2025-12-21 11:06:16 persist.py             45 INFO  root    : Retrieved from cache: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE/nyc_open_data_311_service_requests/20091231/nyc_open_data_311_service_requests.csv
 </pre>
 </div>
 </div>
@@ -8234,7 +8242,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>'20091231, 20091230, 20091229, 20091228, 20091227, 20091226, 20091225, 20091224, 20091223, 20091222, 20091221, 20091220, 20091219, 20091218, 20091217, 20091216, 20091215, 20091214, 20091213, 20091212, 20091211'</pre>
+<pre>'20091231, 20091230, 20091229, 20091228, 20091227, 20091226, 20091225, 20091224, 20091223, 20091222, 20091221, 20091220, 20091219, 20091218, 20091217, 20091216, 20091215, 20091214, 20091213, 20091212, 20091211, 20091210, 20091209, 20091208, 20091207, 20091206, 20091205, 20091204, 20091203, 20091202, 20091201, 20091130, 20091129, 20091128, 20091127, 20091126'</pre>
 </div>
 </div>
 </div>
@@ -8374,7 +8382,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<img alt="Geo plot" src="geo_plot.png" style="width:300px;"/>
+<img alt="Geo plot" src="./geo_plot.png" style="width:300px;"/>
 </div>
 </div>
 </div>
