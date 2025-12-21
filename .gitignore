@@ -1,3 +1,6 @@
+.DS_Store
+docs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -5,6 +8,10 @@ __pycache__/
 
 # C extensions
 *.so
+
+# Anaconda
+.idea/
+anaconda_projects/
 
 # Distribution / packaging
 .Python
