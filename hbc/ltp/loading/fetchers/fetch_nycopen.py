@@ -17,10 +17,6 @@ CONST_PAGE_SIZE = 50_000  # per-page when paging
 class FetcherNYCOpenData(Fetcher):
     """Fetcher implementation for NYC Open Data 311 service requests."""
 
-    @property
-    def validator_name(self) -> str:
-        return "ValidatorNYCOpen311Service"
-
     @classmethod
     def fetch(cls, config: Dict, **query_kwargs) -> pd.DataFrame:
         """

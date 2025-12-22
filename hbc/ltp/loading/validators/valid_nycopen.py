@@ -9,27 +9,27 @@ from hbc.utils import _parse_dt, _nz, _to_hashable_df
 
 logger = logging.getLogger()
 
-NYC_LAT_BOUNDS = (40.0, 41.0)
-NYC_LON_BOUNDS = (-75.0, -72.0)
-NYC_X_BOUNDS = (900_000, 1_070_000)
-NYC_Y_BOUNDS = (120_000, 275_000)
-NYC_BOROUGHS = {
-    "BRONX",
-    "BROOKLYN",
-    "MANHATTAN",
-    "QUEENS",
-    "STATEN ISLAND",
-    "UNSPECIFIED",
-}
-ZIP_RE = re.compile(r"^\d{5}$")
-ZIP_MIN, ZIP_MAX = 10001, 11697
-
 
 class ValidatorNYCOpen311Service(Validator):
     """Validation/clean/normalize/finalize for NYC Open Data 311 Service datasets."""
 
-    @staticmethod
-    def validate(df: pd.DataFrame) -> pd.DataFrame:
+    NYC_LAT_BOUNDS = (40.0, 41.0)
+    NYC_LON_BOUNDS = (-75.0, -72.0)
+    NYC_X_BOUNDS = (900_000, 1_070_000)
+    NYC_Y_BOUNDS = (120_000, 275_000)
+    NYC_BOROUGHS = {
+        "BRONX",
+        "BROOKLYN",
+        "MANHATTAN",
+        "QUEENS",
+        "STATEN ISLAND",
+        "UNSPECIFIED",
+    }
+    ZIP_RE = re.compile(r"^\d{5}$")
+    ZIP_MIN, ZIP_MAX = 10001, 11697
+
+    @classmethod
+    def validate(cls, df: pd.DataFrame) -> pd.DataFrame:
         """
         Do NOT raise or drop. Annotate each row with:
         - DROP_FLAG: bool, True if any validation rule failed
@@ -110,13 +110,14 @@ class ValidatorNYCOpen311Service(Validator):
         if "latitude" in df:
             lat = pd.to_numeric(df["latitude"], errors="coerce")
             mark(
-                (lat < NYC_LAT_BOUNDS[0]) | (lat > NYC_LAT_BOUNDS[1]),
+                (lat < cls.NYC_LAT_BOUNDS[0]) | (lat > cls.NYC_LAT_BOUNDS[1]),
                 "latitude outside NYC",
             )
         if "longitude" in df:
             lon = pd.to_numeric(df["longitude"], errors="coerce")
             mark(
-                (lon < NYC_LON_BOUNDS[0]) | (lon > NYC_LON_BOUNDS[1]),
+                (lon < cls.NYC_LON_BOUNDS[0])
+                | (lon > cls.NYC_LON_BOUNDS[1]),
                 "longitude outside NYC",
             )
         if {"latitude", "longitude"} <= set(df.columns):
@@ -127,31 +128,31 @@ class ValidatorNYCOpen311Service(Validator):
         if "x_coordinate_state_plane_" in df:
             x = pd.to_numeric(df["x_coordinate_state_plane_"], errors="coerce")
             mark(
-                (x < NYC_X_BOUNDS[0]) | (x > NYC_X_BOUNDS[1]),
+                (x < cls.NYC_X_BOUNDS[0]) | (x > cls.NYC_X_BOUNDS[1]),
                 "x_coordinate_state_plane_ out of bounds",
             )
         if "y_coordinate_state_plane_" in df:
             y = pd.to_numeric(df["y_coordinate_state_plane_"], errors="coerce")
             mark(
-                (y < NYC_Y_BOUNDS[0]) | (y > NYC_Y_BOUNDS[1]),
+                (y < cls.NYC_Y_BOUNDS[0]) | (y > cls.NYC_Y_BOUNDS[1]),
                 "y_coordinate_state_plane_ out of bounds",
             )
 
         # --- ZIP (advisory) ---
         if "incident_zip" in df:
             z = _nz(df["incident_zip"])
-            mask_5 = z.str.fullmatch(ZIP_RE)
+            mask_5 = z.str.fullmatch(cls.ZIP_RE)
             z_num = pd.to_numeric(z.where(mask_5), errors="coerce")
             mark((~z.eq("")) & (~mask_5), "incident_zip not 5-digit")
             mark(
-                mask_5 & ~z_num.between(ZIP_MIN, ZIP_MAX),
+                mask_5 & ~z_num.between(cls.ZIP_MIN, cls.ZIP_MAX),
                 "incident_zip outside NYC range",
             )
 
         # --- Borough (advisory) ---
         if "borough" in df:
             b = _nz(df["borough"]).str.upper()
-            mark(~b.isin(NYC_BOROUGHS) & b.ne(""), "borough unexpected value")
+            mark(~b.isin(cls.NYC_BOROUGHS) & b.ne(""), "borough unexpected value")
 
         # Create DROP_FLAG and DROP_REASON (no rows dropped)
         if reason_masks:

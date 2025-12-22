@@ -82,3 +82,59 @@ dc.get(where=f"agency='NYPD'", limit=200)
 ## Demo Notebook
 
 A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying notebook. Open it in your browser or notebook viewer to see end-to-end examples of fetching, cleaning, and plotting the data.
+
+## Design
+
+- **Context/paths** (`hbc/api/context.py`, `utils.py`): `app_context` carries logical date and dirs; CLI dispatch can override dirs/date, and utility helpers honor an overridden base dir for consistent artifact locations.
+- **DataContainer** (`hbc/api/container.py`): loads config/moniker/schema, orchestrates fetcher + validator, enforces schema awareness on assignment, applies a safety `limit=100` when no query kwargs are given, and handles cache I/O.
+- **Fetchers** (`hbc/ltp/loading/fetchers`): fetch only. `FetcherNYCOpenData` wraps Socrata with retries/backoff, pagination, and date→where convenience. Fetcher factory resolves by name from config.
+- **Validators** (`hbc/ltp/loading/validators`): clean/normalize/validate/finalize via `Validator.parse`. Default is `ValidatorGeneric` (no-op); `ValidatorNYCOpen311Service` implements NYC-specific rules and logging. Selected by name in config, logged when used.
+- **Caching** (`hbc/ltp/persistence/cache.py`): reads/writes gzipped CSV snapshots under `app_context` dirs, keeping cache compressed after reads.
+- **Configuration** (`hbc/ltp/configs/*.yaml`): define moniker, fetcher, credentials/URL, schema, and optional validator. Query kwargs are supplied at call time rather than embedded in config.
+
+## UML (High-Level)
+
+```mermaid
+classDiagram
+    class DataContainer {
+      -config
+      -moniker
+      -df
+      +get(**query_kwargs)
+      +to_cache(as_of)
+      +from_cache(as_of, retrieve_if_missing)
+    }
+    class Fetcher {
+      <<abstract>>
+      +fetch(config, **query_kwargs)
+      +validator_name
+    }
+    class FetcherNYCOpenData {
+      +fetch(config, **query_kwargs)
+    }
+    class Validator {
+      <<abstract>>
+      +parse(df)
+      +clean(df)
+      +normalize(df)
+      +validate(df)
+      +finalize(df)
+    }
+    class ValidatorGeneric {
+      +parse(df)
+    }
+    class ValidatorNYCOpen311Service {
+      +parse(df)
+    }
+    class Cache {
+      +to_cache(dc, as_of)
+      +from_cache(dc, as_of)
+      +get_all_cached_dates(dc)
+    }
+    DataContainer --> Fetcher : selects by name
+    Fetcher <|-- FetcherNYCOpenData
+    DataContainer --> Validator : selects by name
+    Validator <|-- ValidatorGeneric
+    Validator <|-- ValidatorNYCOpen311Service
+    DataContainer --> Cache : persist/load df
+```

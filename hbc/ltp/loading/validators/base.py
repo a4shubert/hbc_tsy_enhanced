@@ -40,7 +40,7 @@ class Validator(ABC):
 
             return ValidatorGeneric()
         if name == "ValidatorNYCOpen311Service":
-            from hbc.ltp.loading.validators.nycopen import (
+            from hbc.ltp.loading.validators.valid_nycopen import (
                 ValidatorNYCOpen311Service,
             )
 
