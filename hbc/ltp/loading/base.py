@@ -1,3 +1,4 @@
+import datetime
 import logging
 from abc import ABC, abstractmethod
 
@@ -10,7 +11,7 @@ class Fetcher(ABC):
     """Abstract base for fetch/clean/normalize/validate pipelines."""
 
     @abstractmethod
-    def fetch(self, config, as_of=None) -> pd.DataFrame:
+    def fetch(self, config, as_of: datetime.date) -> pd.DataFrame:
         """Retrieve raw data for the given config/date."""
         raise NotImplementedError()
 
@@ -46,7 +47,7 @@ class Fetcher(ABC):
             return FetcherNYCOpenData()
         raise NotImplementedError(f"Fetcher {name} is not implemented")
 
-    def get(self, config, as_of=None) -> pd.DataFrame:
+    def get(self, config, as_of: datetime.date) -> pd.DataFrame:
         """Full pipeline: fetch -> clean -> normalize -> validate -> finalize."""
         logger.info("loading...")
         df = self.fetch(config, as_of)

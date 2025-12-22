@@ -84,7 +84,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     run_kwargs = _parse_extra_kwargs(list(rest))
     if args.as_of:
-        app_context.update(as_of=ul.str_as_date(args.as_of))
+        app_context.as_of = args.as_of
 
     # we conf log for the job
     ul.conf_log(

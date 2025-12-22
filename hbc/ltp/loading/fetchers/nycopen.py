@@ -6,7 +6,7 @@ from typing import Dict
 import pandas as pd
 from sodapy import Socrata
 
-from hbc import app_context, utils as ul
+from hbc import utils as ul
 from hbc.ltp.loading.base import Fetcher
 from hbc.utils import _parse_dt, _nz, _to_hashable_df
 
@@ -217,10 +217,8 @@ class FetcherNYCOpenData(Fetcher):
         return df
 
     @classmethod
-    def fetch(cls, config: Dict, as_of=None) -> pd.DataFrame:
-        """Fetch rows from Socrata API, defaulting to the provided as-of date."""
-        if not as_of:
-            as_of = app_context.as_of
+    def fetch(cls, config: Dict, as_of: _dt.date) -> pd.DataFrame:
+        """Fetch rows from Socrata API using the provided as-of date."""
         token = config["token"]
         base_url = config["base_url"]  # e.g., "data.cityofnewyork.us"
         dataset = config["url"]  # e.g., "3rfa-3xsf"

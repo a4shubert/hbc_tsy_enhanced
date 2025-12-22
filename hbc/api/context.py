@@ -63,12 +63,5 @@ class AppContext:
             "as_of must be a datetime.date, datetime.datetime, or ISO 'YYYY-MM-DD' string"
         )
 
-    def update(self, **kwargs: Any) -> "AppContext":
-        """Update allowed attributes in-place; returns self for chaining."""
-        for k, v in kwargs.items():
-            if hasattr(self, k):
-                setattr(self, k, v)
-        return self
-
 
 app_context = AppContext()

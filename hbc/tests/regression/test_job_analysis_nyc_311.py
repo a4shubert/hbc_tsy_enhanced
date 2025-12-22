@@ -45,7 +45,7 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         app_context.dir_cache = ul.get_dir_cache()
         app_context.dir_analytics = ul.get_dir_analytics()
         app_context.dir_logging = ul.get_dir_logging()
-        app_context.update(as_of=ul.str_as_date(self.AS_OF_STR))
+        app_context.as_of = ul.str_as_date(self.AS_OF_STR)
 
         # Seed cache with baseline input so job reads from cache, not network.
         cache_dir = (

@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 
-from hbc import utils as ul
+from hbc import app_context, utils as ul
 from hbc.ltp.loading import Fetcher
 from hbc.ltp.persistence.persist import Persistence
 
@@ -36,9 +36,10 @@ class DataContainer:
 
     def get(self, as_of: datetime.date | str = None):
         """Fetch fresh data for the given as-of date and store in `df`."""
+        as_of_date = ul.str_as_date(as_of) or app_context.as_of
         fetcher_name: str = self.config["fetcher"]
         fetcher: Fetcher = Fetcher.from_name(fetcher_name)
-        self.df = fetcher.get(self.config, ul.str_as_date(as_of))
+        self.df = fetcher.get(self.config, as_of_date)
 
     def to_cache(self, as_of: datetime.date = None):
         """Persist the current DataFrame to the cache for the date."""

@@ -2,6 +2,12 @@
 
 Library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
+Updates:
+
+- DataContainer `df` setter uses validation against schema specified in the associated yaml config file
+- app_context is simplified and allows for direct use `app_context.as_of = datetime.date()`
+- fetchers are guaranteed to receive non-`None` as_of
+
 ## Install
 
 ```bash
@@ -41,7 +47,7 @@ Fetch data programmatically, save to cache, and read it back.
 from hbc import DataContainer, app_context, utils as ul
 
 # set logical as-of date (defaults to today)
-app_context.update(as_of=ul.str_as_date("2009-12-31"))
+app_context.as_of = "2009-12-31"
 
 # Fetch once and cache
 dc = DataContainer("nyc_open_data_311_service_requests")
