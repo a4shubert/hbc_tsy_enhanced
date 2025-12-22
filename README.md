@@ -95,6 +95,8 @@ A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying no
 
 ## UML (High-Level)
 
+### Library
+
 ```mermaid
 classDiagram
     class DataContainer {
@@ -152,4 +154,29 @@ classDiagram
     }
     Cache ..> AnalyticalEngine : supplies cached data
     Cache ..> PlotEngine : supplies cached data
+```
+
+### Jobs
+
+```mermaid
+classDiagram
+    class Dispatcher {
+      +main(argv)
+    }
+    class Registry {
+      +JOB_REGISTRY
+    }
+    class Runner {
+      +midnight_scheduler(...)
+    }
+    class job_fetch_nyc_open_data_311_service_requests {
+      +job_fetch_nyc_open_data_311_service_requests(as_of, incremental, last_missing_dates)
+    }
+    class job_analyse_nyc_open_data_311_service_requests {
+      +job_analyse_nyc_open_data_311_service_requests(as_of, n_worst, n_best, n_days)
+    }
+    Dispatcher --> Registry : uses JOB_REGISTRY
+    Registry ..> job_fetch_nyc_open_data_311_service_requests
+    Registry ..> job_analyse_nyc_open_data_311_service_requests
+    Runner ..> Dispatcher : schedules commands
 ```
