@@ -4,12 +4,11 @@ Library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
 _Updates_:
 
-- DataContainer `df` setter uses validation against schema specified in the associated yaml config file
-- app_context is simplified and allows for direct use `app_context.as_of = datetime.date()`
-- fetchers are guaranteed to receive non-`None` as_of
-- cached csv are now gzipped for `to_cache` and ungzipped for `from_cache` methods of DataContainer
-- we added more commmand line arguments to jobs' `dispatch`: `--dir-base` `--dir-cache` `--dir-analytics` and `--dir-logging`
-- as the result aligned directories creation once `--dir-base` is provided
+- DataContainer `df` setter now validates columns against the config schema on assignment.
+- `app_context` is simplified; set the logical date directly (e.g., `app_context.as_of = datetime.date(...)`).
+- Fetchers always receive a non-`None` `as_of` from DataContainer.
+- Cache snapshots are stored as gzipped CSVs; `from_cache` transparently ungzips and re-zips.
+- Job dispatch adds `--dir-base`, `--dir-cache`, `--dir-analytics`, and `--dir-logging` to override runtime dirs; utility paths stay aligned when `--dir-base` is provided.
 
 ## Install
 
