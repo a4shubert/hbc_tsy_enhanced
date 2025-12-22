@@ -91,8 +91,11 @@ A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying no
 - **Validators** (`hbc/ltp/loading/validators`): clean/normalize/validate/finalize via `Validator.parse`. Default is `ValidatorGeneric` (no-op); `ValidatorNYCOpen311Service` implements NYC-specific rules and logging. Selected by name in config, logged when used.
 - **Caching** (`hbc/ltp/persistence/cache.py`): reads/writes gzipped CSV snapshots under `app_context` dirs, keeping cache compressed after reads.
 - **Configuration** (`hbc/ltp/configs/*.yaml`): define moniker, fetcher, credentials/URL, schema, and optional validator. Query kwargs are supplied at call time rather than embedded in config.
+- **Analytics/Plots** (`hbc/quant/analysis.py`, `hbc/quant/plots.py`): `AnalyticalEngine` provides ranking/summary helpers (best/worst/mean/median); `PlotEngine` offers plotting utilities for time series, bars, and geo bubbles.
 
 ## UML (High-Level)
+
+### Data Pipeline
 
 ```mermaid
 classDiagram
@@ -137,4 +140,18 @@ classDiagram
     Validator <|-- ValidatorGeneric
     Validator <|-- ValidatorNYCOpen311Service
     DataContainer --> Cache : persist/load df
+    class AnalyticalEngine {
+      +top_n_best(...)
+      +top_n_worst(...)
+      +mean(...)
+      +median(...)
+      +descriptive_stats(...)
+    }
+    class PlotEngine {
+      +time_series(...)
+      +bar(...)
+      +geo_bubble(...)
+    }
+    DataContainer ..> AnalyticalEngine : used in analytics jobs
+    DataContainer ..> PlotEngine : used in analytics jobs
 ```
