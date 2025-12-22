@@ -47,12 +47,7 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         app_context.as_of = ul.str_as_date(self.AS_OF_STR)
 
         # Seed cache with baseline input so job reads from cache, not network.
-        cache_dir = (
-            self.runtime_root
-            / "CACHE"
-            / self.MONIKER
-            / self.AS_OF_STR
-        )
+        cache_dir = self.runtime_root / "CACHE" / self.MONIKER / self.AS_OF_STR
         cache_dir.mkdir(parents=True, exist_ok=True)
         self.cache_path = cache_dir / f"{self.MONIKER}.csv"
         shutil.copyfile(self.baseline_input, self.cache_path)

@@ -19,6 +19,7 @@ class Fetcher(ABC):
         """Factory to return a concrete Fetcher by short name."""
         if name == "FetcherNYCOpenData":
             from hbc.ltp.loading.fetchers.nycopen import FetcherNYCOpenData
+
             return FetcherNYCOpenData()
         raise NotImplementedError(f"Fetcher {name} is not implemented")
 

@@ -18,6 +18,7 @@ class AppContext:
 
     def __str__(self) -> str:
         """Pretty string representation for logging/debug output."""
+
         def fmt(v: Any) -> str:
             if isinstance(v, (datetime.date, datetime.datetime)):
                 return v.isoformat()
