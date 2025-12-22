@@ -15,7 +15,7 @@ _Updates_:
 ## Install
 
 ```bash
-pip install git+https://github.com/a4shubert/hbc_tsy.git
+pip install git+https://github.com/a4shubert/hbc_tsy_enhanced.git
 ```
 
 ## Running as Jobs
