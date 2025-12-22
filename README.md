@@ -25,20 +25,20 @@ Use the job dispatcher to execute the built-in pipelines. Artifacts (cache/logs/
 _Poll one day of data into cache_:
 
 ```bash
-python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=True --log-level=INFO
+python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=True --log-level=INFO
 ```
 
 _Run analytics for that date_:
 
 ```bash
-python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+python -m hbc.jobs.dispatch --job-name=job_analyse_nyc_open_data_311_service_requests --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
 ```
 
 _Restore cache integrity for the last few missing dates (fetches multiple days)_:
 
 ```bash
 
-python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
+python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
 ```
 
 ### Midnight Scheduler

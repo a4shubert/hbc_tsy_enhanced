@@ -9,7 +9,7 @@ from hbc.quant.plots import PlotEngine
 logger = logging.getLogger()
 
 
-def job_analysis_nyc_311(
+def job_analyse_nyc_open_data_311_service_requests(
     as_of: str = None,
     n_worst=10,
     n_best=10,
@@ -20,7 +20,7 @@ def job_analysis_nyc_311(
         as_of = app_context.as_of
 
     logger.info(
-        f"\n\nRunning job_nyc_open_data_analysis as_of={as_of} n_worst={n_worst} n_best={n_best}  \n\n"
+        f"\n\nRunning job_analyse_nyc_open_data_311_service_requests as_of={as_of} n_worst={n_worst} n_best={n_best}  \n\n"
     )
 
     dc = DataContainer("nyc_open_data_311_service_requests")

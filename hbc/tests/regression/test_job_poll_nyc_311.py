@@ -6,7 +6,7 @@ from unittest import mock
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from hbc.jobs.job_pipeline import job_poll_nyc_311
+from hbc.jobs.job_pipeline import job_fetch_nyc_open_data_311_service_requests
 import hbc.utils as ul
 
 
@@ -47,7 +47,7 @@ class TestJobPollNYC311(unittest.TestCase):
         # Patch fetch to avoid network and return deterministic data.
         baseline_df = pd.read_csv(self.baseline_path)
         self.fetch_patcher = mock.patch(
-            "hbc.ltp.loading.fetchers.nycopen.FetcherNYCOpenData.fetch",
+            "hbc.ltp.loading.fetchers.fetch_nycopen.FetcherNYCOpenData.fetch",
             return_value=baseline_df,
         )
         self.fetch_patcher.start()
@@ -60,7 +60,7 @@ class TestJobPollNYC311(unittest.TestCase):
         shutil.rmtree(self.TMP_ROOT, ignore_errors=True)
 
     def test_job_poll_creates_expected_cache(self):
-        job_poll_nyc_311(as_of=self.AS_OF_STR, incremental=True)
+        job_fetch_nyc_open_data_311_service_requests(as_of=self.AS_OF_STR, incremental=True)
 
         produced_path = (
             self.runtime_root

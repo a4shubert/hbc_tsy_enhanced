@@ -50,7 +50,7 @@ def midnight_scheduler(*commands: str, run_now: bool = False) -> None:
 
 if __name__ == "__main__":
     midnight_scheduler(
-        "python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=20091231 --incremental=True --log-level=INFO",
-        "python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=20091231 --log-level=INFO --n-worst=10 --n-best=10 --n-days=10",
+        "python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=20091231 --incremental=True --log-level=INFO",
+        "python -m hbc.jobs.dispatch --job-name=job_analyse_nyc_open_data_311_service_requests --as-of=20091231 --log-level=INFO --n-worst=10 --n-best=10 --n-days=10",
         run_now=False,
     )
