@@ -41,7 +41,7 @@ _Restore cache integrity for the last few missing dates (fetches multiple days)_
 python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
 ```
 
-### Midnight Scheduler (optional)
+### Midnight Scheduler
 
 _Run jobs (every midnight)_:
 
@@ -94,8 +94,6 @@ A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying no
 - **Analytics/Plots** (`hbc/quant/analysis.py`, `hbc/quant/plots.py`): `AnalyticalEngine` provides ranking/summary helpers (best/worst/mean/median); `PlotEngine` offers plotting utilities for time series, bars, and geo bubbles.
 
 ## UML (High-Level)
-
-### Data Pipeline
 
 ```mermaid
 classDiagram
