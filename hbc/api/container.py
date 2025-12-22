@@ -20,6 +20,15 @@ class DataContainer:
         self._df: pd.DataFrame = pd.DataFrame(
             columns=self.config.get("schema", [])
         )
+    
+
+    def get(self, **query_kwargs):
+        """Fetch fresh data using the configured fetcher and store in `df`."""
+        fetcher_name: str = self.config["fetcher"]
+        fetcher: Fetcher = Fetcher.from_name(fetcher_name)
+        if not query_kwargs:
+            query_kwargs["limit"] = 100        
+        self.df = fetcher.get(self.config, **query_kwargs)
 
     @property
     def df(self) -> pd.DataFrame:
@@ -34,13 +43,7 @@ class DataContainer:
         self._valid_schema(value)
         self._df = value
 
-    def get(self, **query_kwargs):
-        """Fetch fresh data using the configured fetcher and store in `df`."""
-        fetcher_name: str = self.config["fetcher"]
-        fetcher: Fetcher = Fetcher.from_name(fetcher_name)
-        if not query_kwargs:
-            query_kwargs["limit"] = 100
-        self.df = fetcher.get(self.config, **query_kwargs)
+
 
     def to_cache(self, as_of: datetime.date = None):
         """Persist the current DataFrame to the cache for the date."""
