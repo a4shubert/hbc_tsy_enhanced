@@ -18,7 +18,7 @@ class Fetcher(ABC):
     def from_name(cls, name):
         """Factory to return a concrete Fetcher by short name."""
         if name == "FetcherNYCOpenData":
-            from hbc.ltp.loading.fetchers.nycopen import FetcherNYCOpenData
+            from hbc.ltp.loading.fetchers.fetch_nycopen import FetcherNYCOpenData
 
             return FetcherNYCOpenData()
         raise NotImplementedError(f"Fetcher {name} is not implemented")
@@ -28,16 +28,4 @@ class Fetcher(ABC):
         """Return the default validator name for this fetcher."""
         return "ValidatorGeneric"
 
-    def get(self, config, **query_kwargs) -> pd.DataFrame:
-        """Full pipeline: fetch -> validator.parse (clean/normalize/validate/finalize)."""
-        from hbc.ltp.loading.validators import Validator
-
-        logger.info("loading...")
-        df = self.fetch(config, **query_kwargs)
-        if len(df):
-            validator = Validator.from_name(
-                config.get("validator", self.validator_name)
-            )
-            logger.info("parsing (clean/normalize/validate/finalize)...")
-            df = validator.parse(df)
-        return df
+   

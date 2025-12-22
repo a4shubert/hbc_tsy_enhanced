@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 
 from hbc import utils as ul
-from hbc.ltp.loading import Fetcher
+from hbc.ltp.loading import Fetcher, Validator
 from hbc.ltp.persistence.cache import Cache
 
 logger = logging.getLogger()
@@ -27,7 +27,11 @@ class DataContainer:
         fetcher: Fetcher = Fetcher.from_name(fetcher_name)
         if not query_kwargs:
             query_kwargs["limit"] = 100
-        self.df = fetcher.get(self.config, **query_kwargs)
+        # Select validator via config, defaulting to generic.
+        validator_name = self.config.get("validator", "ValidatorGeneric")
+        validator: Validator = Validator.from_name(validator_name)
+        df_raw = fetcher.fetch(self.config, **query_kwargs)
+        self.df = validator.parse(df_raw)
 
     @property
     def df(self) -> pd.DataFrame:
