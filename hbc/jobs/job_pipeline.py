@@ -11,7 +11,7 @@ logger = logging.getLogger()
 LIMIT_MISS_DATES = 10
 
 
-def job_poll_nyc_311(
+def job_fetch_nyc_open_data_311_service_requests(
     as_of: str = None,
     incremental=True,
     last_missing_dates=LIMIT_MISS_DATES,
@@ -24,14 +24,14 @@ def job_poll_nyc_311(
     one created_date at a time
     :return:
     """
-    logger.info(f"\n\nRunning job_poll_nyc_open_data\n\n")
+    logger.info(f"\n\nRunning job_fetch_nyc_open_data_311_service_requests\n\n")
 
     if not as_of:
         as_of = app_context.as_of
 
     if incremental:
         logger.info(
-            f"Running job_poll_nyc_open_data for {as_of} and incremental={incremental}"
+            f"Running job_fetch_nyc_open_data_311_service_requests for {as_of} and incremental={incremental}"
         )
         dc = DataContainer("nyc_open_data_311_service_requests")
         dc.get(
@@ -47,7 +47,7 @@ def job_poll_nyc_311(
         missing_dates = set(all_dates).difference(cached_dates)
         if missing_dates:
             logger.info(
-                f"Running job_poll_nyc_open_data for the last {last_missing_dates} dates:"
+                f"Running job_fetch_nyc_open_data_311_service_requests for the last {last_missing_dates} dates:"
             )
             for as_of in sorted(list(missing_dates), reverse=True)[
                 :last_missing_dates

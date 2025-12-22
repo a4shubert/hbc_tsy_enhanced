@@ -6,7 +6,7 @@ from unittest import mock
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from hbc.jobs.job_analytics import job_analysis_nyc_311
+from hbc.jobs.job_analytics import job_analyse_nyc_open_data_311_service_requests
 import hbc.utils as ul
 
 
@@ -59,7 +59,7 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         shutil.rmtree(self.TMP_ROOT, ignore_errors=True)
 
     def test_job_analysis_produces_expected_closed_same_day(self):
-        job_analysis_nyc_311(
+        job_analyse_nyc_open_data_311_service_requests(
             as_of=self.AS_OF_STR, n_worst=1, n_best=1, n_days=1
         )
 

@@ -33,21 +33,7 @@ class FetcherNYCOpenData(Fetcher):
         retries = int(config.get("retries", 3))
         page_size = int(config.get("page_size", 10_000))
         client = Socrata(base_url, app_token=token, timeout=timeout)
-
-        # convenience: allow date/created_date to define where clause
-        if "where" not in query_kwargs:
-            date_val = query_kwargs.pop(
-                "date", query_kwargs.pop("created_date", None)
-            )
-            if date_val is not None:
-                dt = ul.str_as_date(date_val)
-                query_kwargs["where"] = (
-                    f"created_date = '{ul.date_as_iso_format(dt)}'"
-                )
-        else:
-            query_kwargs.pop("date", None)
-            query_kwargs.pop("created_date", None)
-
+       
         def fetch_once():
             if query_kwargs and "limit" in query_kwargs:
                 return client.get(dataset, **query_kwargs)

@@ -25,20 +25,20 @@ Use the job dispatcher to execute the built-in pipelines. Artifacts (cache/logs/
 _Poll one day of data into cache_:
 
 ```bash
-python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=True --log-level=INFO
+python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=True --log-level=INFO
 ```
 
 _Run analytics for that date_:
 
 ```bash
-python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+python -m hbc.jobs.dispatch --job-name=job_analyse_nyc_open_data_311_service_requests --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
 ```
 
 _Restore cache integrity for the last few missing dates (fetches multiple days)_:
 
 ```bash
 
-python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
+python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
 ```
 
 ### Midnight Scheduler
@@ -94,6 +94,8 @@ A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying no
 - **Analytics/Plots** (`hbc/quant/analysis.py`, `hbc/quant/plots.py`): `AnalyticalEngine` provides ranking/summary helpers (best/worst/mean/median); `PlotEngine` offers plotting utilities for time series, bars, and geo bubbles.
 
 ## UML (High-Level)
+
+### Library
 
 ```mermaid
 classDiagram
@@ -152,4 +154,29 @@ classDiagram
     }
     Cache ..> AnalyticalEngine : supplies cached data
     Cache ..> PlotEngine : supplies cached data
+```
+
+### Jobs
+
+```mermaid
+classDiagram
+    class Dispatcher {
+      +main(argv)
+    }
+    class Registry {
+      +JOB_REGISTRY
+    }
+    class Runner {
+      +midnight_scheduler(...)
+    }
+    class job_fetch_nyc_open_data_311_service_requests {
+      +job_fetch_nyc_open_data_311_service_requests(as_of, incremental, last_missing_dates)
+    }
+    class job_analyse_nyc_open_data_311_service_requests {
+      +job_analyse_nyc_open_data_311_service_requests(as_of, n_worst, n_best, n_days)
+    }
+    Dispatcher --> Registry : uses JOB_REGISTRY
+    Registry ..> job_fetch_nyc_open_data_311_service_requests
+    Registry ..> job_analyse_nyc_open_data_311_service_requests
+    Runner ..> Dispatcher : schedules commands
 ```
