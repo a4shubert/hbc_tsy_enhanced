@@ -14,7 +14,7 @@ _Updates_:
 ## Install
 
 ```bash
-pip install git+https://github.com/a4shubert/hbc_tsy.git
+pip install git+https://github.com/a4shubert/hbc_tsy_enhanced
 # or, from a checkout:
 # pip install .
 ```
