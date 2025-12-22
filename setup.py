@@ -7,7 +7,7 @@ ROOT = Path(__file__).parent
 
 setup(
     name="hbc",  # <- what shows up in pip / PyPI (distribution name)
-    version="0.1.0",
+    version="0.1.1",
     description="HBC utilities and jobs",
     long_description=(ROOT / "README.md").read_text(encoding="utf-8") if (ROOT / "README.md").exists() else "",
     long_description_content_type="text/markdown",
