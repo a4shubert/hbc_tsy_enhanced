@@ -18,10 +18,13 @@ class TestPersistence(unittest.TestCase):
     def setUp(self):
         shutil.rmtree(self.TMP_ROOT, ignore_errors=True)
         self.TMP_ROOT.mkdir(parents=True, exist_ok=True)
-        self._patcher = mock.patch("hbc.utils.get_dir_base", lambda: self.TMP_ROOT)
+        self._patcher = mock.patch(
+            "hbc.utils.get_dir_base", lambda: self.TMP_ROOT
+        )
         self._patcher.start()
         # refresh derived paths after monkeypatch
-        app_context.dir_cache = ul.get_dir_cache()
+        app_context.dir_base = self.TMP_ROOT
+        app_context.dir_cache = ul.mk_dir(app_context.dir_base / "CACHE")
 
     def tearDown(self):
         self._patcher.stop()

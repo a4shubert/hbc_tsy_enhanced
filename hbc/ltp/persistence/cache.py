@@ -26,7 +26,7 @@ class Cache:
             logger.info(f"DataFrame is empty in {dc.moniker}")
             return
         cache_dir = ul.mk_dir(
-            ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of)
+            app_context.dir_cache / dc.moniker / ul.date_as_str(as_of)
         )
         csv_path = cache_dir / f"{dc.moniker}.csv"
         dc.df.to_csv(csv_path, index=False)
@@ -39,7 +39,7 @@ class Cache:
         if not as_of:
             as_of = app_context.as_of
         cache_dir = ul.mk_dir(
-            ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of)
+            app_context.dir_cache / dc.moniker / ul.date_as_str(as_of)
         )
         csv_path = cache_dir / f"{dc.moniker}.csv"
         gz_path = csv_path.with_suffix(csv_path.suffix + ".gz")
@@ -65,7 +65,7 @@ class Cache:
     @classmethod
     def get_all_cached_dates(cls, dc: "DataContainer") -> list[str]:
         """Return sorted list of cached date directory names (desc)."""
-        path_cache: Path = ul.get_dir_cache(dc.moniker)  # ensures base exists
+        path_cache: Path = ul.mk_dir(app_context.dir_cache / dc.moniker)
         return sorted(
             (p.name for p in path_cache.iterdir() if p.is_dir()), reverse=True
         )

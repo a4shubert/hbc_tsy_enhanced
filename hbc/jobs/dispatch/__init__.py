@@ -1,5 +1,6 @@
 import argparse
 import logging
+from pathlib import Path
 from typing import Any, Sequence
 
 from hbc import app_context, utils as ul
@@ -77,6 +78,14 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parser.add_argument("--as-of", type=str, help="YYYY-MM-DD (optional)")
     parser.add_argument("--log-level", type=str, help="log level")
+    parser.add_argument("--dir-base", type=str, help="Base directory override")
+    parser.add_argument("--dir-cache", type=str, help="Cache directory override")
+    parser.add_argument(
+        "--dir-analytics", type=str, help="Analytics directory override"
+    )
+    parser.add_argument(
+        "--dir-logging", type=str, help="Logging directory override"
+    )
 
     args, rest = parser.parse_known_args(argv)
 
@@ -85,11 +94,27 @@ def main(argv: Sequence[str] | None = None) -> None:
     run_kwargs = _parse_extra_kwargs(list(rest))
     if args.as_of:
         app_context.as_of = args.as_of
+    app_context.dir_base = (
+        Path(args.dir_base) if args.dir_base else ul.get_dir_base()
+    )
+    # keep utility helpers in sync when base is overridden via CLI
+    ul.set_dir_base(app_context.dir_base)
+    app_context.dir_cache = (
+        Path(args.dir_cache) if args.dir_cache else ul.get_dir_cache()
+    )
+    app_context.dir_analytics = (
+        Path(args.dir_analytics)
+        if args.dir_analytics
+        else ul.get_dir_analytics()
+    )
+    app_context.dir_logging = (
+        Path(args.dir_logging) if args.dir_logging else ul.get_dir_logging()
+    )
 
     # we conf log for the job
     ul.conf_log(
         file_path=ul.path_to_str(
-            ul.mk_dir(ul.get_dir_logging() / args.job_name)
+            ul.mk_dir(app_context.dir_logging / args.job_name)
             / f"{args.job_name}_{ul.get_id()}.txt"
         ),
         level=log_level,

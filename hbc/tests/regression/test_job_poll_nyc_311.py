@@ -29,10 +29,6 @@ class TestJobPollNYC311(unittest.TestCase):
         # Patch filesystem base dir to isolate artifacts.
         self._patchers = [
             mock.patch("hbc.utils.get_dir_base", lambda: self.runtime_root),
-            mock.patch(
-                "hbc.ltp.persistence.cache.ul.get_dir_base",
-                lambda: self.runtime_root,
-            ),
         ]
 
         for p in self._patchers:
@@ -41,9 +37,12 @@ class TestJobPollNYC311(unittest.TestCase):
         # Ensure app_context directories use the patched base.
         from hbc import app_context
 
-        app_context.dir_cache = ul.get_dir_cache()
-        app_context.dir_analytics = ul.get_dir_analytics()
-        app_context.dir_logging = ul.get_dir_logging()
+        app_context.dir_base = self.runtime_root
+        app_context.dir_cache = ul.mk_dir(app_context.dir_base / "CACHE")
+        app_context.dir_analytics = ul.mk_dir(
+            app_context.dir_base / "ANALYTICS"
+        )
+        app_context.dir_logging = ul.mk_dir(app_context.dir_base / "LOGS")
 
         # Patch fetch to avoid network and return deterministic data.
         baseline_df = pd.read_csv(self.baseline_path)
@@ -68,9 +67,11 @@ class TestJobPollNYC311(unittest.TestCase):
             / "CACHE"
             / self.MONIKER
             / self.AS_OF_STR
-            / f"{self.MONIKER}.csv"
+            / f"{self.MONIKER}.csv.gz"
         )
-        self.assertTrue(produced_path.exists(), "cache file was not created")
+        self.assertTrue(
+            produced_path.exists(), "cache file was not created (gzipped)"
+        )
 
         produced_df = pd.read_csv(produced_path)
         expected_df = pd.read_csv(self.baseline_path)

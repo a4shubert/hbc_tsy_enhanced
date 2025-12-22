@@ -8,6 +8,8 @@ _Updates_:
 - app_context is simplified and allows for direct use `app_context.as_of = datetime.date()`
 - fetchers are guaranteed to receive non-`None` as_of
 - cached csv are now gzipped for `to_cache` and ungzipped for `from_cache` methods of DataContainer
+- we added more commmand line arguments to jobs' `dispatch`: `--dir-base` `--dir-cache` `--dir-analytics` and `--dir-logging`
+- as the result aligned directories creation once `--dir-base` is provided
 
 ## Install
 
