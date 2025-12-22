@@ -34,20 +34,14 @@ def job_poll_nyc_311(
             f"Running job_poll_nyc_open_data for {as_of} and incremental={incremental}"
         )
         dc = DataContainer("nyc_open_data_311_service_requests")
-        dc.config["kwargs"].update(
-            {
-                "where": f"created_date = '{ul.date_as_iso_format(ul.str_as_date(as_of))}' "
-            }
+        dc.get(
+            where=f"created_date = '{ul.date_as_iso_format(ul.str_as_date(as_of))}' "
         )
-        dc.get(as_of)
         dc.to_cache(as_of)
     else:
         # we are going to identify all the created_date(s) in the database that are missing in cache
         dc = DataContainer("nyc_open_data_311_service_requests")
-        dc.config["kwargs"].update(
-            {"select": "created_date", "group": "created_date"}
-        )
-        dc.get()
+        dc.get(select="created_date", group="created_date")
         all_dates = pd.to_datetime(dc.df["created_date"])
         cached_dates = pd.to_datetime(dc.all_cached_dates)
         missing_dates = set(all_dates).difference(cached_dates)
@@ -60,10 +54,9 @@ def job_poll_nyc_311(
             ]:
                 logger.info(f"working {as_of}")
                 dc = DataContainer("nyc_open_data_311_service_requests")
-                dc.config["kwargs"].update(
-                    {
-                        "where": f"created_date = '{ul.date_as_iso_format(as_of.date())}' "
-                    }
+                dc.get(
+                    where=(
+                        f"created_date = '{ul.date_as_iso_format(as_of.date())}' "
+                    )
                 )
-                dc.get(as_of)
                 dc.to_cache(as_of)

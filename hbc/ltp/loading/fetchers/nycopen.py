@@ -1,12 +1,13 @@
 import datetime as _dt
 import logging
+import time
 import re
 from typing import Dict
 
 import pandas as pd
 from sodapy import Socrata
 
-from hbc import app_context, utils as ul
+from hbc import utils as ul
 from hbc.ltp.loading.base import Fetcher
 from hbc.utils import _parse_dt, _nz, _to_hashable_df
 
@@ -217,36 +218,58 @@ class FetcherNYCOpenData(Fetcher):
         return df
 
     @classmethod
-    def fetch(cls, config: Dict, as_of=None) -> pd.DataFrame:
-        """Fetch rows from Socrata API, defaulting to the provided as-of date."""
-        if not as_of:
-            as_of = app_context.as_of
+    def fetch(cls, config: Dict, **query_kwargs) -> pd.DataFrame:
+        """
+        Fetch rows from Socrata API using provided query kwargs.
+        Supported Socrata parameters (passed through unchanged):
+        select, where, order, group, limit, offset, q, query, exclude_system_fields.
+        Convenience: pass `date=` or `created_date=` (YYYY-MM-DD or yyyymmdd)
+        to auto-build a where clause on created_date if none is provided.
+        """
         token = config["token"]
         base_url = config["base_url"]  # e.g., "data.cityofnewyork.us"
         dataset = config["url"]  # e.g., "3rfa-3xsf"
-        query_kwargs = {
-            k: v for k, v in config.get("kwargs", {}).items() if v is not None
-        }
-        client = Socrata(base_url, app_token=token)
+        timeout = int(config.get("timeout", 30))
+        retries = int(config.get("retries", 3))
+        page_size = int(config.get("page_size", 10_000))
+        client = Socrata(base_url, app_token=token, timeout=timeout)
 
-        if not query_kwargs:
-            logger.info(f"added filter: created_date = {as_of}")
-            query_kwargs["where"] = (
-                f"created_date = '{ul.date_as_iso_format(as_of)}'"
-            )
-            page_size = int(config.get("page_size", CONST_PAGE_SIZE))
+        
+
+        def fetch_once():
+            if query_kwargs and "limit" in query_kwargs:
+                return client.get(dataset, **query_kwargs)
             paged_kwargs = dict(query_kwargs)
             paged_kwargs["limit"] = page_size
-            rows = list(client.get_all(dataset, **paged_kwargs))
-        else:
-            if "limit" not in query_kwargs:
-                page_size = int(config.get("page_size", CONST_PAGE_SIZE))
-                paged_kwargs = dict(query_kwargs)
-                paged_kwargs["limit"] = page_size
-                rows = list(client.get_all(dataset, **paged_kwargs))
-            else:
-                rows = client.get(dataset, **query_kwargs)
+            logger.info(
+                "using pagination at fetching with page_size=%s timeout=%s",
+                page_size,
+                timeout,
+            )
+            return list(client.get_all(dataset, **paged_kwargs))
 
+        last_exc = None
+        for attempt in range(retries):
+            try:
+                rows = fetch_once()
+                break
+            except Exception as exc:
+                last_exc = exc
+                if attempt == retries - 1:
+                    raise
+                sleep_for = 2**attempt
+                logger.warning(
+                    "Fetch attempt %s/%s failed (%s); retrying in %ss",
+                    attempt + 1,
+                    retries,
+                    exc,
+                    sleep_for,
+                )
+                time.sleep(sleep_for)
+        else:
+            # Should not reach here, but raise last_exc for clarity.
+            raise last_exc
+        
         df = pd.DataFrame.from_records(rows)
         logger.info(f"Fetched {len(df)} rows")
         return df

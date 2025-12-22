@@ -31,10 +31,6 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         # Patch filesystem base dir to isolate artifacts.
         self._patchers = [
             mock.patch("hbc.utils.get_dir_base", lambda: self.runtime_root),
-            mock.patch(
-                "hbc.ltp.persistence.persist.ul.get_dir_base",
-                lambda: self.runtime_root,
-            ),
         ]
         for p in self._patchers:
             p.start()
@@ -42,10 +38,13 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         # Ensure app_context directories use the patched base.
         from hbc import app_context
 
-        app_context.dir_cache = ul.get_dir_cache()
-        app_context.dir_analytics = ul.get_dir_analytics()
-        app_context.dir_logging = ul.get_dir_logging()
-        app_context.update(as_of=ul.str_as_date(self.AS_OF_STR))
+        app_context.dir_base = self.runtime_root
+        app_context.dir_cache = ul.mk_dir(app_context.dir_base / "CACHE")
+        app_context.dir_analytics = ul.mk_dir(
+            app_context.dir_base / "ANALYTICS"
+        )
+        app_context.dir_logging = ul.mk_dir(app_context.dir_base / "LOGS")
+        app_context.as_of = ul.str_as_date(self.AS_OF_STR)
 
         # Seed cache with baseline input so job reads from cache, not network.
         cache_dir = (

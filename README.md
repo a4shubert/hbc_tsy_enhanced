@@ -2,6 +2,15 @@
 
 Library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
+_Updates_:
+
+- DataContainer `df` setter now validates columns against the config schema on assignment.
+- `app_context` is simplified; set the logical date directly (e.g., `app_context.as_of = datetime.date(...)`).
+- Fetchers always receive a non-`None` `as_of` from DataContainer.
+- Cache snapshots are stored as gzipped CSVs; `from_cache` transparently ungzips and re-zips.
+- Job dispatch adds `--dir-base`, `--dir-cache`, `--dir-analytics`, and `--dir-logging` to override runtime dirs; utility paths stay aligned when `--dir-base` is provided.
+- FetcherNYCOpenData accepts Socrata query kwargs directly; pass `date=`/`created_date=` (`YYYY-MM-DD` or `yyyymmdd`) to auto-build a `where` on `created_date` and use `limit=100` as the default when no query is supplied.
+
 ## Install
 
 ```bash
@@ -41,11 +50,13 @@ Fetch data programmatically, save to cache, and read it back.
 from hbc import DataContainer, app_context, utils as ul
 
 # set logical as-of date (defaults to today)
-app_context.update(as_of=ul.str_as_date("2009-12-31"))
+app_context.as_of = "2009-12-31"
 
 # Fetch once and cache
 dc = DataContainer("nyc_open_data_311_service_requests")
-dc.get(app_context.as_of)
+dc.get(
+    where=f"created_date = '{ul.date_as_iso_format(app_context.as_of)}'"
+)
 dc.to_cache(app_context.as_of)
 
 # Later: load from cache
