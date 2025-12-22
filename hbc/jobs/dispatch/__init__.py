@@ -79,7 +79,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--as-of", type=str, help="YYYY-MM-DD (optional)")
     parser.add_argument("--log-level", type=str, help="log level")
     parser.add_argument("--dir-base", type=str, help="Base directory override")
-    parser.add_argument("--dir-cache", type=str, help="Cache directory override")
+    parser.add_argument(
+        "--dir-cache", type=str, help="Cache directory override"
+    )
     parser.add_argument(
         "--dir-analytics", type=str, help="Analytics directory override"
     )

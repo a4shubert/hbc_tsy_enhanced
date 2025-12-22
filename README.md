@@ -22,24 +22,28 @@ pip install git+https://github.com/a4shubert/hbc_tsy.git
 
 Use the job dispatcher to execute the built-in pipelines. Artifacts (cache/logs/analytics) are written under `app_context.dir_base` (see `utils.get_dir_base` for the current location; override as needed). The installed package name is `hbc` (repo: `hbc_tsy`).
 
+_Poll one day of data into cache_:
+
 ```bash
-# Poll one day of data into cache
 python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=True --log-level=INFO
 ```
 
+_Run analytics for that date_:
+
 ```bash
-# Run analytics for that date
 python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
 ```
 
+_Restore cache integrity for the last few missing dates (fetches multiple days)_:
+
 ```bash
-# Restore cache integrity for the last few missing dates (fetches multiple days)
+
 python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
 ```
 
 ### Midnight Scheduler (optional)
 
-Run jobs (every midnight):
+_Run jobs (every midnight)_:
 
 ```bash
 python -m hbc.jobs.runner
@@ -47,7 +51,7 @@ python -m hbc.jobs.runner
 
 ## Using as a Library
 
-Fetch data programmatically, save to cache, and read it back.
+_Fetch data programmatically, save to cache, and read it back_:
 
 ```python
 from hbc import DataContainer, app_context, utils as ul

@@ -37,6 +37,4 @@ class TestUtils(unittest.TestCase):
             p1 = self.TMP_ROOT / "file.txt"
             p1.touch()
             p2 = "another.txt"
-            self.assertEqual(
-                ul.paths_to_str([p1, Path(p2)]), [str(p1), p2]
-            )
+            self.assertEqual(ul.paths_to_str([p1, Path(p2)]), [str(p1), p2])
