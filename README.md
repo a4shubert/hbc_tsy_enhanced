@@ -1,4 +1,4 @@
-# NYC 311 Service Requests Data Pipeline
+# NYC 311 Open Data (Pipleine and Analytics)
 
 Library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
@@ -10,13 +10,12 @@ _Updates_:
 - Cache snapshots are stored as gzipped CSVs; `from_cache` transparently ungzips and re-zips.
 - Job dispatch adds `--dir-base`, `--dir-cache`, `--dir-analytics`, and `--dir-logging` to override runtime dirs; utility paths stay aligned when `--dir-base` is provided.
 - FetcherNYCOpenData accepts Socrata query kwargs directly; pass `date=`/`created_date=` (`YYYY-MM-DD` or `yyyymmdd`) to auto-build a `where` on `created_date` and use `limit=100` as the default when no query is supplied.
+- Fetch/validate responsibilities are split: fetchers only fetch; validators (default generic, override via config) handle clean/normalize/validate/finalize with logging.
 
 ## Install
 
 ```bash
 pip install git+https://github.com/a4shubert/hbc_tsy.git
-# or, from a checkout:
-# pip install .
 ```
 
 ## Running as Jobs
@@ -26,17 +25,21 @@ Use the job dispatcher to execute the built-in pipelines. Artifacts (cache/logs/
 ```bash
 # Poll one day of data into cache
 python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=True --log-level=INFO
+```
 
+```bash
 # Run analytics for that date
 python -m hbc.jobs.dispatch --job-name=job_analysis_nyc_311 --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+```
 
+```bash
 # Restore cache integrity for the last few missing dates (fetches multiple days)
 python -m hbc.jobs.dispatch --job-name=job_poll_nyc_311 --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
 ```
 
 ### Midnight Scheduler (optional)
 
-Run both jobs every midnight:
+Run jobs (every midnight):
 
 ```bash
 python -m hbc.jobs.runner
@@ -62,6 +65,14 @@ dc.to_cache(app_context.as_of)
 # Later: load from cache
 df = dc.from_cache(app_context.as_of, retrieve_if_missing=False)
 print(df.head())
+
+
+# Load a different data set
+dc = DataContainer('nyc_open_data_311_call_center_inquiry')
+# exploratory  100 (default) rows
+dc.get()
+# with the query
+dc.get(where=f"agency='NYPD'", limit=200)
 ```
 
 ## Demo Notebook
