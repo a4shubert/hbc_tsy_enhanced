@@ -8535,7 +8535,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="311-Call-Center-Inquiry-dataset-onboarding:">311 Call Center Inquiry dataset onboarding:<a class="anchor-link" href="#311-Call-Center-Inquiry-dataset-onboarding:">¶</a></h3>
+<h3 id="new-dataset:-nyc_open_data_311_call_center_inquiry:">new dataset: nyc_open_data_311_call_center_inquiry:<a class="anchor-link" href="#new-dataset:-nyc_open_data_311_call_center_inquiry:">¶</a></h3>
 </div>
 </div>
 </div>
@@ -9026,6 +9026,254 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </tbody>
 </table>
 </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5b193a47">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="new_dataset:-nyc_open_data_311_customer_satisfaction_survey">new_dataset: nyc_open_data_311_customer_satisfaction_survey<a class="anchor-link" href="#new_dataset:-nyc_open_data_311_customer_satisfaction_survey">¶</a></h3>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2ff15c2a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [35]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span><span class="s1">'nyc_open_data_311_customer_satisfaction_survey'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=58822420">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [36]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-22 19:16:44 fetch_nycopen.py       71 INFO  root    : Fetched 100 rows
+2025-12-22 19:16:44 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-22 19:16:44 base.py                53 INFO  root    : cleaning...
+2025-12-22 19:16:44 base.py                56 INFO  root    : normalizing...
+2025-12-22 19:16:44 base.py                59 INFO  root    : validating...
+2025-12-22 19:16:44 base.py                62 INFO  root    : finalizing...
+2025-12-22 19:16:44 container.py           73 ERROR root    : DataContainer nyc_open_data_311_customer_satisfaction_survey does not adhere to schema. Missing columns: agency, agency_name, brief_description, call_resolution, date, date_time, inquiry_name, time, unique_id
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c8380c2a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"answer_satisfaction='Neutral'"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-22 19:20:39 fetch_nycopen.py       42 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
+2025-12-22 19:20:40 fetch_nycopen.py       71 INFO  root    : Fetched 3422 rows
+2025-12-22 19:20:40 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-22 19:20:40 base.py                53 INFO  root    : cleaning...
+2025-12-22 19:20:40 base.py                56 INFO  root    : normalizing...
+2025-12-22 19:20:40 base.py                59 INFO  root    : validating...
+2025-12-22 19:20:40 base.py                62 INFO  root    : finalizing...
+2025-12-22 19:20:40 container.py           73 ERROR root    : DataContainer nyc_open_data_311_customer_satisfaction_survey does not adhere to schema. Missing columns: agency, agency_name, brief_description, call_resolution, date, date_time, inquiry_name, time, unique_id
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=01ca1ee0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[44]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>year</th>
+<th>campaign</th>
+<th>channel</th>
+<th>survey_type</th>
+<th>start_time</th>
+<th>completion_time</th>
+<th>survey_language</th>
+<th>overall_satisfaction</th>
+<th>wait_time</th>
+<th>agent_customer_service</th>
+<th>agent_job_knowledge</th>
+<th>answer_satisfaction</th>
+<th>nps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>2021</td>
+<td>Campaign 5</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2021-12-13T09:17:09.000</td>
+<td>2021-12-13T09:19:31.000</td>
+<td>English (United States)‎</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Neutral</td>
+<td>Neutral</td>
+<td>7</td>
+</tr>
+<tr>
+<th>1</th>
+<td>2022</td>
+<td>Campaign 2</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2022-03-17T13:12:59.000</td>
+<td>2022-03-17T13:14:57.000</td>
+<td>English (United States)‎</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Neutral</td>
+<td>8</td>
+</tr>
+<tr>
+<th>2</th>
+<td>2023</td>
+<td>Campaign 3</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2023-07-06T10:12:24.000</td>
+<td>2023-07-06T10:14:34.000</td>
+<td>English (United States)‎</td>
+<td>Neutral</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Neutral</td>
+<td>Neutral</td>
+<td>5</td>
+</tr>
+<tr>
+<th>3</th>
+<td>2020</td>
+<td>Pilot</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2020-12-15T05:19:59.000</td>
+<td>2020-12-15T05:25:05.000</td>
+<td>Español (España, alfabetización internacional)</td>
+<td>Strongly Agree</td>
+<td>Strongly Agree</td>
+<td>Strongly Agree</td>
+<td>Strongly Agree</td>
+<td>Neutral</td>
+<td>10</td>
+</tr>
+<tr>
+<th>4</th>
+<td>2020</td>
+<td>Pilot</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2020-12-05T20:32:36.000</td>
+<td>2020-12-05T20:34:08.000</td>
+<td>Español (España, alfabetización internacional)</td>
+<td>Disagree</td>
+<td>Disagree</td>
+<td>Neutral</td>
+<td>Disagree</td>
+<td>Neutral</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7d0100b0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
 </div>
 </div>
 </div>

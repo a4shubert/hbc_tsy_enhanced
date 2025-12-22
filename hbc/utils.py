@@ -300,6 +300,11 @@ def get_id() -> str:
     return datetime.datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 
 
+def lst_to_yaml(items: Iterable[str]) -> str:
+    """Convert an iterable of strings to a YAML list block (one item per line)."""
+    return "\n".join(f"- {item}" for item in items)
+
+
 def mk_dir(path: Path) -> Path:
     """Create directory (parents ok) and return the Path."""
     path.mkdir(parents=True, exist_ok=True)
