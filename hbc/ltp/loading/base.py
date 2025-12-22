@@ -1,9 +1,7 @@
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
 
 import pandas as pd
-
-import hbc.ltp.loading
 
 logger = logging.getLogger()
 
@@ -40,6 +38,15 @@ class Fetcher(ABC):
         """Optional final tweaks after validation; defaults to passthrough."""
         return df
 
+    @classmethod
+    def from_name(cls, name):
+        """Factory to return a concrete Fetcher by short name."""
+        if name == "FetcherNYCOpenData":
+            from hbc.ltp.loading.fetchers.nycopen import FetcherNYCOpenData
+
+            return FetcherNYCOpenData()
+        raise NotImplementedError(f"Fetcher {name} is not implemented")
+
     def get(self, config, as_of=None) -> pd.DataFrame:
         """Full pipeline: fetch -> clean -> normalize -> validate -> finalize."""
         logger.info("loading...")
@@ -57,12 +64,3 @@ class Fetcher(ABC):
             logger.info("finalizing...")
             df = self.finalize(df)
         return df
-
-    @classmethod
-    def from_name(cls, name):
-        """Factory to return a concrete Fetcher by short name."""
-        if name == "FetcherNYCOpenData":
-            from hbc.ltp.loading.fetchers.nycopen import FetcherNYCOpenData
-
-            return FetcherNYCOpenData()
-        raise NotImplementedError(f"Fetcher {name} is not implemented")
