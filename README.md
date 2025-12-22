@@ -152,6 +152,6 @@ classDiagram
       +bar(...)
       +geo_bubble(...)
     }
-    DataContainer ..> AnalyticalEngine : used in analytics jobs
-    DataContainer ..> PlotEngine : used in analytics jobs
+    Cache ..> AnalyticalEngine : supplies cached data
+    Cache ..> PlotEngine : supplies cached data
 ```
