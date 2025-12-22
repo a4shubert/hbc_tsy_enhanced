@@ -32,7 +32,7 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         self._patchers = [
             mock.patch("hbc.utils.get_dir_base", lambda: self.runtime_root),
             mock.patch(
-                "hbc.ltp.persistence.persist.ul.get_dir_base",
+                "hbc.ltp.persistence.cache.ul.get_dir_base",
                 lambda: self.runtime_root,
             ),
         ]

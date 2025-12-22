@@ -10,6 +10,8 @@ from pathlib import Path
 import re
 import sys
 import tempfile
+import gzip
+import shutil
 from typing import Any, Iterable, List, Optional, Tuple, Union
 
 from IPython import display
@@ -428,3 +430,29 @@ def to_namedtuple(d, recursive=True):
         d = namedtuple("_", d.keys())(**d)
 
     return d
+
+
+def gz_file(file_path: Union[str, Path], keep_original: bool = False) -> Path:
+    """Gzip a file; optionally remove the source. Returns the .gz Path."""
+    src = Path(file_path)
+    if src.suffix == ".gz":
+        return src
+    gz_path = src.with_suffix(src.suffix + ".gz")
+    with open(src, "rb") as f_in, gzip.open(gz_path, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
+    if not keep_original:
+        src.unlink(missing_ok=True)
+    return gz_path
+
+
+def un_gz_file(file_path: Union[str, Path], remove_gz: bool = True) -> Path:
+    """Ungzip a .gz file; optionally remove the .gz. Returns the plain Path."""
+    src = Path(file_path)
+    if src.suffix != ".gz":
+        return src
+    dest = src.with_suffix("")
+    with gzip.open(src, "rb") as f_in, open(dest, "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
+    if remove_gz:
+        src.unlink(missing_ok=True)
+    return dest

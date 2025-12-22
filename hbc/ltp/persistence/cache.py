@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger()
 
 
-class Persistence:
+class Cache:
     """Cache helper for reading/writing DataContainer CSV snapshots."""
 
     @classmethod
@@ -25,28 +25,42 @@ class Persistence:
         if not len(dc.df):
             logger.info(f"DataFrame is empty in {dc.moniker}")
             return
-        path_cache = (
-            ul.mk_dir(ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of))
-            / f"{dc.moniker}.csv"
+        cache_dir = ul.mk_dir(
+            ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of)
         )
-        dc.df.to_csv(path_cache, index=False)
-        logger.info(f"Cached: {path_cache}")
+        csv_path = cache_dir / f"{dc.moniker}.csv"
+        dc.df.to_csv(csv_path, index=False)
+        gz_path = ul.gz_file(csv_path)
+        logger.info(f"Cached: {gz_path}")
 
     @classmethod
     def from_cache(cls, dc: "DataContainer", as_of: datetime):
         """Load cached CSV for the date; return empty DataFrame if missing."""
         if not as_of:
             as_of = app_context.as_of
-        path_cache = (
-            ul.mk_dir(ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of))
-            / f"{dc.moniker}.csv"
+        cache_dir = ul.mk_dir(
+            ul.get_dir_cache(dc.moniker) / ul.date_as_str(as_of)
         )
-        if os.path.exists(path_cache):
-            logger.info(f"Retrieved from cache: {path_cache}")
-            return pd.read_csv(path_cache, keep_default_na=False)
-        else:
-            logger.info(f"Path {path_cache} does not exist")
-            return pd.DataFrame()
+        csv_path = cache_dir / f"{dc.moniker}.csv"
+        gz_path = csv_path.with_suffix(csv_path.suffix + ".gz")
+
+        if os.path.exists(gz_path):
+            temp_csv = ul.un_gz_file(gz_path)
+            try:
+                df = pd.read_csv(temp_csv, keep_default_na=False)
+            finally:
+                ul.gz_file(temp_csv)
+            logger.info(f"Retrieved from cache: {gz_path}")
+            return df
+        if os.path.exists(csv_path):
+            logger.info(f"Retrieved from cache (plain): {csv_path}")
+            df = pd.read_csv(csv_path, keep_default_na=False)
+            gz_path = ul.gz_file(csv_path)
+            logger.info(f"Compressed cache file: {gz_path}")
+            return df
+
+        logger.info(f"Path {gz_path} does not exist")
+        return pd.DataFrame()
 
     @classmethod
     def get_all_cached_dates(cls, dc: "DataContainer") -> list[str]:

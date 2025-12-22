@@ -5,7 +5,7 @@ import pandas as pd
 
 from hbc import app_context, utils as ul
 from hbc.ltp.loading import Fetcher
-from hbc.ltp.persistence.persist import Persistence
+from hbc.ltp.persistence.cache import Cache
 
 logger = logging.getLogger()
 
@@ -43,13 +43,13 @@ class DataContainer:
 
     def to_cache(self, as_of: datetime.date = None):
         """Persist the current DataFrame to the cache for the date."""
-        Persistence.to_cache(self, as_of)
+        Cache.to_cache(self, as_of)
 
     def from_cache(
         self, as_of: datetime.date = None, retrieve_if_missing=False
     ):
         """Load cached data for the date; optionally fetch if cache is empty."""
-        self.df = Persistence.from_cache(self, as_of)
+        self.df = Cache.from_cache(self, as_of)
         if not len(self.df) and retrieve_if_missing:
             self.get(as_of)
             self.to_cache(as_of)
@@ -58,7 +58,7 @@ class DataContainer:
     @property
     def all_cached_dates(self):
         """List cached date folder names (sorted descending)."""
-        return Persistence.get_all_cached_dates(self)
+        return Cache.get_all_cached_dates(self)
 
     def _valid_schema(self, df: pd.DataFrame) -> bool:
         """Check that df contains all schema columns; log errors when missing."""
