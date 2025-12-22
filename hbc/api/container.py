@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 
-from hbc import app_context, utils as ul
+from hbc import utils as ul
 from hbc.ltp.loading import Fetcher
 from hbc.ltp.persistence.cache import Cache
 
@@ -31,15 +31,16 @@ class DataContainer:
         """Set DataFrame and validate it against configured schema."""
         if not isinstance(value, pd.DataFrame):
             raise TypeError("df must be a pandas DataFrame")
-        if self._valid_schema(value):
-            self._df = value
+        self._valid_schema(value)
+        self._df = value
 
-    def get(self, as_of: datetime.date | str = None):
-        """Fetch fresh data for the given as-of date and store in `df`."""
-        as_of_date = ul.str_as_date(as_of) or app_context.as_of
+    def get(self, **query_kwargs):
+        """Fetch fresh data using the configured fetcher and store in `df`."""
         fetcher_name: str = self.config["fetcher"]
         fetcher: Fetcher = Fetcher.from_name(fetcher_name)
-        self.df = fetcher.get(self.config, as_of_date)
+        if not query_kwargs:
+            query_kwargs["limit"] = 100
+        self.df = fetcher.get(self.config, **query_kwargs)
 
     def to_cache(self, as_of: datetime.date = None):
         """Persist the current DataFrame to the cache for the date."""
