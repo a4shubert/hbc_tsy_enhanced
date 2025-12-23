@@ -1,4 +1,4 @@
-# NYC 311 Open Data (Pipleine and Analytics)
+# NYC 311 Open Data (Pipeline and Analytics)
 
 Library + jobs to fetch, cache, and analyze NYC 311 service request data.
 
