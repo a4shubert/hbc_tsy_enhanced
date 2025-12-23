@@ -128,13 +128,3 @@ def main(argv: Sequence[str] | None = None) -> None:
     # we execute job
     job_fn = JOB_REGISTRY[args.job_name]
     job_fn(**run_kwargs)
-
-
-if __name__ == "__main__":
-    main(
-        [
-            "--as-of=20090105",
-            "--job-name=job_poll_nyc_open_data_311",
-            "--incremental=False",
-        ]
-    )
