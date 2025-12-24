@@ -7,7 +7,9 @@ import pandas as pd
 
 
 class SqlLiteDataBase:
-    """Lightweight helper for executing raw SQLite queries."""
+    """Lightweight helper for executing raw SQLite queries.
+       Not to be used in production - just for prototyping
+    """
 
     def __init__(self, db_path: Optional[str | Path] = None):
         """
@@ -25,22 +27,6 @@ class SqlLiteDataBase:
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
         self.logger = logging.getLogger()
-
-    def run_query(self, query: str, params: Optional[Iterable[Any]] = None):
-        """
-        Execute a native SQLite query and return the result.
-
-        - For SELECT-like statements (cursor has a description), returns a pandas DataFrame.
-        - For non-SELECT statements, commits and returns the affected rowcount.
-        """
-        cur = self.conn.cursor()
-        cur.execute(query, params or [])
-        if cur.description:
-            rows = cur.fetchall()
-            cols = [desc[0] for desc in cur.description]
-            return pd.DataFrame(rows, columns=cols)
-        self.conn.commit()
-        return cur.rowcount
 
     @property
     def all_dbs(self) -> list[str]:
@@ -61,6 +47,22 @@ class SqlLiteDataBase:
             return []
         return [f"{db_name}:{name}" for name in df["name"].tolist()]
 
+    def run_query(self, query: str, params: Optional[Iterable[Any]] = None):
+        """
+        Execute a native SQLite query and return the result.
+
+        - For SELECT-like statements (cursor has a description), returns a pandas DataFrame.
+        - For non-SELECT statements, commits and returns the affected rowcount.
+        """
+        cur = self.conn.cursor()
+        cur.execute(query, params or [])
+        if cur.description:
+            rows = cur.fetchall()
+            cols = [desc[0] for desc in cur.description]
+            return pd.DataFrame(rows, columns=cols)
+        self.conn.commit()
+        return cur.rowcount
+
     def create_table_from_df(self, table_name: str, df: pd.DataFrame) -> None:
         """
         Create/replace a table from a DataFrame, inferring SQLite column types.
@@ -80,6 +82,7 @@ class SqlLiteDataBase:
             "float64": "REAL",
             "float32": "REAL",
             "bool": "INTEGER",
+            
             "datetime64[ns]": "TEXT",
         }
 
@@ -112,6 +115,15 @@ class SqlLiteDataBase:
                 "Failed to create table %s: %s", table_name, exc, exc_info=True
             )
             raise
+
+    def execute(self, command: str, params: Optional[Iterable[Any]] = None) -> int:
+        """
+        Execute a non-SELECT SQL command; returns affected rowcount.
+        """
+        cur = self.conn.cursor()
+        cur.execute(command, params or [])
+        self.conn.commit()
+        return cur.rowcount
 
     def close(self) -> None:
         """Close the open SQLite connection."""
