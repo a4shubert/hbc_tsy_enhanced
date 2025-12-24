@@ -6,6 +6,17 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# .NET / C# build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.csproj.user
+.vs/
+*.db-wal
+*.db-shm
+
 # C extensions
 *.so
 

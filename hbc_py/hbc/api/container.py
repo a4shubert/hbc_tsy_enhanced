@@ -6,6 +6,7 @@ import pandas as pd
 from hbc import utils as ul
 from hbc.ltp.loading import Fetcher, Validator
 from hbc.ltp.persistence.cache import Cache
+from hbc.ltp.persistence.db import SqlLiteDataBase
 
 logger = logging.getLogger()
 
@@ -17,9 +18,8 @@ class DataContainer:
         """Load config by name and prepare empty DataFrame for results."""
         self.config = ul.get_config(config_name)
         self.moniker = self.config["moniker"]
-        self._df: pd.DataFrame = pd.DataFrame(
-            columns=self.config.get("schema", [])
-        )
+        self.schema_cols = self._schema_columns(self.config)
+        self._df: pd.DataFrame = pd.DataFrame(columns=self.schema_cols)
 
     def get(self, **query_kwargs):
         """Fetch fresh data using the configured fetcher and store in `df`."""
@@ -47,7 +47,10 @@ class DataContainer:
         self._df = value
 
     def to_cache(self, as_of: datetime.date = None):
-        """Persist the current DataFrame to the cache for the date."""
+        """Persist the current DataFrame. Special-case service requests to SQLite."""
+        if self.moniker == "nyc_open_data_311_customer_satisfaction_survey":
+            SqlLiteDataBase().update_surveys_table(self.df, verify=False)
+            return
         Cache.to_cache(self, as_of)
 
     def from_cache(
@@ -67,7 +70,7 @@ class DataContainer:
 
     def _valid_schema(self, df: pd.DataFrame) -> bool:
         """Check that df contains all schema columns; log errors when missing."""
-        schema_cols = set(self.config.get("schema", []))
+        schema_cols = set(self.schema_cols)
         missing_cols = sorted(schema_cols - set(df.columns))
         if missing_cols:
             logger.error(
@@ -77,3 +80,16 @@ class DataContainer:
             )
             return False
         return True
+
+    @staticmethod
+    def _schema_columns(config: dict) -> list[str]:
+        """Extract column names from schema supporting both list[str] and list[dict]."""
+        cols = []
+        for item in config.get("schema", []):
+            if isinstance(item, dict):
+                name = item.get("name") or item.get("column") or item.get("field")
+                if name:
+                    cols.append(name)
+            else:
+                cols.append(str(item))
+        return cols

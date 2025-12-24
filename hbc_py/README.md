@@ -90,7 +90,7 @@ A walk-through lives in `notebooks/Demo.html` (rendered) and the accompanying no
 - **Fetchers** (`hbc/ltp/loading/fetchers`): fetch only. `FetcherNYCOpenData` wraps Socrata with retries/backoff, pagination, and date→where convenience. Fetcher factory resolves by name from config.
 - **Validators** (`hbc/ltp/loading/validators`): clean/normalize/validate/finalize via `Validator.parse`. Default is `ValidatorGeneric` (no-op); `ValidatorNYCOpen311Service` implements NYC-specific rules and logging. Selected by name in config, logged when used.
 - **Caching** (`hbc/ltp/persistence/cache.py`): reads/writes gzipped CSV snapshots under `app_context` dirs, keeping cache compressed after reads.
-- **Configuration** (`hbc/ltp/configs/*.yaml`): define moniker, fetcher, credentials/URL, schema, and optional validator. Query kwargs are supplied at call time rather than embedded in config.
+- **Configuration** (`hbc_configs/*.yaml`): define moniker, fetcher, credentials/URL, schema, and optional validator. Query kwargs are supplied at call time rather than embedded in config.
 - **Analytics/Plots** (`hbc/quant/analysis.py`, `hbc/quant/plots.py`): `AnalyticalEngine` provides ranking/summary helpers (best/worst/mean/median); `PlotEngine` offers plotting utilities for time series, bars, and geo bubbles.
 
 ## UML (High-Level)

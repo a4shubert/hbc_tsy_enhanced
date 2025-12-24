@@ -1,9 +1,11 @@
 import logging
 import sqlite3
+import os
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
 import pandas as pd
+import pandas.api.types as ptypes
 
 
 class SqlLiteDataBase:
@@ -18,10 +20,15 @@ class SqlLiteDataBase:
         Parameters
         ----------
         db_path : Optional[str | Path]
-            Path to the SQLite database file. Defaults to `./hbc_db/hbc.sqlite3`
-            relative to the current working directory.
+            Path to the SQLite database file. Defaults to env HBC_DB_PATH
+            or `<repo>/hbc_db/hbc.db`.
         """
-        default_path = Path.cwd() / "hbc_db" / "hbc.sqlite3"
+        env_path = os.environ.get("HBC_DB_PATH")
+        if env_path:
+            default_path = Path(env_path)
+        else:
+            repo_root = Path(__file__).resolve().parents[4]
+            default_path = repo_root / "hbc_db" / "hbc.db"
         self.db_path = Path(db_path) if db_path is not None else default_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
@@ -131,3 +138,72 @@ class SqlLiteDataBase:
             self.conn.close()
         except Exception:
             pass
+
+    def update_surveys_table(
+        self,
+        df: pd.DataFrame,
+        verify: Optional[bool] = None,
+    ) -> list[int]:
+        """
+        Push DataFrame rows to the surveys API.
+        - If Id is provided, tries PUT; falls back to POST on 404.
+        - If Id is missing, uses POST.
+
+        Uses env HBC_API_URL (default http://localhost:5047) and endpoints:
+        - POST /surveys
+        - PUT /surveys/{id}
+        """
+        if df is None or df.empty:
+            self.logger.warning("DataFrame is empty; nothing to sync.")
+            return []
+        try:
+            import requests
+        except ImportError as exc:
+            raise ImportError("requests package is required for API sync") from exc
+
+        api_base = os.environ.get("HBC_API_URL", "http://localhost:5047").rstrip("/")
+        verify_flag = verify
+        if verify_flag is None:
+            env_verify = os.environ.get("HBC_API_VERIFY", "").strip().lower()
+            if env_verify in {"false", "0", "no", "off"}:
+                verify_flag = False
+            elif env_verify in {"true", "1", "yes", "on"}:
+                verify_flag = True
+
+        data = df.copy()
+        # convert datetime columns to isoformat strings
+        for col in data.columns:
+            if ptypes.is_datetime64_any_dtype(data[col]):
+                data[col] = data[col].dt.strftime("%Y-%m-%dT%H:%M:%S")
+
+        # Replace NaN/NaT with None for JSON compatibility.
+        data = data.where(pd.notnull(data), None)
+        print(data)
+
+        records = data.to_dict(orient="records")
+        status_codes: list[int] = []
+
+        for rec in records:
+            clean = {
+                k: v
+                for k, v in rec.items()
+                if not (v is None or (isinstance(v, float) and pd.isna(v)))
+            }
+            resp = requests.post(
+                f"{api_base}/surveys",
+                json=clean,
+                timeout=30,
+                verify=verify_flag,
+            )
+            status_codes.append(resp.status_code)
+            if resp.status_code >= 400:
+                self.logger.error(
+                    "POST /surveys failed for payload %s with status %s: %s",
+                    clean,
+                    resp.status_code,
+                    resp.text,
+                )
+                resp.raise_for_status()
+
+        self.logger.info("Synced %s survey rows via API", len(status_codes))
+        return status_codes

@@ -1,0 +1,163 @@
+moniker: "nyc_open_data_311_service_requests"
+schema:
+  - name: address_type
+    type: text
+    is_key: false
+  - name: agency
+    type: text
+    is_key: false
+  - name: agency_name
+    type: text
+    is_key: false
+  - name: borough
+    type: text
+    is_key: false
+  - name: bridge_highway_direction
+    type: text
+    is_key: false
+  - name: bridge_highway_name
+    type: text
+    is_key: false
+  - name: bridge_highway_segment
+    type: text
+    is_key: false
+  - name: city
+    type: text
+    is_key: false
+  - name: closed_date
+    type: datetime
+    is_key: false
+  - name: community_board
+    type: text
+    is_key: false
+  - name: complaint_type
+    type: text
+    is_key: false
+  - name: created_date
+    type: datetime
+    is_key: true
+  - name: cross_street_1
+    type: text
+    is_key: false
+  - name: cross_street_2
+    type: text
+    is_key: false
+  - name: descriptor
+    type: text
+    is_key: false
+  - name: due_date
+    type: datetime
+    is_key: false
+  - name: facility_type
+    type: text
+    is_key: false
+  - name: ferry_direction
+    type: text
+    is_key: false
+  - name: ferry_terminal_name
+    type: text
+    is_key: false
+  - name: garage_lot_name
+    type: text
+    is_key: false
+  - name: incident_address
+    type: text
+    is_key: false
+  - name: incident_zip
+    type: text
+    is_key: false
+  - name: intersection_street_1
+    type: text
+    is_key: false
+  - name: intersection_street_2
+    type: text
+    is_key: false
+  - name: landmark
+    type: text
+    is_key: false
+  - name: latitude
+    type: number
+    is_key: false
+  - name: location
+    type: text
+    is_key: false
+  - name: location_type
+    type: text
+    is_key: false
+  - name: longitude
+    type: number
+    is_key: false
+  - name: park_borough
+    type: text
+    is_key: false
+  - name: park_facility_name
+    type: text
+    is_key: false
+  - name: resolution_action_updated_date
+    type: datetime
+    is_key: false
+  - name: road_ramp
+    type: text
+    is_key: false
+  - name: school_address
+    type: text
+    is_key: false
+  - name: school_city
+    type: text
+    is_key: false
+  - name: school_code
+    type: text
+    is_key: false
+  - name: school_name
+    type: text
+    is_key: false
+  - name: school_not_found
+    type: text
+    is_key: false
+  - name: school_number
+    type: text
+    is_key: false
+  - name: school_or_citywide_complaint
+    type: text
+    is_key: false
+  - name: school_phone_number
+    type: text
+    is_key: false
+  - name: school_region
+    type: text
+    is_key: false
+  - name: school_state
+    type: text
+    is_key: false
+  - name: school_zip
+    type: text
+    is_key: false
+  - name: status
+    type: text
+    is_key: false
+  - name: street_name
+    type: text
+    is_key: false
+  - name: taxi_company_borough
+    type: text
+    is_key: false
+  - name: taxi_pick_up_location
+    type: text
+    is_key: false
+  - name: unique_key
+    type: text
+    is_key: true
+  - name: vehicle_type
+    type: text
+    is_key: false
+  - name: x_coordinate_state_plane_
+    type: number
+    is_key: false
+  - name: y_coordinate_state_plane_
+    type: number
+    is_key: false
+fetcher: FetcherNYCOpenData
+validator: ValidatorNYCOpen311Service
+token: ERZjPaQcb5J6iJOZeF1BDu4hd
+base_url: data.cityofnewyork.us
+url: "3rfa-3xsf"

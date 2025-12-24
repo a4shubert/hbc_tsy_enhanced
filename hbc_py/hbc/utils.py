@@ -246,8 +246,8 @@ def display_full_df(df):
 
 
 def get_config(config_name: str) -> dict[str, Any] | list[dict[str, Any]]:
-    """Load a YAML config (supports .yml/.yaml) from ltp/configs."""
-    base = Path(__file__).resolve().parent / "ltp" / "configs"
+    """Load a YAML config (supports .yml/.yaml) from repo-level hbc_configs."""
+    base = Path(__file__).resolve().parents[2] / "hbc_configs"
     path = (
         (base / config_name)
         if Path(config_name).suffix
