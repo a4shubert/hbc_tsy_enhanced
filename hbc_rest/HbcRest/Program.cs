@@ -55,9 +55,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Expose Swagger UI in all environments for ease of testing.
-app.UseSwagger();
-app.UseSwaggerUI();
+if (!app.Environment.IsProduction())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.MapGet("/surveys", async (HbcContext db) =>
     await db.CustomerSatisfactionSurveys.AsNoTracking().ToListAsync());
