@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HbcRest.Migrations
 {
     [DbContext(typeof(HbcContext))]
-    [Migration("20251224201111_Initial")]
-    partial class Initial
+    [Migration("20251224205815_AddUniqueKeyToSurveys")]
+    partial class AddUniqueKeyToSurveys
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,6 +83,11 @@ namespace HbcRest.Migrations
                         .HasColumnName("survey_type")
                         .HasAnnotation("Relational:JsonPropertyName", "survey_type");
 
+                    b.Property<string>("UniqueKey")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("unique_key")
+                        .HasAnnotation("Relational:JsonPropertyName", "unique_key");
+
                     b.Property<string>("WaitTime")
                         .HasColumnType("TEXT")
                         .HasColumnName("wait_time")
@@ -94,6 +99,9 @@ namespace HbcRest.Migrations
                         .HasAnnotation("Relational:JsonPropertyName", "year");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UniqueKey")
+                        .IsUnique();
 
                     b.ToTable("nyc_open_data_311_customer_satisfaction_survey");
                 });

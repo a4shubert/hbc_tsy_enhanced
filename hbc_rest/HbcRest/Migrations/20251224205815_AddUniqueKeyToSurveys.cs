@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HbcRest.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class AddUniqueKeyToSurveys : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,6 +17,7 @@ namespace HbcRest.Migrations
                 {
                     id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    unique_key = table.Column<string>(type: "TEXT", nullable: true),
                     year = table.Column<string>(type: "TEXT", nullable: true),
                     campaign = table.Column<string>(type: "TEXT", nullable: true),
                     channel = table.Column<string>(type: "TEXT", nullable: true),
@@ -35,6 +36,12 @@ namespace HbcRest.Migrations
                 {
                     table.PrimaryKey("PK_nyc_open_data_311_customer_satisfaction_survey", x => x.id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_nyc_open_data_311_customer_satisfaction_survey_unique_key",
+                table: "nyc_open_data_311_customer_satisfaction_survey",
+                column: "unique_key",
+                unique: true);
         }
 
         /// <inheritdoc />

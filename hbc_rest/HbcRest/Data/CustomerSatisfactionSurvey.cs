@@ -12,6 +12,10 @@ public class CustomerSatisfactionSurvey
     [JsonPropertyName("id")]
     public long Id { get; set; }
 
+    [Column("unique_key")]
+    [JsonPropertyName("unique_key")]
+    public string? UniqueKey { get; set; }
+
     [Column("year")]
     [JsonPropertyName("year")]
     public string? Year { get; set; } // schema: text

@@ -61,6 +61,19 @@ app.MapGet("/surveys/{id}", async (long id, HbcContext db) =>
 
 app.MapPost("/surveys", async (CustomerSatisfactionSurvey survey, HbcContext db) =>
 {
+    if (!string.IsNullOrWhiteSpace(survey.UniqueKey))
+    {
+        var existing = await db.CustomerSatisfactionSurveys
+            .FirstOrDefaultAsync(s => s.UniqueKey == survey.UniqueKey);
+        if (existing is not null)
+        {
+            CopyFields(existing, survey);
+            var savedExisting = await db.SaveChangesAsync();
+            Console.WriteLine($"[HbcRest] POST /surveys updated existing {savedExisting} row(s) by unique_key");
+            return Results.Ok(existing);
+        }
+    }
+
     db.CustomerSatisfactionSurveys.Add(survey);
     var saved = await db.SaveChangesAsync();
     Console.WriteLine($"[HbcRest] POST /surveys saved {saved} row(s)");
@@ -71,9 +84,32 @@ app.MapPost("/surveys/batch", async ([FromBody] List<CustomerSatisfactionSurvey>
 {
     if (surveys is null || surveys.Count == 0) return Results.BadRequest("No surveys provided");
 
-    await db.CustomerSatisfactionSurveys.AddRangeAsync(surveys);
+    int updated = 0;
+    var toInsert = new List<CustomerSatisfactionSurvey>();
+
+    foreach (var survey in surveys)
+    {
+        if (!string.IsNullOrWhiteSpace(survey.UniqueKey))
+        {
+            var existing = await db.CustomerSatisfactionSurveys
+                .FirstOrDefaultAsync(s => s.UniqueKey == survey.UniqueKey);
+            if (existing is not null)
+            {
+                CopyFields(existing, survey);
+                updated++;
+                continue;
+            }
+        }
+        toInsert.Add(survey);
+    }
+
+    if (toInsert.Count > 0)
+    {
+        await db.CustomerSatisfactionSurveys.AddRangeAsync(toInsert);
+    }
+
     var saved = await db.SaveChangesAsync();
-    Console.WriteLine($"[HbcRest] POST /surveys/batch saved {saved} row(s)");
+    Console.WriteLine($"[HbcRest] POST /surveys/batch saved {saved} row(s), updated {updated} existing");
     return Results.Ok(surveys);
 });
 

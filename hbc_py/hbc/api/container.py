@@ -54,9 +54,13 @@ class DataContainer:
         Cache.to_cache(self, as_of)
 
     def from_cache(
-        self, as_of: datetime.date = None, retrieve_if_missing=False
+        self, as_of: datetime.date = None, retrieve_if_missing=False, query=None
     ):
         """Load cached data for the date; optionally fetch if cache is empty."""
+        if self.moniker == 'nyc_open_data_311_customer_satisfaction_survey':
+            if query is None:
+                query = f'select count(*) from {self.moniker}'
+            return SqlLiteDataBase().run_query(query)
         self.df = Cache.from_cache(self, as_of)
         if not len(self.df) and retrieve_if_missing:
             self.get(as_of)

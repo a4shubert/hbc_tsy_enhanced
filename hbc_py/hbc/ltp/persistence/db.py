@@ -178,32 +178,52 @@ class SqlLiteDataBase:
 
         # Replace NaN/NaT with None for JSON compatibility.
         data = data.where(pd.notnull(data), None)
-        print(data)
+
+        # Add deterministic unique_key hash column to help dedupe/upsert decisions.
+        if "unique_key" not in data.columns:
+            import hashlib
+            import json
+
+            def _hash_row(row):
+                payload = {k: row[k] for k in data.columns if k != "unique_key"}
+                serialized = json.dumps(payload, sort_keys=True, default=str)
+                return hashlib.sha1(serialized.encode("utf-8")).hexdigest()
+
+            data["unique_key"] = data.apply(_hash_row, axis=1)
+
+        # Drop duplicates on unique_key within this payload.
+        data = data.drop_duplicates(subset=["unique_key"])
 
         records = data.to_dict(orient="records")
-        status_codes: list[int] = []
+        if not records:
+            return []
 
-        for rec in records:
-            clean = {
-                k: v
-                for k, v in rec.items()
-                if not (v is None or (isinstance(v, float) and pd.isna(v)))
-            }
+        status_codes: list[int] = []
+        chunk_size = 100
+        for i in range(0, len(records), chunk_size):
+            batch = records[i : i + chunk_size]
+            self.logger.info(
+                "Posting batch %s-%s/%s to %s/surveys/batch (verify=%s)",
+                i + 1,
+                i + len(batch),
+                len(records),
+                api_base,
+                verify_flag,
+            )
             resp = requests.post(
-                f"{api_base}/surveys",
-                json=clean,
-                timeout=30,
+                f"{api_base}/surveys/batch",
+                json=batch,
+                timeout=60,
                 verify=verify_flag,
             )
-            status_codes.append(resp.status_code)
+            status_codes.extend([resp.status_code] * len(batch))
             if resp.status_code >= 400:
                 self.logger.error(
-                    "POST /surveys failed for payload %s with status %s: %s",
-                    clean,
+                    "Batch POST /surveys/batch failed with status %s: %s",
                     resp.status_code,
                     resp.text,
                 )
                 resp.raise_for_status()
 
-        self.logger.info("Synced %s survey rows via API", len(status_codes))
+        self.logger.info("Synced %s survey rows via batch API", len(status_codes))
         return status_codes

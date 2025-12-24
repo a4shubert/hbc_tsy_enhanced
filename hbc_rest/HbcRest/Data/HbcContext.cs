@@ -12,6 +12,8 @@ public class HbcContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // No composite uniqueness enforced at the EF level; rely on Id PK only.
+        modelBuilder.Entity<CustomerSatisfactionSurvey>()
+            .HasIndex(c => c.UniqueKey)
+            .IsUnique();
     }
 }
