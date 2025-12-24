@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HbcRest.Migrations
 {
     [DbContext(typeof(HbcContext))]
-    [Migration("20251224205815_AddUniqueKeyToSurveys")]
-    partial class AddUniqueKeyToSurveys
+    [Migration("20251224212603_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

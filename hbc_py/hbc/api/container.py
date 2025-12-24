@@ -38,6 +38,11 @@ class DataContainer:
         """DataFrame backing the container; validated against config schema."""
         return self._df
 
+    @property
+    def all_cached_dates(self):
+        """List cached date folder names (sorted descending)."""
+        return Cache.get_all_cached_dates(self)
+
     @df.setter
     def df(self, value: pd.DataFrame):
         """Set DataFrame and validate it against configured schema."""
@@ -66,11 +71,6 @@ class DataContainer:
             self.get(as_of)
             self.to_cache(as_of)
         return self.df
-
-    @property
-    def all_cached_dates(self):
-        """List cached date folder names (sorted descending)."""
-        return Cache.get_all_cached_dates(self)
 
     def _valid_schema(self, df: pd.DataFrame) -> bool:
         """Check that df contains all schema columns; log errors when missing."""

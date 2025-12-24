@@ -1,3 +1,4 @@
+using System;
 using HbcRest.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -23,19 +24,26 @@ if (File.Exists(envFile))
     }
 }
 
-var envDbPath = envVars.TryGetValue("HBC_DB_PATH", out var p) ? p : null;
+var envDbPath = Environment.GetEnvironmentVariable("HBC_DB_PATH")
+               ?? (envVars.TryGetValue("HBC_DB_PATH", out var p) ? p : null);
+
 var connString = builder.Configuration.GetConnectionString("HbcSqlite");
 if (!string.IsNullOrWhiteSpace(envDbPath))
 {
-    connString = $"Data Source={envDbPath}";
+    var absPath = Path.GetFullPath(envDbPath);
+    connString = $"Data Source={absPath}";
 }
 Console.WriteLine($"[HbcRest] Using SQLite connection: {connString}");
 
 // Configure URLs from env if provided
-var urlsToUse = envVars.TryGetValue("ASPNETCORE_URLS", out var urls) &&
+var urlsToUse = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+if (string.IsNullOrWhiteSpace(urlsToUse))
+{
+    urlsToUse = envVars.TryGetValue("ASPNETCORE_URLS", out var urls) &&
                 !string.IsNullOrWhiteSpace(urls)
-    ? urls
-    : "http://localhost:5047";
+        ? urls
+        : "http://localhost:5047";
+}
 builder.WebHost.UseUrls(urlsToUse);
 Console.WriteLine($"[HbcRest] Binding URLs: {urlsToUse}");
 
