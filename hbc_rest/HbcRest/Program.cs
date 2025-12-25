@@ -40,7 +40,7 @@ if (!app.Environment.IsProduction())
 }
 
 const string Moniker = "nyc_open_data_311_customer_satisfaction_survey";
-const int MaxTop = 100000;
+const int MaxTop = 100_000;
 
 app.MapGet($"/{Moniker}", async (
     [FromQuery(Name = "$top")] long? top,
