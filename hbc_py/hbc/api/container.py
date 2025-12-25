@@ -6,6 +6,7 @@ import pandas as pd
 from hbc import utils as ul
 from hbc.ltp.loading import Fetcher, Validator
 from hbc.ltp.persistence.cache import Cache
+from hbc.ltp.persistence.rest import RestApi
 from hbc.ltp.persistence.db import SqlLiteDataBase
 
 logger = logging.getLogger()
@@ -54,7 +55,7 @@ class DataContainer:
     def to_cache(self, as_of: datetime.date = None):
         """Persist the current DataFrame. Special-case service requests to SQLite."""
         if self.moniker == "nyc_open_data_311_customer_satisfaction_survey":
-            SqlLiteDataBase().update_surveys_table(self.df, verify=False)
+            RestApi().update_surveys_table(self.df, verify=False)
             return
         Cache.to_cache(self, as_of)
 

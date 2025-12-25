@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 import pandas as pd
-import pandas.api.types as ptypes
 
 
 class SqlLiteDataBase:
@@ -138,92 +137,3 @@ class SqlLiteDataBase:
             self.conn.close()
         except Exception:
             pass
-
-    def update_surveys_table(
-        self,
-        df: pd.DataFrame,
-        verify: Optional[bool] = None,
-    ) -> list[int]:
-        """
-        Push DataFrame rows to the surveys API.
-        - If Id is provided, tries PUT; falls back to POST on 404.
-        - If Id is missing, uses POST.
-
-        Uses env HBC_API_URL (default http://localhost:5047) and endpoints:
-        - POST /surveys
-        - PUT /surveys/{id}
-        """
-        if df is None or df.empty:
-            self.logger.warning("DataFrame is empty; nothing to sync.")
-            return []
-        try:
-            import requests
-        except ImportError as exc:
-            raise ImportError("requests package is required for API sync") from exc
-
-        api_base = os.environ.get("HBC_API_URL", "http://localhost:5047").rstrip("/")
-        verify_flag = verify
-        if verify_flag is None:
-            env_verify = os.environ.get("HBC_API_VERIFY", "").strip().lower()
-            if env_verify in {"false", "0", "no", "off"}:
-                verify_flag = False
-            elif env_verify in {"true", "1", "yes", "on"}:
-                verify_flag = True
-
-        data = df.copy()
-        # convert datetime columns to isoformat strings
-        for col in data.columns:
-            if ptypes.is_datetime64_any_dtype(data[col]):
-                data[col] = data[col].dt.strftime("%Y-%m-%dT%H:%M:%S")
-
-        # Replace NaN/NaT with None for JSON compatibility.
-        data = data.where(pd.notnull(data), None)
-
-        # Add deterministic unique_key hash column to help dedupe/upsert decisions.
-        if "unique_key" not in data.columns:
-            import hashlib
-            import json
-
-            def _hash_row(row):
-                payload = {k: row[k] for k in data.columns if k != "unique_key"}
-                serialized = json.dumps(payload, sort_keys=True, default=str)
-                return hashlib.sha1(serialized.encode("utf-8")).hexdigest()
-
-            data["unique_key"] = data.apply(_hash_row, axis=1)
-
-        # Drop duplicates on unique_key within this payload.
-        data = data.drop_duplicates(subset=["unique_key"])
-
-        records = data.to_dict(orient="records")
-        if not records:
-            return []
-
-        status_codes: list[int] = []
-        chunk_size = 100
-        for i in range(0, len(records), chunk_size):
-            batch = records[i : i + chunk_size]
-            self.logger.info(
-                "Posting batch %s-%s/%s to %s/surveys/batch (verify=%s)",
-                i + 1,
-                i + len(batch),
-                len(records),
-                api_base,
-                verify_flag,
-            )
-            resp = requests.post(
-                f"{api_base}/surveys/batch",
-                json=batch,
-                timeout=60,
-                verify=verify_flag,
-            )
-            status_codes.extend([resp.status_code] * len(batch))
-            if resp.status_code >= 400:
-                self.logger.error(
-                    "Batch POST /surveys/batch failed with status %s: %s",
-                    resp.status_code,
-                    resp.text,
-                )
-                resp.raise_for_status()
-
-        self.logger.info("Synced %s survey rows via batch API", len(status_codes))
-        return status_codes
