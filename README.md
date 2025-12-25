@@ -80,6 +80,92 @@ print(dc.df.head())
   - Unit benchmarks in `hbc_py/hbc/tests/unit/benchmarks`
   - Integration tests hit live Socrata/REST; enable with `HBC_INTEGRATION=1` and provide tokens in `hbc_py/hbc/tests/integration/.env`.
 
+## UML (High-Level)
+
+### Library
+
+```mermaid
+classDiagram
+    class DataContainer {
+      -config
+      -moniker
+      -df
+      +get(query)
+      +to_cache()
+      +from_cache(query)
+    }
+    class Fetcher {
+      <<abstract>>
+      +fetch(config, query)
+    }
+    class FetcherNYCOpenData {
+      +fetch(config, query)
+    }
+    class Validator {
+      <<abstract>>
+      +parse(df)
+      +clean(df)
+      +normalize(df)
+      +validate(df)
+      +finalize(df)
+    }
+    class ValidatorGeneric {
+      +parse(df)
+    }
+    class ValidatorNYCOpen311Service {
+      +parse(df)
+    }
+    class RestApi {
+      +get(table, query)
+      +post(table, df)
+    }
+    DataContainer --> Fetcher : selects by name
+    Fetcher <|-- FetcherNYCOpenData
+    DataContainer --> Validator : selects by name
+    Validator <|-- ValidatorGeneric
+    Validator <|-- ValidatorNYCOpen311Service
+    DataContainer --> RestApi : persist/load df
+    class AnalyticalEngine {
+      +top_n_best(...)
+      +top_n_worst(...)
+      +mean(...)
+      +median(...)
+      +descriptive_stats(...)
+    }
+    class PlotEngine {
+      +time_series(...)
+      +bar(...)
+      +geo_bubble(...)
+    }
+    RestApi ..> AnalyticalEngine : supplies cached data
+    RestApi ..> PlotEngine : supplies cached data
+```
+
+### Jobs
+
+```mermaid
+classDiagram
+    class Dispatcher {
+      +main(argv)
+    }
+    class Registry {
+      +JOB_REGISTRY
+    }
+    class Runner {
+      +midnight_scheduler(...)
+    }
+    class job_fetch_nyc_open_data_311_service_requests {
+      +job_fetch_nyc_open_data_311_service_requests(as_of, incremental, last_missing_dates)
+    }
+    class job_analyse_nyc_open_data_311_service_requests {
+      +job_analyse_nyc_open_data_311_service_requests(as_of, n_worst, n_best, n_days)
+    }
+    Dispatcher --> Registry : uses JOB_REGISTRY
+    Registry ..> job_fetch_nyc_open_data_311_service_requests
+    Registry ..> job_analyse_nyc_open_data_311_service_requests
+    Runner ..> Dispatcher : schedules commands
+```
+
 ## hbc_rest (ASP\.Net EF Core)
 
 - Minimal API (net8.0) with EF Core + SQLite.
