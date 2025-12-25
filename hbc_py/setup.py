@@ -25,6 +25,8 @@ setup(
         "folium",
         "matplotlib",
         "ipython",
+        "notebook",
+        "nbclassic",
     ],
     entry_points={
         "console_scripts": [
