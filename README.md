@@ -2,6 +2,20 @@
 
 Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normalizes them in Python, and persists them through a minimal ASP\.NET EF Core REST API backed by SQLite.
 
+# Table of Contents
+
+- [Package Map](#package-map)
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+- [Testing](#testing)
+- [Components](#components)
+  - [hbc_configs (yaml)](#hbc_configs-yaml)
+  - [hbc_db (sqlite)](#hbc_db-sqlite)
+  - [hbc_py (Python)](#hbc_py-python)
+    - [UML (High-Level)](#uml-high-level)
+  - [hbc_rest (ASPNet EF Core)](#hbc_rest-aspnet-ef-core)
+  - [hbc_web (Next.js)](#hbc_web-nextjs)
+
 # Package Map
 
 - `hbc_configs`: Source configs (YAML) defining schemas, types, and source tokens for each moniker.
@@ -80,9 +94,9 @@ print(dc.df.head())
   - Unit benchmarks in `hbc_py/hbc/tests/unit/benchmarks`
   - Integration tests hit live Socrata/REST; enable with `HBC_INTEGRATION=1` and provide tokens in `hbc_py/hbc/tests/integration/.env`.
 
-## UML (High-Level)
+### UML (High-Level)
 
-### Library
+#### Library
 
 ```mermaid
 classDiagram
