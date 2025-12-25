@@ -41,6 +41,10 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
    ```
    - Python only: `pip install -e hbc_py`
    - Start API only (published build): `hbc_rest/scripts/run_prod.sh` (Swagger UI lives at `$ASPNETCORE_URLS/swagger/index.html`)
+3. Open the demo notebook (classic Jupyter):
+   ```bash
+   hbc_py/scripts/run_demo_notebook.sh
+   ```
 
 ---
 
