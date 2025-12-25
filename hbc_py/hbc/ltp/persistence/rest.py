@@ -15,7 +15,13 @@ class RestApi:
 
     def __init__(self):
         self.logger = logging.getLogger()
-        self.api_base = os.environ.get("HBC_API_URL", "http://localhost:5047").rstrip("/")
+        raw_base = os.environ.get("HBC_API_URL", "").strip()
+        if not raw_base:
+            raise RuntimeError(
+                "HBC_API_URL is not set. Please export the REST base URL (e.g., http://localhost:5047) "
+                "or source scripts/env.sh before using RestApi."
+            )
+        self.api_base = raw_base.rstrip("/")
 
     def get(
         self,
