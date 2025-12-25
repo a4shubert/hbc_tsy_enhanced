@@ -40,9 +40,10 @@ if (!app.Environment.IsProduction())
 }
 
 const string Moniker = "nyc_open_data_311_customer_satisfaction_survey";
+const int MaxTop = 100000;
 
 app.MapGet($"/{Moniker}", async (
-    [FromQuery(Name = "$top")] int? top,
+    [FromQuery(Name = "$top")] long? top,
     [FromQuery(Name = "$filter")] string? filter,
     HbcContext db) =>
 {
@@ -53,8 +54,26 @@ app.MapGet($"/{Moniker}", async (
         query = ApplyFilter(filter, query);
     }
 
-    var take = (top.HasValue && top.Value > 0) ? top.Value : 10;
-    query = query.Take(take);
+    // If $top is specified:
+    //   >0 => clamp to MaxTop; <=0 => no limit
+    // If $top is not specified:
+    //   apply default 10 only when no filter; otherwise no limit.
+    if (top.HasValue)
+    {
+        if (top.Value > 0)
+        {
+            var take = (int)Math.Min(top.Value, MaxTop);
+            query = query.Take(take);
+        }
+        // top <= 0 means no limit
+    }
+    else
+    {
+        if (string.IsNullOrWhiteSpace(filter))
+        {
+            query = query.Take(10); // default limit when not specified and no filter
+        }
+    }
 
     var results = await query.AsNoTracking().ToListAsync();
     return Results.Ok(results);

@@ -38,11 +38,11 @@ class RestApi:
                 verify_flag = True
 
         url = f"{self.api_base}/{table}"
-        if not query:            
+        if not query:
             effective_query = f"$top={MIN_ROWS_COUNT}"
-            logger.info(f' Without query retrieving only {MIN_ROWS_COUNT} rows')
+            logger.info(f" Without query retrieving only {MIN_ROWS_COUNT} rows")
         else:
-            effective_query = query 
+            effective_query = query
         url = f"{url}?{effective_query}"
 
         resp = requests.get(url, timeout=60, verify=verify_flag)
