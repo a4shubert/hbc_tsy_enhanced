@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Connections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,11 +49,10 @@ app.Use(async (context, next) =>
     await next.Invoke();
 });
 
-if (!app.Environment.IsProduction())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 const string MonikerSurvey = "nyc_open_data_311_customer_satisfaction_survey";
 const string MonikerCall = "nyc_open_data_311_call_center_inquiry";
@@ -151,8 +151,8 @@ app.MapPost($"/{MonikerSurvey}", async (CustomerSatisfactionSurvey survey, HbcCo
         {
             CopyFields(existing, survey);
             var savedExisting = await db.SaveChangesAsync();
-    Console.WriteLine($"[HbcRest] POST /{MonikerSurvey} updated existing {savedExisting} row(s) by hbc_unique_key");
-    return Results.Ok(existing);
+            Console.WriteLine($"[HbcRest] POST /{MonikerSurvey} updated existing {savedExisting} row(s) by hbc_unique_key");
+            return Results.Ok(existing);
         }
     }
 
@@ -457,12 +457,23 @@ app.MapPost($"/{MonikerService}/batch", async ([FromBody] List<ServiceRequest> i
         await db.ServiceRequests.AddRangeAsync(toInsert);
     }
 
-    var saved = await db.SaveChangesAsync();
-    Console.WriteLine($"[HbcRest] POST /{MonikerService}/batch saved {saved} row(s), updated {updated} existing");
-    return Results.Ok(inputs);
+var saved = await db.SaveChangesAsync();
+Console.WriteLine($"[HbcRest] POST /{MonikerService}/batch saved {saved} row(s), updated {updated} existing");
+return Results.Ok(inputs);
 });
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (AddressInUseException)
+{
+    Console.Error.WriteLine("[HbcRest] Failed to start: address/port already in use. Check ASPNETCORE_URLS or stop the other process.");
+}
+catch (IOException ioEx) when (ioEx.InnerException is AddressInUseException)
+{
+    Console.Error.WriteLine("[HbcRest] Failed to start: address/port already in use. Check ASPNETCORE_URLS or stop the other process.");
+}
 
 static void CopyFields(CustomerSatisfactionSurvey target, CustomerSatisfactionSurvey source)
 {

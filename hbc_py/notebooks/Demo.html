@@ -7517,7 +7517,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="NYC-311-Service-Requests-Data-Pipeline">NYC 311 Service Requests Data Pipeline<a class="anchor-link" href="#NYC-311-Service-Requests-Data-Pipeline">¶</a></h1>
+<h1 id="HBC_TSY_ENCHANCED">HBC_TSY_ENCHANCED<a class="anchor-link" href="#HBC_TSY_ENCHANCED">¶</a></h1>
 </div>
 </div>
 </div>
@@ -7528,23 +7528,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><em>Library + jobs to fetch, cache, and analyze NYC 311 service request data.</em></p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e9476f70-0dfa-4c34-8c4e-f27295cb4bb5">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
-<span class="o">%</span><span class="k">autoreload</span> 2
-<span class="o">%</span><span class="k">matplotlib</span> inline
-</pre></div>
-</div>
+<p><em>Features-reach system for data pipelining and analytics</em></p>
 </div>
 </div>
 </div>
@@ -7566,7 +7550,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="LTP-Pipeline">LTP Pipeline<a class="anchor-link" href="#LTP-Pipeline">¶</a></h2>
+<h2 id="Pipeline-(load/transform/persist)">Pipeline (load/transform/persist)<a class="anchor-link" href="#Pipeline-(load/transform/persist)">¶</a></h2>
 </div>
 </div>
 </div>
@@ -7575,22 +7559,25 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 
-<span class="c1"># Per-user, cross-platform base under the home dir</span>
-<span class="c1"># retrieve for one day only:</span>
-<span class="n">dir_base</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"TASK_HBC_TSY"</span>
+<span class="n">dir_base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">())</span> <span class="o">/</span> <span class="s2">"HBC_TASK_BASE_FOLDER"</span>
+<span class="n">dir_analytics</span> <span class="o">=</span> <span class="n">dir_base</span> <span class="o">/</span> <span class="s2">"ANALYTICS"</span>
+<span class="n">dir_logging</span> <span class="o">=</span> <span class="n">dir_base</span> <span class="o">/</span> <span class="s2">"LOGGING"</span>
 
 <span class="o">%</span><span class="k">cd</span> -q ..
 <span class="o">!</span>python<span class="w"> </span>-m<span class="w"> </span>hbc.jobs.dispatch<span class="w"> </span><span class="err">\</span>
   <span class="o">--</span><span class="n">job</span><span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">job_fetch_nyc_open_data_311_service_requests</span> \
   <span class="o">--</span><span class="k">as</span><span class="o">-</span><span class="n">of</span><span class="o">=</span><span class="mi">20091231</span> \
-  <span class="o">--</span><span class="nb">dir</span><span class="o">-</span><span class="n">base</span><span class="o">=</span><span class="p">{</span><span class="n">dir_base</span><span class="p">}</span> \
+  <span class="o">--</span><span class="nb">dir</span><span class="o">-</span><span class="n">base</span><span class="o">=</span><span class="s2">"</span><span class="si">{dir_base}</span><span class="s2">"</span> \
+  <span class="o">--</span><span class="nb">dir</span><span class="o">-</span><span class="n">analytics</span><span class="o">=</span><span class="s2">"</span><span class="si">{dir_analytics}</span><span class="s2">"</span> \
+  <span class="o">--</span><span class="nb">dir</span><span class="o">-</span><span class="n">logging</span><span class="o">=</span><span class="s2">"</span><span class="si">{dir_logging}</span><span class="s2">"</span> \
   <span class="o">--</span><span class="n">incremental</span><span class="o">=</span><span class="kc">True</span> \
-  <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">INFO</span>
+  <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">DEBUG</span>
 <span class="o">%</span><span class="k">cd</span> -q notebooks/
 </pre></div>
 </div>
@@ -7604,7 +7591,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Log file: /Users/alexandershubert/TASK_HBC_TSY/LOGS/job_fetch_nyc_open_data_311_service_requests/job_fetch_nyc_open_data_311_service_requests_20251222190911.txt
+<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/HBC_TASK_BASE_FOLDER/LOGGING/job_fetch_nyc_open_data_311_service_requests/job_fetch_nyc_open_data_311_service_requests_20251225211738.txt
 </pre>
 </div>
 </div>
@@ -7615,7 +7602,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># restore cache integrity for the last missing dates</span>
@@ -7625,7 +7612,7 @@ a.anchor-link {
       <span class="o">--</span><span class="k">as</span><span class="o">-</span><span class="n">of</span><span class="o">=</span><span class="mi">20091231</span> \
       <span class="o">--</span><span class="n">incremental</span><span class="o">=</span><span class="n">false</span> \
       <span class="o">--</span><span class="n">log</span><span class="o">-</span><span class="n">level</span><span class="o">=</span><span class="n">INFO</span> \
-      <span class="o">--</span><span class="n">last</span><span class="o">-</span><span class="n">missing</span><span class="o">-</span><span class="n">dates</span><span class="o">=</span><span class="mi">5</span>
+      <span class="o">--</span><span class="n">last</span><span class="o">-</span><span class="n">missing</span><span class="o">-</span><span class="n">dates</span><span class="o">=</span><span class="mi">10</span>
 <span class="o">%</span><span class="k">cd</span> -q notebooks/
 </pre></div>
 </div>
@@ -7639,7 +7626,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_fetch_nyc_open_data_311_service_requests/job_fetch_nyc_open_data_311_service_requests_20251222190917.txt
+<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_fetch_nyc_open_data_311_service_requests/job_fetch_nyc_open_data_311_service_requests_20251225211754.txt
 </pre>
 </div>
 </div>
@@ -7661,7 +7648,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">cd</span> -q ..
@@ -7685,14 +7672,14 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_analyse_nyc_open_data_311_service_requests/job_analyse_nyc_open_data_311_service_requests_20251222190937.txt
+<pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/job_analyse_nyc_open_data_311_service_requests/job_analyse_nyc_open_data_311_service_requests_20251225211939.txt
 </pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3bd3f621-f3b3-41a0-a3c0-94a4e0eb4bb9">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=58c0c3e9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7713,6 +7700,36 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=eb64c741">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=162e9a58-66e8-4609-a8aa-f29d627b712b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -7724,52 +7741,41 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1628a0c6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=6e257f05-b2ad-4264-b0bd-aa2e3074f8a0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="n">p</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="c1"># one dir up</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="c1"># one dir up</span>
 <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=33a7f0d4-57bc-4d91-a5dd-7ccd761e6039">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=cd20bd08-abce-4e32-ba03-385133739ac6">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -7792,24 +7798,11 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hbc</span><span class="w"> </span><span class="kn">import</span> <span class="n">app_context</span><span class="p">,</span> <span class="n">DataContainer</span><span class="p">,</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">ul</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f24a48de-64e2-48b8-8388-087ec7543d8d">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hbc.quant.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnalyticalEngine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hbc.quant.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnalyticalEngine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hbc.quant.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlotEngine</span>
 </pre></div>
 </div>
@@ -7821,7 +7814,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">app_context</span>
@@ -7835,13 +7828,13 @@ a.anchor-link {
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>AppContext
-as_of : 2025-12-22
-dir_analytics: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/ANALYTICS'),
+==========
+as_of : 2025-12-25
 dir_base: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp'),
-dir_cache: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE'),
+dir_analytics: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/ANALYTICS'),
 dir_logging: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS')</pre>
 </div>
 </div>
@@ -7858,21 +7851,16 @@ dir_logging: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=93c49926-9e9f-4ae3-8608-919bf2dba81a">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1009961b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Console-only (no file writes):</span>
-<span class="n">ul</span><span class="o">.</span><span class="n">conf_log</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reset_handlers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># File-only (no console output at all):</span>
-<span class="n">ul</span><span class="o">.</span><span class="n">conf_log</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reset_handlers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Both:</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
 <span class="n">ul</span><span class="o">.</span><span class="n">conf_log</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reset_handlers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -7887,12 +7875,11 @@ dir_logging: PosixPath('/var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_job_generic.txt
-Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_job_generic.txt
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>&lt;RootLogger root (INFO)&gt;</pre>
 </div>
@@ -7900,40 +7887,41 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8035a13d-79fe-4dff-b89b-db54d6dafd1b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7d943120">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="DataContainer">DataContainer<a class="anchor-link" href="#DataContainer">¶</a></h2>
+<h2 id="Data-Container-:-nyc_open_data_311_customer_satisfaction_survey">Data Container : nyc_open_data_311_customer_satisfaction_survey<a class="anchor-link" href="#Data-Container-:-nyc_open_data_311_customer_satisfaction_survey">¶</a></h2>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8d601149-ce1b-4ab4-9652-131476bc6cdf">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3ab62a65">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span><span class="s1">'nyc_open_data_311_service_requests'</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span><span class="s2">"nyc_open_data_311_customer_satisfaction_survey"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=152198d4-b787-4590-9f1c-f11b531b3622">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=563f03ef">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># we retrieve 100 rows</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># retrieve: query first 100 rows</span>
 <span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
 </div>
@@ -7946,300 +7934,312 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:46 fetch_nycopen.py       71 INFO  root    : Fetched 100 rows
-2025-12-22 19:09:46 base.py                52 INFO  root    : using validator: ValidatorNYCOpen311Service
-2025-12-22 19:09:46 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:09:46 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:09:46 base.py                59 INFO  root    : validating...
-2025-12-22 19:09:47 valid_nycopen.py      183 INFO  root    : Validation summary -&gt; flagged 10 rows. closed_date before created_date: 4; closed_date set but status not closed: 5; incident_zip outside NYC range: 2; resolution_action_updated_date before created_date: 7
-2025-12-22 19:09:47 base.py                62 INFO  root    : finalizing...
-2025-12-22 19:09:47 container.py           73 ERROR root    : DataContainer nyc_open_data_311_service_requests does not adhere to schema. Missing columns: bridge_highway_direction, bridge_highway_name, bridge_highway_segment, garage_lot_name, landmark, latitude, location, longitude, road_ramp, school_not_found, school_or_citywide_complaint, taxi_company_borough, vehicle_type, x_coordinate_state_plane_, y_coordinate_state_plane_
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=30211d5e-f714-4a36-88e2-1b2a64fb39f3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"created_date = '</span><span class="si">{</span><span class="n">ul</span><span class="o">.</span><span class="n">date_as_iso_format</span><span class="p">(</span><span class="n">ul</span><span class="o">.</span><span class="n">str_as_date</span><span class="p">(</span><span class="s1">'20091231'</span><span class="p">))</span><span class="si">}</span><span class="s2">' "</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:47 fetch_nycopen.py       42 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
-2025-12-22 19:09:48 fetch_nycopen.py       71 INFO  root    : Fetched 4155 rows
-2025-12-22 19:09:48 base.py                52 INFO  root    : using validator: ValidatorNYCOpen311Service
-2025-12-22 19:09:48 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:09:48 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:09:48 base.py                59 INFO  root    : validating...
-2025-12-22 19:09:48 valid_nycopen.py      183 INFO  root    : Validation summary -&gt; flagged 311 rows. closed_date before created_date: 52; closed_date set but status not closed: 89; incident_zip outside NYC range: 4; resolution_action_updated_date before created_date: 270
-2025-12-22 19:09:48 base.py                62 INFO  root    : finalizing...
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=93ef618a-2adc-477b-9e46-98a59493a286">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">to_cache</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:48 cache.py               34 INFO  root    : Cached: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE/nyc_open_data_311_service_requests/20251222/nyc_open_data_311_service_requests.csv.gz
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=91d80d6f-d3be-4f1d-980e-48c33a497690">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:48 cache.py               53 INFO  root    : Retrieved from cache: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/CACHE/nyc_open_data_311_service_requests/20251222/nyc_open_data_311_service_requests.csv.gz
+<pre>2025-12-25 21:20:10 fetch_nycopen.py       84 INFO  root    : Fetched 100 rows
+2025-12-25 21:20:10 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-25 21:20:10 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:10 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:10 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:10 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:10 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:10 container.py           35 INFO  root    : Retrieved dataFrame with shape=(100, 14)
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>unique_key</th>
-<th>created_date</th>
-<th>closed_date</th>
-<th>agency</th>
-<th>agency_name</th>
-<th>complaint_type</th>
-<th>descriptor</th>
-<th>incident_zip</th>
-<th>intersection_street_1</th>
-<th>intersection_street_2</th>
-<th>...</th>
-<th>ferry_direction</th>
-<th>ferry_terminal_name</th>
-<th>school_or_citywide_complaint</th>
-<th>taxi_company_borough</th>
-<th>vehicle_type</th>
-<th>school_not_found</th>
-<th>garage_lot_name</th>
-<th>landmark</th>
-<th>DROP_FLAG</th>
-<th>DROP_REASON</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>15654551</td>
-<td>2009-12-31 00:00:00</td>
-<td>2009-12-31 00:00:00</td>
-<td>DOT</td>
-<td>Department of Transportation</td>
-<td>Street Condition</td>
-<td>Pothole</td>
-<td>10472</td>
-<td>EAST 182 STREET</td>
-<td>SOUTHERN BOULEVARD</td>
-<td>...</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>False</td>
-<td></td>
-</tr>
-<tr>
-<th>1</th>
-<td>15631023</td>
-<td>2009-12-31 00:00:00</td>
-<td>2011-03-10 00:00:00</td>
-<td>DOT</td>
-<td>Department of Transportation</td>
-<td>Street Light Condition</td>
-<td>Street Light Out</td>
-<td></td>
-<td>86 ST</td>
-<td>7 ST W</td>
-<td>...</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>False</td>
-<td></td>
-</tr>
-<tr>
-<th>2</th>
-<td>15632945</td>
-<td>2009-12-31 00:00:00</td>
-<td>2009-12-31 00:00:00</td>
-<td>DOT</td>
-<td>Department of Transportation</td>
-<td>Street Light Condition</td>
-<td>Street Light Out</td>
-<td></td>
-<td>WEBSTER AVE</td>
-<td>168 ST E</td>
-<td>...</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>True</td>
-<td>resolution_action_updated_date before created_...</td>
-</tr>
-<tr>
-<th>3</th>
-<td>15632946</td>
-<td>2009-12-31 00:00:00</td>
-<td>2009-12-31 00:00:00</td>
-<td>DOT</td>
-<td>Department of Transportation</td>
-<td>Street Light Condition</td>
-<td>Street Light Cycling</td>
-<td></td>
-<td>3 AVE</td>
-<td>167 ST E</td>
-<td>...</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>True</td>
-<td>resolution_action_updated_date before created_...</td>
-</tr>
-<tr>
-<th>4</th>
-<td>15619185</td>
-<td>2009-12-31 00:00:00</td>
-<td>2010-02-17 00:00:00</td>
-<td>TLC</td>
-<td>Correspondence - Taxi and Limousine Commission</td>
-<td>Taxi Compliment</td>
-<td>Driver Compliment</td>
-<td></td>
-<td></td>
-<td></td>
-<td>...</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>False</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<p>5 rows × 54 columns</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d730f47c-aa0a-4280-bba7-f4bfa9d2e826">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dc</span><span class="o">.</span><span class="n">all_cached_dates</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>'20251222, 20091231, 20091230, 20091229, 20091228, 20091227, 20091226, 20091225, 20091224, 20091223, 20091222, 20091221, 20091220, 20091219, 20091218, 20091217, 20091216, 20091215, 20091214, 20091213, 20091212, 20091211, 20091210, 20091209, 20091208, 20091207, 20091206, 20091205, 20091204, 20091203, 20091202, 20091201, 20091130, 20091129, 20091128, 20091127, 20091126, 20091125, 20091124, 20091123, 20091122, 20091121'</pre>
+<pre>(100, 14)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=61204faa">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># retrieve: query distinct</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$apply=groupby((campaign))"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:10 fetch_nycopen.py       55 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
+2025-12-25 21:20:10 fetch_nycopen.py       84 INFO  root    : Fetched 6 rows
+2025-12-25 21:20:10 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-25 21:20:10 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:10 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:10 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:10 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:10 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:10 container.py           69 WARNING root    : DataContainer nyc_open_data_311_customer_satisfaction_survey missing columns; filling with None: agent_customer_service, agent_job_knowledge, answer_satisfaction, channel, completion_time, nps, overall_satisfaction, start_time, survey_language, survey_type, wait_time, year
+2025-12-25 21:20:11 container.py           35 INFO  root    : Retrieved dataFrame with shape=(6, 14)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[23]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(6, 14)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bae4a506">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># retrieve: query with filter</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$filter=campaign eq 'Campaign 4'"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:11 fetch_nycopen.py       55 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
+2025-12-25 21:20:12 fetch_nycopen.py       84 INFO  root    : Fetched 4889 rows
+2025-12-25 21:20:12 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-25 21:20:12 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:12 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:12 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:12 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:12 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:12 container.py           35 INFO  root    : Retrieved dataFrame with shape=(4889, 14)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[24]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(4889, 14)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=16a6c97d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># caching: </span>
+<span class="n">dc</span><span class="o">.</span><span class="n">to_cache</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:13 rest.py               182 INFO  root    : Synced 4889 rows via batch API
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=389d3328">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># from_cache: get 10 rows</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">()</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:13 container.py           58 INFO  root    : Retrieved dataFrame with shape=(10, 15)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(10, 15)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ffb1d67e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># from_cache: get by filter</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$filter=campaign eq 'Campaign 4'"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:13 container.py           58 INFO  root    : Retrieved dataFrame with shape=(4889, 15)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(4889, 15)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bdd70149">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># from_cache: get distinct</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$apply=groupby((year))"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:14 container.py           69 WARNING root    : DataContainer nyc_open_data_311_customer_satisfaction_survey missing columns; filling with None: agent_customer_service, agent_job_knowledge, answer_satisfaction, campaign, channel, completion_time, nps, overall_satisfaction, start_time, survey_language, survey_type, wait_time
+2025-12-25 21:20:14 container.py           58 INFO  root    : Retrieved dataFrame with shape=(4, 14)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(4, 14)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d6cd3134">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [29]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># from_cache: get page 2 with page size 50</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$top=50&amp;$skip=50"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:14 container.py           58 INFO  root    : Retrieved dataFrame with shape=(50, 15)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[29]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(50, 15)</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=40b1061a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [30]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># from_cache: get total count</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$count=true"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:14 container.py           58 INFO  root    : Retrieved dataFrame with shape=(4889, 15)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[30]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>(4889, 15)</pre>
 </div>
 </div>
 </div>
@@ -8255,12 +8255,133 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=28c47fd7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [31]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">app_context</span><span class="o">.</span><span class="n">as_of</span>  <span class="o">=</span> <span class="n">ul</span><span class="o">.</span><span class="n">str_as_date</span><span class="p">(</span><span class="s1">'20091231'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=13375799">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [32]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span><span class="s1">'nyc_open_data_311_service_requests'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=57b7191b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [33]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># query / load / validate:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="sa">f</span><span class="s2">"$filter=created_date eq '</span><span class="si">{</span><span class="n">ul</span><span class="o">.</span><span class="n">date_as_iso_format</span><span class="p">(</span><span class="n">app_context</span><span class="o">.</span><span class="n">as_of</span><span class="p">)</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:14 fetch_nycopen.py       55 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
+2025-12-25 21:20:17 fetch_nycopen.py       84 INFO  root    : Fetched 4155 rows
+2025-12-25 21:20:17 base.py                52 INFO  root    : using validator: ValidatorNYCOpen311Service
+2025-12-25 21:20:17 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:17 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:17 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:17 valid_nycopen.py      183 INFO  root    : Validation summary -&gt; flagged 311 rows. closed_date before created_date: 52; closed_date set but status not closed: 89; incident_zip outside NYC range: 4; resolution_action_updated_date before created_date: 270
+2025-12-25 21:20:17 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:17 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:18 container.py           35 INFO  root    : Retrieved dataFrame with shape=(3844, 55)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1bbd7bb6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [34]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># persist:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">to_cache</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:19 rest.py               182 INFO  root    : Synced 3844 rows via batch API
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4bfaae53">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [35]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># retrieve from cache for analytics:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="sa">f</span><span class="s2">"$filter=created_date eq '</span><span class="si">{</span><span class="n">ul</span><span class="o">.</span><span class="n">date_as_iso_format</span><span class="p">(</span><span class="n">app_context</span><span class="o">.</span><span class="n">as_of</span><span class="p">)</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:20 container.py           58 INFO  root    : Retrieved dataFrame with shape=(3844, 54)
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2e5ae3eb-4830-40fc-8ef7-aea0d1feb03d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [36]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">dc</span><span class="o">.</span><span class="n">df</span>
@@ -8274,24 +8395,10 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [37]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">cols</span> <span class="o">=</span> <span class="n">ul</span><span class="o">.</span><span class="n">cols_as_named_tuple</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=caed4830-31bf-47ce-b3af-022bda2deb08">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">DROP_FLAG</span><span class="p">]]</span>
 </pre></div>
 </div>
 </div>
@@ -8302,7 +8409,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [38]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s2">"hbc_days_to_close"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -8320,7 +8427,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [39]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">hbc_days_to_close</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
@@ -8335,11 +8442,11 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">ul</span><span class="o">.</span><span class="n">path_to_str</span><span class="p">(</span>
-                <span class="n">ul</span><span class="o">.</span><span class="n">mk_dir</span><span class="p">(</span><span class="n">ul</span><span class="o">.</span><span class="n">get_dir_analytics</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"plots"</span><span class="p">)</span>
+                <span class="n">ul</span><span class="o">.</span><span class="n">mk_dir</span><span class="p">(</span><span class="n">app_context</span><span class="o">.</span><span class="n">dir_analytics</span> <span class="o">/</span> <span class="s2">"plots"</span><span class="p">)</span>
                 <span class="o">/</span> <span class="s2">"closed_requests_by_location.html"</span>
             <span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">PlotEngine</span><span class="o">.</span><span class="n">plot_geo_map</span><span class="p">(</span>
@@ -8377,7 +8484,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [41]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># by agency</span>
@@ -8401,7 +8508,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">res</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
@@ -8415,7 +8522,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[42]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>dict_keys(['best', 'worst', 'median', 'mean'])</pre>
 </div>
@@ -8427,7 +8534,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">res</span><span class="p">[</span><span class="s1">'worst'</span><span class="p">]</span>
@@ -8441,7 +8548,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[43]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8535,7 +8642,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="new-dataset:-nyc_open_data_311_call_center_inquiry:">new dataset: nyc_open_data_311_call_center_inquiry:<a class="anchor-link" href="#new-dataset:-nyc_open_data_311_call_center_inquiry:">¶</a></h3>
+<h2 id="Data-Container-:-nyc_open_data_311_call_center_inquiry">Data Container : nyc_open_data_311_call_center_inquiry<a class="anchor-link" href="#Data-Container-:-nyc_open_data_311_call_center_inquiry">¶</a></h2>
 </div>
 </div>
 </div>
@@ -8544,7 +8651,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span><span class="s1">'nyc_open_data_311_call_center_inquiry'</span><span class="p">)</span>
@@ -8558,10 +8665,12 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># load / validate:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8574,12 +8683,107 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:52 fetch_nycopen.py       71 INFO  root    : Fetched 100 rows
-2025-12-22 19:09:52 base.py                52 INFO  root    : using validator: ValidatorGeneric
-2025-12-22 19:09:52 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:09:52 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:09:52 base.py                59 INFO  root    : validating...
-2025-12-22 19:09:52 base.py                62 INFO  root    : finalizing...
+<pre>2025-12-25 21:20:23 fetch_nycopen.py       84 INFO  root    : Fetched 100 rows
+2025-12-25 21:20:23 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-25 21:20:23 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:23 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:23 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:23 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:23 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:23 container.py           35 INFO  root    : Retrieved dataFrame with shape=(100, 10)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[45]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>unique_id</th>
+<th>date</th>
+<th>time</th>
+<th>date_time</th>
+<th>agency</th>
+<th>agency_name</th>
+<th>inquiry_name</th>
+<th>brief_description</th>
+<th>call_resolution</th>
+<th>hbc_unique_key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>138393623</td>
+<td>2019-08-15T00:00:00.000</td>
+<td>1:49:20 PM</td>
+<td>2019-08-15T13:49:20.000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>Building Construction Complaint</td>
+<td>Report building construction that is noisy, un...</td>
+<td>NaN</td>
+<td>5740535d80eb0391d9075a8ede3807d453db32f7</td>
+</tr>
+<tr>
+<th>1</th>
+<td>138393624</td>
+<td>2019-08-15T00:00:00.000</td>
+<td>1:50:02 PM</td>
+<td>2019-08-15T13:50:02.000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>Sprinklers</td>
+<td>Get locations of water sprinkler areas in City...</td>
+<td>NaN</td>
+<td>fdcdfd91c0137d35f34432a94ed6440eb5d3f659</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=072749cf">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># persist</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">to_cache</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:23 rest.py               182 INFO  root    : Synced 100 rows via batch API
 </pre>
 </div>
 </div>
@@ -8590,10 +8794,12 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [29]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [47]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"agency='NYPD'"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># query at loading:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$filter=agency eq 'NYPD'&amp;$top=250"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8606,63 +8812,19 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:52 fetch_nycopen.py       71 INFO  root    : Fetched 250 rows
-2025-12-22 19:09:52 base.py                52 INFO  root    : using validator: ValidatorGeneric
-2025-12-22 19:09:52 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:09:52 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:09:52 base.py                59 INFO  root    : validating...
-2025-12-22 19:09:52 base.py                62 INFO  root    : finalizing...
+<pre>2025-12-25 21:20:24 fetch_nycopen.py       84 INFO  root    : Fetched 250 rows
+2025-12-25 21:20:24 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-25 21:20:24 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:24 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:24 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:24 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:24 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:24 container.py           35 INFO  root    : Retrieved dataFrame with shape=(250, 10)
 </pre>
 </div>
 </div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ba1de0d1">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [30]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[30]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>(250, 9)</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=96a38c18">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [31]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[47]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8691,6 +8853,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <th>inquiry_name</th>
 <th>brief_description</th>
 <th>call_resolution</th>
+<th>hbc_unique_key</th>
 </tr>
 </thead>
 <tbody>
@@ -8705,6 +8868,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <td>Noise from Neighbor</td>
 <td>Report a noisy neighbor.</td>
 <td>CSMS SR</td>
+<td>f93f486adf3593b2bc346d5b652dd263c24dfd10</td>
 </tr>
 <tr>
 <th>1</th>
@@ -8717,160 +8881,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <td>Hot Transfer 911</td>
 <td>Requires immediate transfer to 911.</td>
 <td>Hot Transfer 911</td>
-</tr>
-<tr>
-<th>2</th>
-<td>100011603</td>
-<td>2014-03-27T00:00:00.000</td>
-<td>6:39:52 PM</td>
-<td>2014-03-27T18:39:52.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Lost or Found Property</td>
-<td>Report lost or found property.</td>
-<td>Information Provided</td>
-</tr>
-<tr>
-<th>3</th>
-<td>100011951</td>
-<td>2014-03-27T00:00:00.000</td>
-<td>4:08:20 PM</td>
-<td>2014-03-27T16:08:20.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Division Information Provided</td>
-<td>Hidden service for activity coding.</td>
-<td>Information Provided</td>
-</tr>
-<tr>
-<th>4</th>
-<td>100012105</td>
-<td>2014-03-28T00:00:00.000</td>
-<td>1:13:07 AM</td>
-<td>2014-03-28T01:13:07.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Club or Bar</td>
-<td>Report noise from inside a club or bar.</td>
-<td>CSMS SR</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=95d00bd0">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [32]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[32]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>unique_id</th>
-<th>date</th>
-<th>time</th>
-<th>date_time</th>
-<th>agency</th>
-<th>agency_name</th>
-<th>inquiry_name</th>
-<th>brief_description</th>
-<th>call_resolution</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>100000002</td>
-<td>2014-03-27T00:00:00.000</td>
-<td>8:49:03 PM</td>
-<td>2014-03-27T20:49:03.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Neighbor</td>
-<td>Report a noisy neighbor.</td>
-<td>CSMS SR</td>
-</tr>
-<tr>
-<th>1</th>
-<td>100000001</td>
-<td>2014-03-27T00:00:00.000</td>
-<td>3:03:22 PM</td>
-<td>2014-03-27T15:03:22.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Hot Transfer 911</td>
-<td>Requires immediate transfer to 911.</td>
-<td>Hot Transfer 911</td>
-</tr>
-<tr>
-<th>2</th>
-<td>100011603</td>
-<td>2014-03-27T00:00:00.000</td>
-<td>6:39:52 PM</td>
-<td>2014-03-27T18:39:52.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Lost or Found Property</td>
-<td>Report lost or found property.</td>
-<td>Information Provided</td>
-</tr>
-<tr>
-<th>3</th>
-<td>100011951</td>
-<td>2014-03-27T00:00:00.000</td>
-<td>4:08:20 PM</td>
-<td>2014-03-27T16:08:20.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Division Information Provided</td>
-<td>Hidden service for activity coding.</td>
-<td>Information Provided</td>
-</tr>
-<tr>
-<th>4</th>
-<td>100012105</td>
-<td>2014-03-28T00:00:00.000</td>
-<td>1:13:07 AM</td>
-<td>2014-03-28T01:13:07.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Club or Bar</td>
-<td>Report noise from inside a club or bar.</td>
-<td>CSMS SR</td>
+<td>35d9ca1775b4f39d89f5eb034d5c0f14bf522940</td>
 </tr>
 </tbody>
 </table>
@@ -8884,10 +8895,12 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [33]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [48]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"date = '</span><span class="si">{</span><span class="n">ul</span><span class="o">.</span><span class="n">date_as_iso_format</span><span class="p">(</span><span class="n">ul</span><span class="o">.</span><span class="n">str_as_date</span><span class="p">(</span><span class="s1">'2010-01-03'</span><span class="p">))</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># query at caching:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$filter=date eq '2012-04-11'"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -8900,38 +8913,13 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:09:52 fetch_nycopen.py       42 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
-2025-12-22 19:09:54 fetch_nycopen.py       71 INFO  root    : Fetched 14971 rows
-2025-12-22 19:09:54 base.py                52 INFO  root    : using validator: ValidatorGeneric
-2025-12-22 19:09:54 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:09:54 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:09:54 base.py                59 INFO  root    : validating...
-2025-12-22 19:09:54 base.py                62 INFO  root    : finalizing...
+<pre>2025-12-25 21:20:24 container.py           69 WARNING root    : DataContainer nyc_open_data_311_call_center_inquiry missing columns; filling with None: agency, agency_name, brief_description, call_resolution, date, date_time, inquiry_name, time, unique_id
+2025-12-25 21:20:24 container.py           58 INFO  root    : Retrieved dataFrame with shape=(0, 10)
 </pre>
 </div>
 </div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c10491d8">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [34]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[34]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[48]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8960,69 +8948,10 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <th>inquiry_name</th>
 <th>brief_description</th>
 <th>call_resolution</th>
+<th>hbc_unique_key</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<th>0</th>
-<td>59855644</td>
-<td>2010-01-03T00:00:00.000</td>
-<td>12:52:55 AM</td>
-<td>2010-01-03T00:52:55.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Neighbor</td>
-<td>Report a noisy neighbor.</td>
-<td>CSMS SR</td>
-</tr>
-<tr>
-<th>1</th>
-<td>59855645</td>
-<td>2010-01-03T00:00:00.000</td>
-<td>12:27:41 AM</td>
-<td>2010-01-03T00:27:41.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Neighbor</td>
-<td>Report a noisy neighbor.</td>
-<td>CSMS SR</td>
-</tr>
-<tr>
-<th>2</th>
-<td>59855646</td>
-<td>2010-01-03T00:00:00.000</td>
-<td>12:34:13 AM</td>
-<td>2010-01-03T00:34:13.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Neighbor</td>
-<td>Report a noisy neighbor.</td>
-<td>CSMS SR</td>
-</tr>
-<tr>
-<th>3</th>
-<td>59871947</td>
-<td>2010-01-03T00:00:00.000</td>
-<td>11:54:54 AM</td>
-<td>2010-01-03T11:54:54.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Neighbor</td>
-<td>Report a noisy neighbor.</td>
-<td>CSMS SR</td>
-</tr>
-<tr>
-<th>4</th>
-<td>59873887</td>
-<td>2010-01-03T00:00:00.000</td>
-<td>11:00:39 PM</td>
-<td>2010-01-03T23:00:39.000</td>
-<td>NYPD</td>
-<td>New York City Police Department</td>
-<td>Noise from Neighbor</td>
-<td>Report a noisy neighbor.</td>
-<td>CSMS SR</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -9037,7 +8966,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="new_dataset:-nyc_open_data_311_customer_satisfaction_survey">new_dataset: nyc_open_data_311_customer_satisfaction_survey<a class="anchor-link" href="#new_dataset:-nyc_open_data_311_customer_satisfaction_survey">¶</a></h3>
+<h2 id="Data-Container-:-nyc_open_data_311_customer_satisfaction_survey">Data Container : nyc_open_data_311_customer_satisfaction_survey<a class="anchor-link" href="#Data-Container-:-nyc_open_data_311_customer_satisfaction_survey">¶</a></h2>
 </div>
 </div>
 </div>
@@ -9046,7 +8975,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [35]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [49]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span><span class="s1">'nyc_open_data_311_customer_satisfaction_survey'</span><span class="p">)</span>
@@ -9060,10 +8989,12 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [36]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [50]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># load / validate:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -9076,72 +9007,19 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:16:44 fetch_nycopen.py       71 INFO  root    : Fetched 100 rows
-2025-12-22 19:16:44 base.py                52 INFO  root    : using validator: ValidatorGeneric
-2025-12-22 19:16:44 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:16:44 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:16:44 base.py                59 INFO  root    : validating...
-2025-12-22 19:16:44 base.py                62 INFO  root    : finalizing...
-2025-12-22 19:16:44 container.py           73 ERROR root    : DataContainer nyc_open_data_311_customer_satisfaction_survey does not adhere to schema. Missing columns: agency, agency_name, brief_description, call_resolution, date, date_time, inquiry_name, time, unique_id
+<pre>2025-12-25 21:20:25 fetch_nycopen.py       84 INFO  root    : Fetched 100 rows
+2025-12-25 21:20:25 base.py                52 INFO  root    : using validator: ValidatorGeneric
+2025-12-25 21:20:25 base.py                53 INFO  root    : cleaning...
+2025-12-25 21:20:25 base.py                56 INFO  root    : normalizing...
+2025-12-25 21:20:25 base.py                59 INFO  root    : validating...
+2025-12-25 21:20:25 base.py                62 INFO  root    : dropping flagged rows...
+2025-12-25 21:20:25 base.py                65 INFO  root    : finalizing...
+2025-12-25 21:20:25 container.py           35 INFO  root    : Retrieved dataFrame with shape=(100, 14)
 </pre>
 </div>
 </div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c8380c2a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"answer_satisfaction='Neutral'"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>2025-12-22 19:20:39 fetch_nycopen.py       42 INFO  root    : using pagination at fetching with page_size=10000 timeout=30
-2025-12-22 19:20:40 fetch_nycopen.py       71 INFO  root    : Fetched 3422 rows
-2025-12-22 19:20:40 base.py                52 INFO  root    : using validator: ValidatorGeneric
-2025-12-22 19:20:40 base.py                53 INFO  root    : cleaning...
-2025-12-22 19:20:40 base.py                56 INFO  root    : normalizing...
-2025-12-22 19:20:40 base.py                59 INFO  root    : validating...
-2025-12-22 19:20:40 base.py                62 INFO  root    : finalizing...
-2025-12-22 19:20:40 container.py           73 ERROR root    : DataContainer nyc_open_data_311_customer_satisfaction_survey does not adhere to schema. Missing columns: agency, agency_name, brief_description, call_resolution, date, date_time, inquiry_name, time, unique_id
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=01ca1ee0">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[44]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[50]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -9174,11 +9052,29 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <th>agent_job_knowledge</th>
 <th>answer_satisfaction</th>
 <th>nps</th>
+<th>hbc_unique_key</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <th>0</th>
+<td>2021</td>
+<td>Campaign 5</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2021-12-08T15:09:24.000</td>
+<td>2021-12-08T15:18:59.000</td>
+<td>English (United States)‎</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Disagree</td>
+<td>7</td>
+<td>0193950b24c0fd7540f81ebd67ef7eec9dd63ca7</td>
+</tr>
+<tr>
+<th>1</th>
 <td>2021</td>
 <td>Campaign 5</td>
 <td>NYC311 Call Center</td>
@@ -9192,70 +9088,7 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 <td>Neutral</td>
 <td>Neutral</td>
 <td>7</td>
-</tr>
-<tr>
-<th>1</th>
-<td>2022</td>
-<td>Campaign 2</td>
-<td>NYC311 Call Center</td>
-<td>Customer Satisfaction (CSAT) Survey</td>
-<td>2022-03-17T13:12:59.000</td>
-<td>2022-03-17T13:14:57.000</td>
-<td>English (United States)‎</td>
-<td>Agree</td>
-<td>Agree</td>
-<td>Agree</td>
-<td>Agree</td>
-<td>Neutral</td>
-<td>8</td>
-</tr>
-<tr>
-<th>2</th>
-<td>2023</td>
-<td>Campaign 3</td>
-<td>NYC311 Call Center</td>
-<td>Customer Satisfaction (CSAT) Survey</td>
-<td>2023-07-06T10:12:24.000</td>
-<td>2023-07-06T10:14:34.000</td>
-<td>English (United States)‎</td>
-<td>Neutral</td>
-<td>Agree</td>
-<td>Agree</td>
-<td>Neutral</td>
-<td>Neutral</td>
-<td>5</td>
-</tr>
-<tr>
-<th>3</th>
-<td>2020</td>
-<td>Pilot</td>
-<td>NYC311 Call Center</td>
-<td>Customer Satisfaction (CSAT) Survey</td>
-<td>2020-12-15T05:19:59.000</td>
-<td>2020-12-15T05:25:05.000</td>
-<td>Español (España, alfabetización internacional)</td>
-<td>Strongly Agree</td>
-<td>Strongly Agree</td>
-<td>Strongly Agree</td>
-<td>Strongly Agree</td>
-<td>Neutral</td>
-<td>10</td>
-</tr>
-<tr>
-<th>4</th>
-<td>2020</td>
-<td>Pilot</td>
-<td>NYC311 Call Center</td>
-<td>Customer Satisfaction (CSAT) Survey</td>
-<td>2020-12-05T20:32:36.000</td>
-<td>2020-12-05T20:34:08.000</td>
-<td>Español (España, alfabetización internacional)</td>
-<td>Disagree</td>
-<td>Disagree</td>
-<td>Neutral</td>
-<td>Disagree</td>
-<td>Neutral</td>
-<td>4</td>
+<td>aa41a7cd3809f37af6dc9100c377e5139e8da7b3</td>
 </tr>
 </tbody>
 </table>
@@ -9264,7 +9097,201 @@ Log file: /var/folders/jj/dn25brln45j26cvj4y_lgbzr0000gn/T/hbc_nyc_dp/LOGS/hbc_j
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7d0100b0">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2018f12d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [51]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># cache:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">to_cache</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:25 rest.py               182 INFO  root    : Synced 100 rows via batch API
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a9513c2c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [52]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># query from caching:</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">from_cache</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"$filter=answer_satisfaction eq 'Neutral'"</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>2025-12-25 21:20:25 container.py           58 INFO  root    : Retrieved dataFrame with shape=(733, 15)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[52]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>year</th>
+<th>campaign</th>
+<th>channel</th>
+<th>survey_type</th>
+<th>start_time</th>
+<th>completion_time</th>
+<th>survey_language</th>
+<th>overall_satisfaction</th>
+<th>wait_time</th>
+<th>agent_customer_service</th>
+<th>agent_job_knowledge</th>
+<th>answer_satisfaction</th>
+<th>nps</th>
+<th>id</th>
+<th>hbc_unique_key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>2021</td>
+<td>Campaign 4</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2021-10-12T14:34:54</td>
+<td>2021-10-12T14:38:39</td>
+<td>English (United States)‎</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Agree</td>
+<td>Neutral</td>
+<td>Neutral</td>
+<td>7</td>
+<td>14</td>
+<td>64f41d526a64aea9d85d6b3965f36e38db55b57e</td>
+</tr>
+<tr>
+<th>1</th>
+<td>2021</td>
+<td>Campaign 4</td>
+<td>NYC311 Call Center</td>
+<td>Customer Satisfaction (CSAT) Survey</td>
+<td>2021-10-12T10:46:20</td>
+<td>2021-10-12T10:47:35</td>
+<td>English (United States)‎</td>
+<td>Strongly Agree</td>
+<td>Strongly Agree</td>
+<td>Agree</td>
+<td>Neutral</td>
+<td>Neutral</td>
+<td>10</td>
+<td>25</td>
+<td>1515b96365e7e31416ed44004017b6eb79495df2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a58887fb">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Raw-DB-Access">Raw DB Access<a class="anchor-link" href="#Raw-DB-Access">¶</a></h2>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d32d97d4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [53]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hbc.ltp.persistence.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqlLiteDataBase</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2275aabe">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [54]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">SqlLiteDataBase</span><span class="p">()</span>
+<span class="p">[</span><span class="n">db</span><span class="o">.</span><span class="n">run_query</span><span class="p">(</span><span class="sa">f</span><span class="s1">'select count(*) from </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">all_tables</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[54]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>[   count(*)
+ 0       100,
+    count(*)
+ 0      4987,
+    count(*)
+ 0     48964]</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2e867a40">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
