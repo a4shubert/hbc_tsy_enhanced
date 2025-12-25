@@ -28,7 +28,8 @@ class AppContext:
             for k, v in self.__dict__.items()
             if not k.startswith("_")
         )
-        return f"{self.__class__.__name__}\nas_of : {self.as_of}\n{body}"
+        underline = "=" * len(self.__class__.__name__)
+        return f"{self.__class__.__name__}\n{underline}\nas_of : {self.as_of}\n{body}"
 
     __repr__ = __str__
 

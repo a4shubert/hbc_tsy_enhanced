@@ -28,6 +28,10 @@ Pacakges:
 - cache data
 - retrieve data from cache using OData query language
 
+## `job`:
+
+- once data is fetched and validated we only persist `DROP_FLAG == False` records, however, we might want to retain in some form all the `DROP_FLAG == True` records
+
 # ToDo:
 
 - [x] we need to remove all the rest-api related methods away from db.py into rest.py
@@ -35,3 +39,4 @@ Pacakges:
 - [x] db.py should be ultimately depricated or just as an alternative way to look into the database
   - [ ] replaced with sql-alchemy
 - [ ] ultimately creating dataclasses in asp.net from yaml configs
+- [ ] once data is fetched and validated we only persist `DROP_FLAG == False` records, however, we might want to retain in some form all the `DROP_FLAG == True` records

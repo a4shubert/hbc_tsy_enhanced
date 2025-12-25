@@ -59,7 +59,20 @@ class Validator(ABC):
         logger.info("validating...")
         df = self.validate(df)
 
+        logger.info("dropping flagged rows...")
+        df = self.drop_flagged(df)
+
         logger.info("finalizing...")
         df = self.finalize(df)
 
         return df
+
+    @staticmethod
+    def drop_flagged(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Drop rows where DROP_FLAG is truthy; if absent, return df unchanged.
+        """
+        if "DROP_FLAG" not in df.columns:
+            return df
+        mask = ~(df["DROP_FLAG"].fillna(False).astype(bool))
+        return df.loc[mask].copy()

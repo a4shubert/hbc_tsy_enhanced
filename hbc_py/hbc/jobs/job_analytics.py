@@ -1,4 +1,5 @@
 import logging
+import datetime
 
 import pandas as pd
 
@@ -24,7 +25,8 @@ def job_analyse_nyc_open_data_311_service_requests(
     )
 
     dc = DataContainer("nyc_open_data_311_service_requests")
-    dc.from_cache(as_of, retrieve_if_missing=True)
+    # Pull all data via REST; use a trivial filter to avoid server-side default top limit.
+    dc.from_cache(query="$filter=created_date ge '1900-01-01'")
 
     df = dc.df.copy()
     cols = ul.cols_as_named_tuple(df)
@@ -33,13 +35,7 @@ def job_analyse_nyc_open_data_311_service_requests(
         app_context.dir_analytics
         / dc.moniker
         / ul.date_as_str(app_context.as_of)
-    )
-    # for the moment we'll drop all the DROP_FLAG = TRUE rows
-    df_drop = df[df[cols.DROP_FLAG]].copy()
-    df_drop.to_csv(
-        ul.mk_dir(dir_analytics / "tables") / "df_dropped.csv", index=False
-    )
-    df = df[~df[cols.DROP_FLAG]]
+    )    
 
     df["hbc_days_to_close"] = (
         pd.to_datetime(df[cols.closed_date])
@@ -189,8 +185,14 @@ def job_analyse_nyc_open_data_311_service_requests(
             replace=True,
         )
 
-    # the last one will be the time series  / tren analysis of the worst agency over the last n_days
-    df = pd.concat([dc.from_cache(t) for t in dc.all_cached_dates[:n_days]])
+    # time series over the last n_days via REST query
+    start_dt = ul.str_as_date(as_of) if isinstance(as_of, str) else as_of
+    if isinstance(start_dt, datetime.datetime):
+        start_dt = start_dt.date()
+    start_dt = start_dt - datetime.timedelta(days=max(n_days - 1, 0))
+    start_str = start_dt.isoformat()
+    dc.from_cache(query=f"$filter=created_date ge '{start_str}'")
+    df = dc.df.copy()
 
     worst_agency = df[cols.agency_name].value_counts().idxmax()
     _ = PlotEngine.plot_ts(

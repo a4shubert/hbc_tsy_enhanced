@@ -43,7 +43,14 @@ class RestApi:
         else:
             url = f"{url}"
 
-        resp = requests.get(url, timeout=60, verify=verify_flag)
+        try:
+            resp = requests.get(url, timeout=60, verify=verify_flag)
+        except requests.exceptions.ConnectionError:
+            self.logger.error(
+                "ConnectionError on GET %s — please check connection with back-end server",
+                url,
+            )
+            return pd.DataFrame()
         if resp.status_code >= 400:
             self.logger.error(
                 "GET %s failed with status %s: %s", url, resp.status_code, resp.text
@@ -83,6 +90,14 @@ class RestApi:
                 verify_flag = True
 
         data = df.copy()
+        # Attempt to normalize any columns that look like datetime/time into pandas datetime.
+        for col in data.columns:
+            col_lower = str(col).lower()
+            if "date" in col_lower or "time" in col_lower:
+                try:
+                    data[col] = pd.to_datetime(data[col])
+                except Exception:
+                    pass
         # convert datetime columns to isoformat strings
         for col in data.columns:
             if ptypes.is_datetime64_any_dtype(data[col]):
@@ -105,6 +120,25 @@ class RestApi:
         data = data.drop_duplicates(subset=[key_col])
 
         records = data.to_dict(orient="records")
+        # Normalize any residual Timestamp/datetime values to ISO strings.
+        def _normalize_row(row: dict) -> dict:
+            norm = {}
+            for k, v in row.items():
+                if hasattr(v, "isoformat"):
+                    try:
+                        norm[k] = v.isoformat()
+                        continue
+                    except Exception:
+                        pass
+                if isinstance(v, (dict, list)):
+                    try:
+                        norm[k] = json.dumps(v, default=str)
+                        continue
+                    except Exception:
+                        pass
+                norm[k] = v
+            return norm
+        records = [_normalize_row(r) for r in records]
         if not records:
             return []
 
@@ -121,12 +155,20 @@ class RestApi:
                 table,
                 verify_flag,
             )
-            resp = requests.post(
-                f"{self.api_base}/{table}/batch",
-                json=batch,
-                timeout=60,
-                verify=verify_flag,
-            )
+            try:
+                resp = requests.post(
+                    f"{self.api_base}/{table}/batch",
+                    json=batch,
+                    timeout=60,
+                    verify=verify_flag,
+                )
+            except requests.exceptions.ConnectionError:
+                self.logger.error(
+                    "ConnectionError on POST %s/%s/batch — please check connection with back-end server",
+                    self.api_base,
+                    table,
+                )
+                return []
             status_codes.extend([resp.status_code] * len(batch))
             if resp.status_code >= 400:
                 self.logger.error(

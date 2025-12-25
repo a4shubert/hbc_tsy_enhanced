@@ -45,13 +45,19 @@ class SqlLiteDataBase:
         """
         List tables in the current database as `db_name:table_name`.
         """
-        db_name = "main"
         df = self.run_query(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
+            """
+            SELECT name
+            FROM sqlite_master
+            WHERE type='table'
+              AND name NOT LIKE 'sqlite_%'
+              AND name NOT LIKE '__EFMigrationsHistory'
+            ORDER BY name;
+            """
         )
         if df.empty:
             return []
-        return [f"{db_name}:{name}" for name in df["name"].tolist()]
+        return df["name"].tolist()
 
     def run_query(self, query: str, params: Optional[Iterable[Any]] = None):
         """

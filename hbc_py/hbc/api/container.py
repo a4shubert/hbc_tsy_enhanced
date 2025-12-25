@@ -32,6 +32,7 @@ class DataContainer:
         df_validated = validator.parse(df_raw)
         df_with_key = self._add_hbc_unique_key(df_validated)
         self.df = df_with_key
+        logger.info(f'Retrieved dataFrame with shape={self.df.shape}')
 
     @property
     def df(self) -> pd.DataFrame:
@@ -53,7 +54,10 @@ class DataContainer:
     def from_cache(self, query=None):
         """Load cached data via REST API."""
         api = RestApi()
-        return api.get(self.moniker, query if query else None)
+        self.df = api.get(self.moniker, query if query else None)
+        logger.info(f'Retrieved dataFrame with shape={self.df.shape}')
+        
+        
 
     def _valid_schema(self, df: pd.DataFrame) -> bool:
         """Check that df contains all schema columns; log errors when missing."""

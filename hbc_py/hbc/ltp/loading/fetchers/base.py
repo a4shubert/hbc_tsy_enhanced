@@ -22,10 +22,4 @@ class Fetcher(ABC):
 
             return FetcherNYCOpenData()
         raise NotImplementedError(f"Fetcher {name} is not implemented")
-
-    @property
-    def validator_name(self) -> str:
-        """Return the default validator name for this fetcher."""
-        return "ValidatorGeneric"
-
    

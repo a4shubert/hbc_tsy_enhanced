@@ -1,4 +1,3 @@
-from datetime import datetime
 import logging
 
 import pandas as pd
@@ -29,34 +28,33 @@ def job_fetch_nyc_open_data_311_service_requests(
     if not as_of:
         as_of = app_context.as_of
 
+    dc = DataContainer("nyc_open_data_311_service_requests")
+
     if incremental:
         logger.info(
-            f"Running job_fetch_nyc_open_data_311_service_requests for {as_of} and incremental={incremental}"
+            "Running job_fetch_nyc_open_data_311_service_requests for %s (incremental)",
+            as_of,
         )
-        dc = DataContainer("nyc_open_data_311_service_requests")
-        dc.get(
-            where=f"created_date = '{ul.date_as_iso_format(ul.str_as_date(as_of))}' "
-        )
-        dc.to_cache(as_of)
-    else:
-        # we are going to identify all the created_date(s) in the database that are missing in cache
-        dc = DataContainer("nyc_open_data_311_service_requests")
-        dc.get(select="created_date", group="created_date")
-        all_dates = pd.to_datetime(dc.df["created_date"])
-        cached_dates = pd.to_datetime(dc.all_cached_dates)
-        missing_dates = set(all_dates).difference(cached_dates)
-        if missing_dates:
-            logger.info(
-                f"Running job_fetch_nyc_open_data_311_service_requests for the last {last_missing_dates} dates:"
-            )
-            for as_of in sorted(list(missing_dates), reverse=True)[
-                :last_missing_dates
-            ]:
-                logger.info(f"working {as_of}")
-                dc = DataContainer("nyc_open_data_311_service_requests")
-                dc.get(
-                    where=(
-                        f"created_date = '{ul.date_as_iso_format(as_of.date())}' "
-                    )
-                )
-                dc.to_cache(as_of)
+        date_str = ul.date_as_iso_format(ul.str_as_date(as_of))
+        dc.get(query=f"$filter=created_date eq '{date_str}'")
+        dc.to_cache()
+        return
+
+    # Non-incremental: pull distinct created_date values from source and fetch each.
+    logger.info(
+        "Running job_fetch_nyc_open_data_311_service_requests full sync (last %s dates)",
+        last_missing_dates,
+    )
+    dc.get(query="$apply=groupby((created_date))")
+    dates = (
+        pd.to_datetime(dc.df["created_date"], errors="coerce")
+        .dropna()
+        .sort_values(ascending=False)
+        .head(last_missing_dates)
+    )
+    for d in dates:
+        date_str = ul.date_as_iso_format(d.date())
+        logger.info("Fetching created_date=%s", date_str)
+        dc_day = DataContainer("nyc_open_data_311_service_requests")
+        dc_day.get(query=f"$filter=created_date eq '{date_str}'")
+        dc_day.to_cache()
