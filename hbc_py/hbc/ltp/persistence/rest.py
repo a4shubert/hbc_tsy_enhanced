@@ -112,7 +112,7 @@ class RestApi:
         chunk_size = 100
         for i in range(0, len(records), chunk_size):
             batch = records[i : i + chunk_size]
-            self.logger.info(
+            self.logger.debug(
                 "Posting batch %s-%s/%s to %s/%s/batch (verify=%s)",
                 i + 1,
                 i + len(batch),

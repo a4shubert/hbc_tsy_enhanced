@@ -2,43 +2,30 @@ moniker: "nyc_open_data_311_customer_satisfaction_survey"
 schema:
   - name: year
     type: text
-    is_key: false
   - name: campaign
     type: text
-    is_key: true
   - name: channel
     type: text
-    is_key: true
   - name: survey_type
     type: text
-    is_key: true
   - name: start_time
     type: datetime
-    is_key: true
   - name: completion_time
     type: datetime
-    is_key: true
   - name: survey_language
     type: text
-    is_key: true
   - name: overall_satisfaction
     type: text
-    is_key: false
   - name: wait_time
     type: text
-    is_key: false
   - name: agent_customer_service
     type: text
-    is_key: false
   - name: agent_job_knowledge
     type: text
-    is_key: false
   - name: answer_satisfaction
     type: text
-    is_key: false
   - name: nps
     type: number
-    is_key: false
 fetcher: FetcherNYCOpenData
 token: ERZjPaQcb5J6iJOZeF1BDu4hd
 base_url: data.cityofnewyork.us
