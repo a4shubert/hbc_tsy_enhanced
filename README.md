@@ -19,6 +19,15 @@ Pacakges:
 - `hbc_web`: web-portal
 - `hbc_rest`: REST-full api for CRUD operations
 
+# HowTo:
+
+## `ltp`:
+
+- onboard new fetcher
+- retrieve data using OData query language
+- cache data
+- retrieve data from cache using OData query language
+
 # ToDo:
 
 - [x] we need to remove all the rest-api related methods away from db.py into rest.py

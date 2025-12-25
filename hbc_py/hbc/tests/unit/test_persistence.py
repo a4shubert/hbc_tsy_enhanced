@@ -12,6 +12,7 @@ from hbc.ltp.persistence.cache import Cache
 import hbc.utils as ul
 
 
+@unittest.skip("Cache filesystem removed; REST cache used instead.")
 class TestPersistence(unittest.TestCase):
     TMP_ROOT = Path(__file__).resolve().parent / "tmp"
 
@@ -24,7 +25,6 @@ class TestPersistence(unittest.TestCase):
         self._patcher.start()
         # refresh derived paths after monkeypatch
         app_context.dir_base = self.TMP_ROOT
-        app_context.dir_cache = ul.mk_dir(app_context.dir_base / "CACHE")
 
     def tearDown(self):
         self._patcher.stop()

@@ -38,21 +38,24 @@ class TestJobAnalysisNYC311(unittest.TestCase):
         # Ensure app_context directories use the patched base.
         from hbc import app_context
 
+        # REST cache replaces filesystem; no seed needed.
         app_context.dir_base = self.runtime_root
-        app_context.dir_cache = ul.mk_dir(app_context.dir_base / "CACHE")
         app_context.dir_analytics = ul.mk_dir(
             app_context.dir_base / "ANALYTICS"
         )
         app_context.dir_logging = ul.mk_dir(app_context.dir_base / "LOGS")
         app_context.as_of = ul.str_as_date(self.AS_OF_STR)
 
-        # Seed cache with baseline input so job reads from cache, not network.
-        cache_dir = self.runtime_root / "CACHE" / self.MONIKER / self.AS_OF_STR
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        self.cache_path = cache_dir / f"{self.MONIKER}.csv"
-        shutil.copyfile(self.baseline_input, self.cache_path)
+        baseline_df = pd.read_csv(self.baseline_input)
+        # Patch REST get to return baseline input.
+        self.rest_get_patcher = mock.patch(
+            "hbc.ltp.persistence.rest.RestApi.get",
+            return_value=baseline_df,
+        )
+        self.rest_get_patcher.start()
 
     def tearDown(self):
+        self.rest_get_patcher.stop()
         for p in self._patchers:
             p.stop()
         shutil.rmtree(self.runtime_root, ignore_errors=True)

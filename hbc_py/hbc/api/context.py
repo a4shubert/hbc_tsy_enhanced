@@ -12,7 +12,6 @@ class AppContext:
         # why: keep storage private so validation runs via the property
         self._as_of: datetime.date = datetime.date.today()
         self.dir_base = ul.get_dir_base()
-        self.dir_cache = ul.get_dir_cache()
         self.dir_analytics = ul.get_dir_analytics()
         self.dir_logging = ul.get_dir_logging()
 

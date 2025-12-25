@@ -80,9 +80,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--log-level", type=str, help="log level")
     parser.add_argument("--dir-base", type=str, help="Base directory override")
     parser.add_argument(
-        "--dir-cache", type=str, help="Cache directory override"
-    )
-    parser.add_argument(
         "--dir-analytics", type=str, help="Analytics directory override"
     )
     parser.add_argument(
@@ -101,9 +98,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     # keep utility helpers in sync when base is overridden via CLI
     ul.set_dir_base(app_context.dir_base)
-    app_context.dir_cache = (
-        Path(args.dir_cache) if args.dir_cache else ul.get_dir_cache()
-    )
     app_context.dir_analytics = (
         Path(args.dir_analytics)
         if args.dir_analytics

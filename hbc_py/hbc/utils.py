@@ -300,14 +300,6 @@ def get_dir_base() -> Path:
     return base
 
 
-def get_dir_cache(postfix: str | None = None) -> Path:
-    """Return/create cache directory; optionally append a postfix subdir."""
-    base = get_dir_base() / "CACHE"
-    cache = base / postfix if postfix else base
-    cache.mkdir(parents=True, exist_ok=True)
-    return cache
-
-
 def get_dir_logging() -> Path:
     """Return/create log directory."""
     logdir = get_dir_base() / "LOGS"

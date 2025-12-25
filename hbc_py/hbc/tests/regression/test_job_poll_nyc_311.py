@@ -38,7 +38,6 @@ class TestJobPollNYC311(unittest.TestCase):
         from hbc import app_context
 
         app_context.dir_base = self.runtime_root
-        app_context.dir_cache = ul.mk_dir(app_context.dir_base / "CACHE")
         app_context.dir_analytics = ul.mk_dir(
             app_context.dir_base / "ANALYTICS"
         )
@@ -52,8 +51,20 @@ class TestJobPollNYC311(unittest.TestCase):
         )
         self.fetch_patcher.start()
 
+        # Patch REST post to capture payload instead of real HTTP.
+        self.rest_post_calls = []
+        def _fake_post(table, df, verify=None):
+            self.rest_post_calls.append((table, df.copy(), verify))
+            return [200] * len(df)
+        self.rest_post_patcher = mock.patch(
+            "hbc.ltp.persistence.rest.RestApi.post",
+            side_effect=_fake_post,
+        )
+        self.rest_post_patcher.start()
+
     def tearDown(self):
         self.fetch_patcher.stop()
+        self.rest_post_patcher.stop()
         for p in self._patchers:
             p.stop()
         shutil.rmtree(self.runtime_root, ignore_errors=True)
@@ -61,19 +72,8 @@ class TestJobPollNYC311(unittest.TestCase):
 
     def test_job_poll_creates_expected_cache(self):
         job_fetch_nyc_open_data_311_service_requests(as_of=self.AS_OF_STR, incremental=True)
-
-        produced_path = (
-            self.runtime_root
-            / "CACHE"
-            / self.MONIKER
-            / self.AS_OF_STR
-            / f"{self.MONIKER}.csv.gz"
-        )
-        self.assertTrue(
-            produced_path.exists(), "cache file was not created (gzipped)"
-        )
-
-        produced_df = pd.read_csv(produced_path)
+        self.assertTrue(self.rest_post_calls, "REST cache was not called")
+        table, df_posted, _ = self.rest_post_calls[0]
+        self.assertEqual(table, self.MONIKER)
         expected_df = pd.read_csv(self.baseline_path)
-
-        assert_frame_equal(produced_df, expected_df, check_like=True)
+        assert_frame_equal(df_posted.reset_index(drop=True), expected_df, check_like=True)
