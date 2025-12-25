@@ -44,7 +44,7 @@ class DataContainer:
         """Set DataFrame and validate it against configured schema."""
         if not isinstance(value, pd.DataFrame):
             raise TypeError("df must be a pandas DataFrame")
-        self._valid_schema(value)
+        value = self._ensure_schema(value)
         self._df = value
 
     def to_cache(self):
@@ -59,18 +59,25 @@ class DataContainer:
         
         
 
-    def _valid_schema(self, df: pd.DataFrame) -> bool:
-        """Check that df contains all schema columns; log errors when missing."""
+    def _ensure_schema(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Ensure df contains all schema columns; add missing columns as None.
+        """
         schema_cols = set(self.schema_cols)
         missing_cols = sorted(schema_cols - set(df.columns))
         if missing_cols:
-            logger.error(
-                "DataContainer %s does not adhere to schema. Missing columns: %s",
+            logger.warning(
+                "DataContainer %s missing columns; filling with None: %s",
                 self.moniker,
                 ", ".join(missing_cols),
             )
-            return False
-        return True
+            for col in missing_cols:
+                df[col] = None
+        # reorder to schema order plus any extras at the end
+        ordered_cols = list(self.schema_cols) + [
+            c for c in df.columns if c not in self.schema_cols
+        ]
+        return df[ordered_cols]
 
     @staticmethod
     def _schema_columns(config: dict) -> list[str]:

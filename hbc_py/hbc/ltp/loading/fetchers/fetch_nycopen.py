@@ -35,6 +35,19 @@ class FetcherNYCOpenData(Fetcher):
 
         query_params = cls._parse_query(query)
 
+        # If no explicit select provided, request all schema columns from config.
+        if "select" not in query_params and "$select" not in query_params:
+            schema_cols = []
+            for item in config.get("schema", []):
+                if isinstance(item, dict):
+                    name = item.get("name") or item.get("column") or item.get("field")
+                else:
+                    name = str(item)
+                if name:
+                    schema_cols.append(name)
+            if schema_cols:
+                query_params["select"] = ",".join(schema_cols)
+
         def fetch_once():
             if query_params and "limit" in query_params:
                 return client.get(dataset, **query_params)

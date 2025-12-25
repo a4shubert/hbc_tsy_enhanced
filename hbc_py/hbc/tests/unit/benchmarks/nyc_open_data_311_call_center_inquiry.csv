@@ -1,0 +1,2 @@
+unique_id,date,time,date_time,agency,agency_name,inquiry_name,brief_description,call_resolution
+1001,2024-01-02,12:00:00,2024-01-02 12:00:00,311,NYC 311,General Inquiry,Test inquiry description,Resolved

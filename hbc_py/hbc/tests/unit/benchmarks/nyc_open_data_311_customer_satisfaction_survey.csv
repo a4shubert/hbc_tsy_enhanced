@@ -1,0 +1,2 @@
+year,campaign,channel,survey_type,start_time,completion_time,survey_language,overall_satisfaction,wait_time,agent_customer_service,agent_job_knowledge,answer_satisfaction,nps
+2024,Campaign 1,PHONE,CSAT,2024-01-05 10:00:00,2024-01-05 10:03:00,English,Satisfied,Short,Satisfied,Knowledgeable,Satisfied,9
