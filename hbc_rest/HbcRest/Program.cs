@@ -135,32 +135,6 @@ app.MapPut("/surveys/{id}", async (long id, CustomerSatisfactionSurvey input, Hb
     return Results.NoContent();
 });
 
-app.MapPut("/surveys/batch", async (IEnumerable<CustomerSatisfactionSurvey> inputs, HbcContext db) =>
-{
-    if (inputs is null) return Results.BadRequest();
-
-    using var txn = await db.Database.BeginTransactionAsync();
-    foreach (var input in inputs)
-    {
-        if (input.Id != 0)
-        {
-            var survey = await db.CustomerSatisfactionSurveys.FindAsync(input.Id);
-            if (survey is not null)
-            {
-                CopyFields(survey, input);
-                continue;
-            }
-        }
-
-        db.CustomerSatisfactionSurveys.Add(input);
-    }
-
-    var saved = await db.SaveChangesAsync();
-    await txn.CommitAsync();
-    Console.WriteLine($"[HbcRest] PUT /surveys/batch saved {saved} row(s)");
-    return Results.NoContent();
-});
-
 app.MapDelete("/surveys/{id}", async (long id, HbcContext db) =>
 {
     var survey = await db.CustomerSatisfactionSurveys.FindAsync(id);
