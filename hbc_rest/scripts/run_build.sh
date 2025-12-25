@@ -10,12 +10,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 PROJECT_PATH="${REPO_ROOT}/hbc_rest/HbcRest/HbcRest.csproj"
 
-export HBC_DB_PATH="${HBC_DB_PATH:-${REPO_ROOT}/hbc_db/hbc.db}"
-export ASPNETCORE_ENVIRONMENT="${ASPNETCORE_ENVIRONMENT:-Production}"
-
-echo "[build_prod] Using HBC_DB_PATH=${HBC_DB_PATH}"
-echo "[build_prod] ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}"
-
 cd "${REPO_ROOT}"
 
 echo "[build_prod] Cleaning..."

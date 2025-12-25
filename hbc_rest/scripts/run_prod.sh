@@ -12,13 +12,5 @@ if [ ! -d "${PUBLISH_DIR}" ]; then
   exit 1
 fi
 
-export HBC_DB_PATH="${HBC_DB_PATH:-${REPO_ROOT}/hbc_db/hbc.db}"
-export ASPNETCORE_ENVIRONMENT="${ASPNETCORE_ENVIRONMENT:-Production}"
-export ASPNETCORE_URLS="${ASPNETCORE_URLS:-http://0.0.0.0:5047}"
-
-echo "[run_prod] Using HBC_DB_PATH=${HBC_DB_PATH}"
-echo "[run_prod] ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}"
-echo "[run_prod] ASPNETCORE_URLS=${ASPNETCORE_URLS}"
-
 cd "${PUBLISH_DIR}"
 dotnet HbcRest.dll
