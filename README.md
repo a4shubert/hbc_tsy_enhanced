@@ -1,6 +1,6 @@
 # HBC_TSY_ENHANCED
 
-Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normalizes them in Python, and persists them through a small ASP\.NET EF Core REST API backed by SQLite.
+Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normalizes them in Python, and persists them through a minimal ASP\.NET EF Core REST API backed by SQLite.
 
 # Package Map
 

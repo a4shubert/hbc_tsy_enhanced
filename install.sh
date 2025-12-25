@@ -8,7 +8,7 @@ set -euo pipefail
 # - starts the published ASP.NET Core REST API (foreground) via run_prod.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="${SCRIPT_DIR}"
 
 # Load environment defaults.
 source "${REPO_ROOT}/scripts/env.sh"
