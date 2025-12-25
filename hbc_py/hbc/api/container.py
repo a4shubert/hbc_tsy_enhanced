@@ -67,10 +67,10 @@ class DataContainer:
         self, as_of: datetime.date = None, retrieve_if_missing=False, query=None
     ):
         """Load cached data for the date; optionally fetch if cache is empty."""
-        if self.moniker == 'nyc_open_data_311_customer_satisfaction_survey':
-            if query is None:
-                query = f'select * from {self.moniker} limit 10'
-            return SqlLiteDataBase().run_query(query)
+        if self.moniker == "nyc_open_data_311_customer_satisfaction_survey":
+            api = RestApi()
+            query_str = query if query else None
+            return api.get(self.moniker, query_str)
         self.df = Cache.from_cache(self, as_of)
         if not len(self.df) and retrieve_if_missing:
             self.get(as_of)

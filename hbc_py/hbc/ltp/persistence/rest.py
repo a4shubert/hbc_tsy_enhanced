@@ -6,7 +6,10 @@ from typing import Optional, List
 
 import pandas as pd
 import pandas.api.types as ptypes
+import requests
 
+logger = logging.getLogger()
+MIN_ROWS_COUNT = 10
 
 class RestApi:
     """Helper for interacting with the REST API."""
@@ -15,9 +18,43 @@ class RestApi:
         self.logger = logging.getLogger()
         self.api_base = os.environ.get("HBC_API_URL", "http://localhost:5047").rstrip("/")
 
-    def get(self, query: str):
-        """Placeholder for future GET support."""
-        raise NotImplementedError
+    def get(
+        self,
+        table: str,
+        query: Optional[str] = None,
+        verify: Optional[bool] = None,
+    ) -> pd.DataFrame:
+        """
+        Execute an OData-style GET against the API and return a DataFrame.
+
+        `query` should be an OData query string (e.g., "$top=10", "$filter=col eq 'val'").
+        """
+        verify_flag = verify
+        if verify_flag is None:
+            env_verify = os.environ.get("HBC_API_VERIFY", "").strip().lower()
+            if env_verify in {"false", "0", "no", "off"}:
+                verify_flag = False
+            elif env_verify in {"true", "1", "yes", "on"}:
+                verify_flag = True
+
+        url = f"{self.api_base}/{table}"
+        if not query:            
+            effective_query = f"$top={MIN_ROWS_COUNT}"
+            logger.info(f' Without query retrieving only {MIN_ROWS_COUNT} rows')
+        else:
+            effective_query = query 
+        url = f"{url}?{effective_query}"
+
+        resp = requests.get(url, timeout=60, verify=verify_flag)
+        if resp.status_code >= 400:
+            self.logger.error(
+                "GET %s failed with status %s: %s", url, resp.status_code, resp.text
+            )
+            resp.raise_for_status()
+        data = resp.json()
+        if isinstance(data, dict) and "value" in data:
+            data = data["value"]
+        return pd.DataFrame(data)
 
     def post(
         self,

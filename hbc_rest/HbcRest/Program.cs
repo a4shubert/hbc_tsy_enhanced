@@ -2,6 +2,7 @@ using System;
 using HbcRest.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,8 +41,24 @@ if (!app.Environment.IsProduction())
 
 const string Moniker = "nyc_open_data_311_customer_satisfaction_survey";
 
-app.MapGet($"/{Moniker}", async (HbcContext db) =>
-    await db.CustomerSatisfactionSurveys.AsNoTracking().ToListAsync());
+app.MapGet($"/{Moniker}", async (
+    [FromQuery(Name = "$top")] int? top,
+    [FromQuery(Name = "$filter")] string? filter,
+    HbcContext db) =>
+{
+    IQueryable<CustomerSatisfactionSurvey> query = db.CustomerSatisfactionSurveys.AsQueryable();
+
+    if (!string.IsNullOrWhiteSpace(filter))
+    {
+        query = ApplyFilter(filter, query);
+    }
+
+    var take = (top.HasValue && top.Value > 0) ? top.Value : 10;
+    query = query.Take(take);
+
+    var results = await query.AsNoTracking().ToListAsync();
+    return Results.Ok(results);
+});
 
 app.MapGet($"/{Moniker}/{{id}}", async (long id, HbcContext db) =>
     await db.CustomerSatisfactionSurveys.FindAsync(id) is { } survey
@@ -141,4 +158,33 @@ static void CopyFields(CustomerSatisfactionSurvey target, CustomerSatisfactionSu
     target.AgentJobKnowledge = source.AgentJobKnowledge;
     target.AnswerSatisfaction = source.AnswerSatisfaction;
     target.Nps = source.Nps;
+}
+
+static IQueryable<CustomerSatisfactionSurvey> ApplyFilter(
+    string filter,
+    IQueryable<CustomerSatisfactionSurvey> query)
+{
+    // Very small OData-like filter support: "<field> eq '<value>'"
+    var parts = filter.Split(" eq ", 2, StringSplitOptions.TrimEntries);
+    if (parts.Length != 2) return query;
+
+    var field = parts[0].Trim().ToLowerInvariant();
+    var value = parts[1].Trim().Trim('\'', '"');
+
+    return field switch
+    {
+        "campaign" => query.Where(s => s.Campaign == value),
+        "channel" => query.Where(s => s.Channel == value),
+        "survey_type" => query.Where(s => s.SurveyType == value),
+        "survey_language" => query.Where(s => s.SurveyLanguage == value),
+        "wait_time" => query.Where(s => s.WaitTime == value),
+        "overall_satisfaction" => query.Where(s => s.OverallSatisfaction == value),
+        "agent_customer_service" => query.Where(s => s.AgentCustomerService == value),
+        "agent_job_knowledge" => query.Where(s => s.AgentJobKnowledge == value),
+        "answer_satisfaction" => query.Where(s => s.AnswerSatisfaction == value),
+        "year" => query.Where(s => s.Year == value),
+        "unique_key" or "hbc_unique_key" => query.Where(s => s.HbcUniqueKey == value),
+        "nps" => int.TryParse(value, out var npsVal) ? query.Where(s => s.Nps == npsVal) : query,
+        _ => query
+    };
 }
