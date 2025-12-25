@@ -41,6 +41,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Simple request logging
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"[HbcRest] {context.Request.Method} {context.Request.Path}{context.Request.QueryString}");
+    await next.Invoke();
+});
+
 if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
@@ -129,8 +136,8 @@ app.MapGet($"/{MonikerSurvey}", async (
     return Results.Ok(projected);
 });
 
-app.MapGet($"/{MonikerSurvey}/{{id}}", async (long id, HbcContext db) =>
-    await db.CustomerSatisfactionSurveys.FindAsync(id) is { } survey
+app.MapGet($"/{MonikerSurvey}/{{id}}", async (string id, HbcContext db) =>
+    await db.CustomerSatisfactionSurveys.FirstOrDefaultAsync(s => s.HbcUniqueKey == id) is { } survey
         ? Results.Ok(survey)
         : Results.NotFound());
 
@@ -188,9 +195,9 @@ app.MapPost($"/{MonikerSurvey}/batch", async ([FromBody] List<CustomerSatisfacti
     return Results.Ok(surveys);
 });
 
-app.MapPut($"/{MonikerSurvey}/{{id}}", async (long id, CustomerSatisfactionSurvey input, HbcContext db) =>
+app.MapPut($"/{MonikerSurvey}/{{id}}", async (string id, CustomerSatisfactionSurvey input, HbcContext db) =>
 {
-    var survey = await db.CustomerSatisfactionSurveys.FindAsync(id);
+    var survey = await db.CustomerSatisfactionSurveys.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
 
     if (survey is null) return Results.NotFound();
 
@@ -200,11 +207,29 @@ app.MapPut($"/{MonikerSurvey}/{{id}}", async (long id, CustomerSatisfactionSurve
     return Results.NoContent();
 });
 
-app.MapDelete($"/{MonikerSurvey}/{{id}}", async (long id, HbcContext db) =>
+app.MapDelete($"/{MonikerSurvey}/{{id}}", async (string id, HbcContext db) =>
 {
-    var survey = await db.CustomerSatisfactionSurveys.FindAsync(id);
+    var survey = await db.CustomerSatisfactionSurveys.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
     if (survey is null) return Results.NotFound();
     db.CustomerSatisfactionSurveys.Remove(survey);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+app.MapDelete($"/{MonikerCall}/{{id}}", async (string id, HbcContext db) =>
+{
+    var row = await db.CallCenterInquiries.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
+    if (row is null) return Results.NotFound();
+    db.CallCenterInquiries.Remove(row);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+app.MapDelete($"/{MonikerService}/{{id}}", async (string id, HbcContext db) =>
+{
+    var row = await db.ServiceRequests.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
+    if (row is null) return Results.NotFound();
+    db.ServiceRequests.Remove(row);
     await db.SaveChangesAsync();
     return Results.NoContent();
 });

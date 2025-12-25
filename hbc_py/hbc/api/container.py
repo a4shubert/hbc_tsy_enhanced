@@ -73,6 +73,11 @@ class DataContainer:
             )
             for col in missing_cols:
                 df[col] = None
+
+        # Always ensure hbc_unique_key exists so we can round-trip cache operations.
+        if "hbc_unique_key" not in df.columns:
+            df["hbc_unique_key"] = None
+
         # reorder to schema order plus any extras at the end
         ordered_cols = list(self.schema_cols) + [
             c for c in df.columns if c not in self.schema_cols
