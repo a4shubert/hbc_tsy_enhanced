@@ -1,0 +1,3 @@
+# To use for the integration tests
+HBC_INTEGRATION=1
+HBC_API_URL=http://localhost:5047

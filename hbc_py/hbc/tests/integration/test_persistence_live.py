@@ -1,15 +1,10 @@
 import os
-from pathlib import Path
 
 import pandas as pd
-import pandas.testing as pdt
 import pytest
 import requests
-import hashlib
-import json
 
-from hbc import DataContainer, utils as ul
-from hbc.ltp.persistence.rest import RestApi
+from hbc import DataContainer
 
 
 REQUIRES_ENV = os.getenv("HBC_INTEGRATION")
@@ -87,9 +82,13 @@ def test_live_persistence_roundtrip(moniker):
         upstream = _normalize_df(upstream)
         cached = _normalize_df(cached)
 
-        # Align on shared columns, fill missing hbc_unique_key if API omitted it.
+        # Ensure hbc_unique_key present on both sides.
         if "hbc_unique_key" not in cached.columns:
             cached["hbc_unique_key"] = None
+        if "hbc_unique_key" not in upstream.columns:
+            upstream["hbc_unique_key"] = pd.Series(keys[: len(upstream)])
+
+        # Align on shared columns.
         common_cols = [c for c in upstream.columns if c in cached.columns]
         upstream = upstream[common_cols].set_index("hbc_unique_key")
         cached = cached[common_cols].set_index("hbc_unique_key")

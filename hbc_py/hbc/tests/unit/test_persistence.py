@@ -3,9 +3,8 @@ import pandas.testing as pdt
 import pytest
 from pathlib import Path
 
-from hbc import DataContainer, utils as ul
+from hbc import DataContainer
 from hbc.ltp.loading.fetchers import fetch_nycopen
-from hbc.ltp.loading.fetchers.fetch_nycopen import FetcherNYCOpenData
 from hbc.ltp.loading.validators.valid_nycopen import ValidatorNYCOpen311Service
 from hbc.ltp.persistence.rest import RestApi
 
@@ -37,7 +36,6 @@ def _load_baseline(moniker: str) -> pd.DataFrame:
 )
 def test_persistence_roundtrip(monkeypatch, moniker, query):
     baseline = _load_baseline(moniker)
-    config = ul.get_config(moniker)
 
     # Patch Socrata client to return the baseline deterministically.
     class FakeClient:

@@ -103,7 +103,7 @@ def job_analyse_nyc_open_data_311_service_requests(
             ascending=False,
             largest_on_top=True,
             percent_base="plotted",
-            title=f"Top Worst Agencies by Requests (%)",
+            title="Top Worst Agencies by Requests (%)",
             show=False,
             savepath=ul.path_to_str(
                 ul.mk_dir(dir_analytics / "plots")

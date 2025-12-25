@@ -23,7 +23,7 @@ def job_fetch_nyc_open_data_311_service_requests(
     one created_date at a time
     :return:
     """
-    logger.info(f"\n\nRunning job_fetch_nyc_open_data_311_service_requests\n\n")
+    logger.info("\n\nRunning job_fetch_nyc_open_data_311_service_requests\n\n")
 
     if not as_of:
         as_of = app_context.as_of
