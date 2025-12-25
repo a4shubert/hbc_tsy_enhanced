@@ -31,4 +31,4 @@ pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
 
 echo "[install] Starting REST API from published build..."
-exec "${REPO_ROOT}/hbc_rest/scripts/run_prod.sh"
+exec bash "${REPO_ROOT}/hbc_rest/scripts/run_prod.sh"
