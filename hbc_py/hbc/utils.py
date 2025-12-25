@@ -95,6 +95,28 @@ def _sheetify(name):
     return clean[:31]
 
 
+def odata_filter_to_soql(expr: str) -> str:
+    """
+    Translate a basic OData $filter expression into Socrata SoQL operators.
+
+    Supports simple operator replacements (eq, ne, gt, lt, ge, le, and, or).
+    """
+    replacements = {
+        r"\beq\b": "=",
+        r"\bne\b": "!=",
+        r"\bgt\b": ">",
+        r"\blt\b": "<",
+        r"\bge\b": ">=",
+        r"\ble\b": "<=",
+        r"\band\b": "AND",
+        r"\bor\b": "OR",
+    }
+    out = expr
+    for pattern, repl in replacements.items():
+        out = re.sub(pattern, repl, out, flags=re.IGNORECASE)
+    return out
+
+
 def _to_hashable_df(df: pd.DataFrame) -> pd.DataFrame:
     """Return copy of df with object columns converted to hashable values."""
     out = df.copy()

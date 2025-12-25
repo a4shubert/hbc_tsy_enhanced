@@ -24,16 +24,14 @@ class DataContainer:
         self.schema_cols = self._schema_columns(self.config)
         self._df: pd.DataFrame = pd.DataFrame(columns=self.schema_cols)
 
-    def get(self, **query_kwargs):
+    def get(self, query: str | None = None):
         """Fetch fresh data using the configured fetcher and store in `df`."""
         fetcher_name: str = self.config["fetcher"]
         fetcher: Fetcher = Fetcher.from_name(fetcher_name)
-        if not query_kwargs:
-            query_kwargs["limit"] = 100
         # Select validator via config, defaulting to generic.
         validator_name = self.config.get("validator", "ValidatorGeneric")
         validator: Validator = Validator.from_name(validator_name)
-        df_raw = fetcher.fetch(self.config, **query_kwargs)
+        df_raw = fetcher.fetch(self.config, query=query)
         df_validated = validator.parse(df_raw)
         df_with_key = self._add_hbc_unique_key(df_validated)
         self.df = df_with_key
@@ -73,7 +71,7 @@ class DataContainer:
             return api.get(self.moniker, query_str)
         self.df = Cache.from_cache(self, as_of)
         if not len(self.df) and retrieve_if_missing:
-            self.get(as_of)
+            self.get()
             self.to_cache(as_of)
         return self.df
 

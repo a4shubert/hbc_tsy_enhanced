@@ -10,8 +10,8 @@ class Fetcher(ABC):
     """Abstract base for fetch/clean/normalize/validate pipelines."""
 
     @abstractmethod
-    def fetch(self, config, **query_kwargs) -> pd.DataFrame:
-        """Retrieve raw data for the given config/query kwargs."""
+    def fetch(self, config, query: str | None = None) -> pd.DataFrame:
+        """Retrieve raw data for the given config/query string."""
         raise NotImplementedError()
 
     @classmethod

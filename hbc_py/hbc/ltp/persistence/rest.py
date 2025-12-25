@@ -9,7 +9,6 @@ import pandas.api.types as ptypes
 import requests
 
 logger = logging.getLogger()
-MIN_ROWS_COUNT = 10
 
 class RestApi:
     """Helper for interacting with the REST API."""
@@ -38,12 +37,11 @@ class RestApi:
                 verify_flag = True
 
         url = f"{self.api_base}/{table}"
-        if not query:
-            effective_query = f"$top={MIN_ROWS_COUNT}"
-            logger.info(f" Without query retrieving only {MIN_ROWS_COUNT} rows")
+        effective_query = query if query else ""
+        if effective_query:
+            url = f"{url}?{effective_query}"
         else:
-            effective_query = query
-        url = f"{url}?{effective_query}"
+            url = f"{url}"
 
         resp = requests.get(url, timeout=60, verify=verify_flag)
         if resp.status_code >= 400:

@@ -3,6 +3,7 @@ using HbcRest.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,11 +41,17 @@ if (!app.Environment.IsProduction())
 }
 
 const string Moniker = "nyc_open_data_311_customer_satisfaction_survey";
-const int MaxTop = 100_000;
+const int MaxTop = 100;
 
 app.MapGet($"/{Moniker}", async (
     [FromQuery(Name = "$top")] long? top,
     [FromQuery(Name = "$filter")] string? filter,
+    [FromQuery(Name = "$apply")] string? apply,
+    [FromQuery(Name = "$orderby")] string? orderBy,
+    [FromQuery(Name = "$skip")] int? skip,
+    [FromQuery(Name = "$count")] bool? count,
+    [FromQuery(Name = "$select")] string? select,
+    [FromQuery(Name = "$expand")] string? expand,
     HbcContext db) =>
 {
     IQueryable<CustomerSatisfactionSurvey> query = db.CustomerSatisfactionSurveys.AsQueryable();
@@ -52,6 +59,28 @@ app.MapGet($"/{Moniker}", async (
     if (!string.IsNullOrWhiteSpace(filter))
     {
         query = ApplyFilter(filter, query);
+    }
+
+    if (!string.IsNullOrWhiteSpace(apply))
+    {
+        return await ApplyGroupBy(apply, query);
+    }
+
+    if (!string.IsNullOrWhiteSpace(expand))
+    {
+        return Results.BadRequest("$expand is not supported.");
+    }
+
+    if (!string.IsNullOrWhiteSpace(orderBy))
+    {
+        query = ApplyOrderBy(orderBy, query);
+    }
+
+    var totalCount = count == true ? await query.CountAsync() : (int?)null;
+
+    if (skip.HasValue && skip.Value > 0)
+    {
+        query = query.Skip(skip.Value);
     }
 
     // If $top is specified:
@@ -69,14 +98,19 @@ app.MapGet($"/{Moniker}", async (
     }
     else
     {
-        if (string.IsNullOrWhiteSpace(filter))
+        if (string.IsNullOrWhiteSpace(filter) && count != true)
         {
             query = query.Take(10); // default limit when not specified and no filter
         }
     }
 
     var results = await query.AsNoTracking().ToListAsync();
-    return Results.Ok(results);
+    var projected = ApplySelect(select, results);
+    if (totalCount.HasValue)
+    {
+        return Results.Ok(new { count = totalCount.Value, value = projected });
+    }
+    return Results.Ok(projected);
 });
 
 app.MapGet($"/{Moniker}/{{id}}", async (long id, HbcContext db) =>
@@ -206,4 +240,103 @@ static IQueryable<CustomerSatisfactionSurvey> ApplyFilter(
         "nps" => int.TryParse(value, out var npsVal) ? query.Where(s => s.Nps == npsVal) : query,
         _ => query
     };
+}
+
+static async Task<IResult> ApplyGroupBy(
+    string apply,
+    IQueryable<CustomerSatisfactionSurvey> query)
+{
+    var match = Regex.Match(apply, @"groupby\(\(([^)]+)\)\)", RegexOptions.IgnoreCase);
+    if (!match.Success) return Results.BadRequest("Unsupported $apply expression");
+    var col = match.Groups[1].Value.Trim().ToLowerInvariant();
+
+    switch (col)
+    {
+        case "start_time":
+            return Results.Ok(await query.GroupBy(s => s.StartTime)
+                .Select(g => new { start_time = g.Key })
+                .ToListAsync());
+        case "campaign":
+            return Results.Ok(await query.GroupBy(s => s.Campaign)
+                .Select(g => new { campaign = g.Key })
+                .ToListAsync());
+        case "channel":
+            return Results.Ok(await query.GroupBy(s => s.Channel)
+                .Select(g => new { channel = g.Key })
+                .ToListAsync());
+        case "survey_type":
+            return Results.Ok(await query.GroupBy(s => s.SurveyType)
+                .Select(g => new { survey_type = g.Key })
+                .ToListAsync());
+        case "survey_language":
+            return Results.Ok(await query.GroupBy(s => s.SurveyLanguage)
+                .Select(g => new { survey_language = g.Key })
+                .ToListAsync());
+        case "year":
+            return Results.Ok(await query.GroupBy(s => s.Year)
+                .Select(g => new { year = g.Key })
+                .ToListAsync());
+        default:
+            return Results.BadRequest($"Unsupported groupby column: {col}");
+    }
+}
+
+static IQueryable<CustomerSatisfactionSurvey> ApplyOrderBy(
+    string orderBy,
+    IQueryable<CustomerSatisfactionSurvey> query)
+{
+    var parts = orderBy.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length == 0) return query;
+    var field = parts[0].Trim().ToLowerInvariant();
+    var desc = parts.Length > 1 && parts[1].Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+    return field switch
+    {
+        "campaign" => desc ? query.OrderByDescending(s => s.Campaign) : query.OrderBy(s => s.Campaign),
+        "channel" => desc ? query.OrderByDescending(s => s.Channel) : query.OrderBy(s => s.Channel),
+        "start_time" => desc ? query.OrderByDescending(s => s.StartTime) : query.OrderBy(s => s.StartTime),
+        "completion_time" => desc ? query.OrderByDescending(s => s.CompletionTime) : query.OrderBy(s => s.CompletionTime),
+        "survey_language" => desc ? query.OrderByDescending(s => s.SurveyLanguage) : query.OrderBy(s => s.SurveyLanguage),
+        "survey_type" => desc ? query.OrderByDescending(s => s.SurveyType) : query.OrderBy(s => s.SurveyType),
+        "wait_time" => desc ? query.OrderByDescending(s => s.WaitTime) : query.OrderBy(s => s.WaitTime),
+        "overall_satisfaction" => desc ? query.OrderByDescending(s => s.OverallSatisfaction) : query.OrderBy(s => s.OverallSatisfaction),
+        "agent_customer_service" => desc ? query.OrderByDescending(s => s.AgentCustomerService) : query.OrderBy(s => s.AgentCustomerService),
+        "agent_job_knowledge" => desc ? query.OrderByDescending(s => s.AgentJobKnowledge) : query.OrderBy(s => s.AgentJobKnowledge),
+        "answer_satisfaction" => desc ? query.OrderByDescending(s => s.AnswerSatisfaction) : query.OrderBy(s => s.AnswerSatisfaction),
+        "year" => desc ? query.OrderByDescending(s => s.Year) : query.OrderBy(s => s.Year),
+        "nps" => desc ? query.OrderByDescending(s => s.Nps) : query.OrderBy(s => s.Nps),
+        "hbc_unique_key" => desc ? query.OrderByDescending(s => s.HbcUniqueKey) : query.OrderBy(s => s.HbcUniqueKey),
+        _ => query
+    };
+}
+
+static IEnumerable<object> ApplySelect(string? select, IEnumerable<CustomerSatisfactionSurvey> source)
+{
+    if (string.IsNullOrWhiteSpace(select)) return source;
+
+    var fields = select.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    if (fields.Length == 0) return source;
+
+    var lowerFields = new HashSet<string>(fields.Select(f => f.ToLowerInvariant()));
+
+    return source.Select(s =>
+    {
+        var dict = new Dictionary<string, object?>();
+        if (lowerFields.Contains("id")) dict["id"] = s.Id;
+        if (lowerFields.Contains("hbc_unique_key")) dict["hbc_unique_key"] = s.HbcUniqueKey;
+        if (lowerFields.Contains("year")) dict["year"] = s.Year;
+        if (lowerFields.Contains("campaign")) dict["campaign"] = s.Campaign;
+        if (lowerFields.Contains("channel")) dict["channel"] = s.Channel;
+        if (lowerFields.Contains("survey_type")) dict["survey_type"] = s.SurveyType;
+        if (lowerFields.Contains("start_time")) dict["start_time"] = s.StartTime;
+        if (lowerFields.Contains("completion_time")) dict["completion_time"] = s.CompletionTime;
+        if (lowerFields.Contains("survey_language")) dict["survey_language"] = s.SurveyLanguage;
+        if (lowerFields.Contains("overall_satisfaction")) dict["overall_satisfaction"] = s.OverallSatisfaction;
+        if (lowerFields.Contains("wait_time")) dict["wait_time"] = s.WaitTime;
+        if (lowerFields.Contains("agent_customer_service")) dict["agent_customer_service"] = s.AgentCustomerService;
+        if (lowerFields.Contains("agent_job_knowledge")) dict["agent_job_knowledge"] = s.AgentJobKnowledge;
+        if (lowerFields.Contains("answer_satisfaction")) dict["answer_satisfaction"] = s.AnswerSatisfaction;
+        if (lowerFields.Contains("nps")) dict["nps"] = s.Nps;
+        return dict;
+    });
 }
