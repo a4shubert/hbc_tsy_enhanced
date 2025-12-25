@@ -17,7 +17,7 @@ namespace HbcRest.Migrations
                 {
                     id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    unique_key = table.Column<string>(type: "TEXT", nullable: true),
+                    hbc_unique_key = table.Column<string>(type: "TEXT", nullable: true),
                     year = table.Column<string>(type: "TEXT", nullable: true),
                     campaign = table.Column<string>(type: "TEXT", nullable: true),
                     channel = table.Column<string>(type: "TEXT", nullable: true),
@@ -38,9 +38,9 @@ namespace HbcRest.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_nyc_open_data_311_customer_satisfaction_survey_unique_key",
+                name: "IX_nyc_open_data_311_customer_satisfaction_survey_hbc_unique_key",
                 table: "nyc_open_data_311_customer_satisfaction_survey",
-                column: "unique_key",
+                column: "hbc_unique_key",
                 unique: true);
         }
 

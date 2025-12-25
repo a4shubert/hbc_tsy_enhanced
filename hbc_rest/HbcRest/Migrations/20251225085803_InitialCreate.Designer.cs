@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HbcRest.Migrations
 {
     [DbContext(typeof(HbcContext))]
-    [Migration("20251225083849_InitialCreate")]
+    [Migration("20251225085803_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -58,6 +58,11 @@ namespace HbcRest.Migrations
                         .HasColumnName("completion_time")
                         .HasAnnotation("Relational:JsonPropertyName", "completion_time");
 
+                    b.Property<string>("HbcUniqueKey")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("hbc_unique_key")
+                        .HasAnnotation("Relational:JsonPropertyName", "hbc_unique_key");
+
                     b.Property<int?>("Nps")
                         .HasColumnType("INTEGER")
                         .HasColumnName("nps")
@@ -83,11 +88,6 @@ namespace HbcRest.Migrations
                         .HasColumnName("survey_type")
                         .HasAnnotation("Relational:JsonPropertyName", "survey_type");
 
-                    b.Property<string>("UniqueKey")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("unique_key")
-                        .HasAnnotation("Relational:JsonPropertyName", "unique_key");
-
                     b.Property<string>("WaitTime")
                         .HasColumnType("TEXT")
                         .HasColumnName("wait_time")
@@ -100,7 +100,7 @@ namespace HbcRest.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UniqueKey")
+                    b.HasIndex("HbcUniqueKey")
                         .IsUnique();
 
                     b.ToTable("nyc_open_data_311_customer_satisfaction_survey");

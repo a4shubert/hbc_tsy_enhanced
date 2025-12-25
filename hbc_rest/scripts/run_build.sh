@@ -10,6 +10,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 PROJECT_PATH="${REPO_ROOT}/hbc_rest/HbcRest/HbcRest.csproj"
 
+# Load shared env defaults (defines HBC_DB_PATH, ASPNETCORE_ENVIRONMENT, etc.).
+source "${REPO_ROOT}/scripts/env.sh"
+
 cd "${REPO_ROOT}"
 
 echo "[build_prod] Cleaning..."

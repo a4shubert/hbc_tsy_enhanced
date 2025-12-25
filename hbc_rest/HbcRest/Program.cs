@@ -38,36 +38,38 @@ if (!app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/surveys", async (HbcContext db) =>
+const string Moniker = "nyc_open_data_311_customer_satisfaction_survey";
+
+app.MapGet($"/{Moniker}", async (HbcContext db) =>
     await db.CustomerSatisfactionSurveys.AsNoTracking().ToListAsync());
 
-app.MapGet("/surveys/{id}", async (long id, HbcContext db) =>
+app.MapGet($"/{Moniker}/{{id}}", async (long id, HbcContext db) =>
     await db.CustomerSatisfactionSurveys.FindAsync(id) is { } survey
         ? Results.Ok(survey)
         : Results.NotFound());
 
-app.MapPost("/surveys", async (CustomerSatisfactionSurvey survey, HbcContext db) =>
+app.MapPost($"/{Moniker}", async (CustomerSatisfactionSurvey survey, HbcContext db) =>
 {
-    if (!string.IsNullOrWhiteSpace(survey.UniqueKey))
+    if (!string.IsNullOrWhiteSpace(survey.HbcUniqueKey))
     {
         var existing = await db.CustomerSatisfactionSurveys
-            .FirstOrDefaultAsync(s => s.UniqueKey == survey.UniqueKey);
+            .FirstOrDefaultAsync(s => s.HbcUniqueKey == survey.HbcUniqueKey);
         if (existing is not null)
         {
             CopyFields(existing, survey);
             var savedExisting = await db.SaveChangesAsync();
-            Console.WriteLine($"[HbcRest] POST /surveys updated existing {savedExisting} row(s) by unique_key");
+            Console.WriteLine($"[HbcRest] POST /{Moniker} updated existing {savedExisting} row(s) by hbc_unique_key");
             return Results.Ok(existing);
         }
     }
 
     db.CustomerSatisfactionSurveys.Add(survey);
     var saved = await db.SaveChangesAsync();
-    Console.WriteLine($"[HbcRest] POST /surveys saved {saved} row(s)");
-    return Results.Created($"/surveys/{survey.Id}", survey);
+    Console.WriteLine($"[HbcRest] POST /{Moniker} saved {saved} row(s)");
+    return Results.Created($"/{Moniker}/{survey.Id}", survey);
 });
 
-app.MapPost("/surveys/batch", async ([FromBody] List<CustomerSatisfactionSurvey> surveys, HbcContext db) =>
+app.MapPost($"/{Moniker}/batch", async ([FromBody] List<CustomerSatisfactionSurvey> surveys, HbcContext db) =>
 {
     if (surveys is null || surveys.Count == 0) return Results.BadRequest("No surveys provided");
 
@@ -76,10 +78,10 @@ app.MapPost("/surveys/batch", async ([FromBody] List<CustomerSatisfactionSurvey>
 
     foreach (var survey in surveys)
     {
-        if (!string.IsNullOrWhiteSpace(survey.UniqueKey))
+        if (!string.IsNullOrWhiteSpace(survey.HbcUniqueKey))
         {
             var existing = await db.CustomerSatisfactionSurveys
-                .FirstOrDefaultAsync(s => s.UniqueKey == survey.UniqueKey);
+                .FirstOrDefaultAsync(s => s.HbcUniqueKey == survey.HbcUniqueKey);
             if (existing is not null)
             {
                 CopyFields(existing, survey);
@@ -96,11 +98,11 @@ app.MapPost("/surveys/batch", async ([FromBody] List<CustomerSatisfactionSurvey>
     }
 
     var saved = await db.SaveChangesAsync();
-    Console.WriteLine($"[HbcRest] POST /surveys/batch saved {saved} row(s), updated {updated} existing");
+    Console.WriteLine($"[HbcRest] POST /{Moniker}/batch saved {saved} row(s), updated {updated} existing");
     return Results.Ok(surveys);
 });
 
-app.MapPut("/surveys/{id}", async (long id, CustomerSatisfactionSurvey input, HbcContext db) =>
+app.MapPut($"/{Moniker}/{{id}}", async (long id, CustomerSatisfactionSurvey input, HbcContext db) =>
 {
     var survey = await db.CustomerSatisfactionSurveys.FindAsync(id);
 
@@ -108,11 +110,11 @@ app.MapPut("/surveys/{id}", async (long id, CustomerSatisfactionSurvey input, Hb
 
     CopyFields(survey, input);
     var saved = await db.SaveChangesAsync();
-    Console.WriteLine($"[HbcRest] PUT /surveys/{id} saved {saved} row(s)");
+    Console.WriteLine($"[HbcRest] PUT /{Moniker}/{id} saved {saved} row(s)");
     return Results.NoContent();
 });
 
-app.MapDelete("/surveys/{id}", async (long id, HbcContext db) =>
+app.MapDelete($"/{Moniker}/{{id}}", async (long id, HbcContext db) =>
 {
     var survey = await db.CustomerSatisfactionSurveys.FindAsync(id);
     if (survey is null) return Results.NotFound();
@@ -125,6 +127,7 @@ app.Run();
 
 static void CopyFields(CustomerSatisfactionSurvey target, CustomerSatisfactionSurvey source)
 {
+    target.HbcUniqueKey = source.HbcUniqueKey;
     target.Year = source.Year;
     target.Campaign = source.Campaign;
     target.Channel = source.Channel;

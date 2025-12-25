@@ -13,7 +13,7 @@ public class HbcContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<CustomerSatisfactionSurvey>()
-            .HasIndex(c => c.UniqueKey)
+            .HasIndex(c => c.HbcUniqueKey)
             .IsUnique();
     }
 }

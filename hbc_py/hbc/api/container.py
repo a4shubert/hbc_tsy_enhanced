@@ -1,5 +1,7 @@
 import datetime
 import logging
+import hashlib
+import json
 
 import pandas as pd
 
@@ -32,7 +34,9 @@ class DataContainer:
         validator_name = self.config.get("validator", "ValidatorGeneric")
         validator: Validator = Validator.from_name(validator_name)
         df_raw = fetcher.fetch(self.config, **query_kwargs)
-        self.df = validator.parse(df_raw)
+        df_validated = validator.parse(df_raw)
+        df_with_key = self._add_hbc_unique_key(df_validated)
+        self.df = df_with_key
 
     @property
     def df(self) -> pd.DataFrame:
@@ -55,7 +59,7 @@ class DataContainer:
     def to_cache(self, as_of: datetime.date = None):
         """Persist the current DataFrame. Special-case service requests to SQLite."""
         if self.moniker == "nyc_open_data_311_customer_satisfaction_survey":
-            RestApi().update_surveys_table(self.df, verify=False)
+            RestApi().post(self.moniker, self.df, verify=False)
             return
         Cache.to_cache(self, as_of)
 
@@ -65,7 +69,7 @@ class DataContainer:
         """Load cached data for the date; optionally fetch if cache is empty."""
         if self.moniker == 'nyc_open_data_311_customer_satisfaction_survey':
             if query is None:
-                query = f'select count(*) from {self.moniker}'
+                query = f'select * from {self.moniker} limit 10'
             return SqlLiteDataBase().run_query(query)
         self.df = Cache.from_cache(self, as_of)
         if not len(self.df) and retrieve_if_missing:
@@ -98,3 +102,21 @@ class DataContainer:
             else:
                 cols.append(str(item))
         return cols
+
+    @staticmethod
+    def _add_hbc_unique_key(df: pd.DataFrame) -> pd.DataFrame:
+        """Add deterministic hbc_unique_key column based on row contents."""
+        if df is None or df.empty:
+            return df
+        key_col = "hbc_unique_key"
+        if key_col in df.columns:
+            return df
+
+        def _hash_row(row):
+            payload = {k: row[k] for k in df.columns if k != key_col}
+            serialized = json.dumps(payload, sort_keys=True, default=str)
+            return hashlib.sha1(serialized.encode("utf-8")).hexdigest()
+
+        df = df.copy()
+        df[key_col] = df.apply(_hash_row, axis=1)
+        return df

@@ -12,9 +12,9 @@ public class CustomerSatisfactionSurvey
     [JsonPropertyName("id")]
     public long Id { get; set; }
 
-    [Column("unique_key")]
-    [JsonPropertyName("unique_key")]
-    public string? UniqueKey { get; set; }
+    [Column("hbc_unique_key")]
+    [JsonPropertyName("hbc_unique_key")]
+    public string? HbcUniqueKey { get; set; }
 
     [Column("year")]
     [JsonPropertyName("year")]

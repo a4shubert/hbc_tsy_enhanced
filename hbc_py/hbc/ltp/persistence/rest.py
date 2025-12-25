@@ -9,22 +9,27 @@ import pandas.api.types as ptypes
 
 
 class RestApi:
-    """Helper for interacting with the surveys REST API."""
+    """Helper for interacting with the REST API."""
 
     def __init__(self):
         self.logger = logging.getLogger()
         self.api_base = os.environ.get("HBC_API_URL", "http://localhost:5047").rstrip("/")
 
-    def update_surveys_table(
+    def get(self, query: str):
+        """Placeholder for future GET support."""
+        raise NotImplementedError
+
+    def post(
         self,
+        table: str,
         df: pd.DataFrame,
         verify: Optional[bool] = None,
     ) -> List[int]:
         """
-        Push DataFrame rows to the surveys API via batch endpoint.
+        Push DataFrame rows to the REST API via batch endpoint named after the table.
 
-        - Adds a deterministic unique_key hash if missing.
-        - Deduplicates within the batch by unique_key.
+        - Adds a deterministic hbc_unique_key hash if missing.
+        - Deduplicates within the batch by hbc_unique_key.
         """
         if df is None or df.empty:
             self.logger.warning("DataFrame is empty; nothing to sync.")
@@ -51,17 +56,18 @@ class RestApi:
         # Replace NaN/NaT with None for JSON compatibility.
         data = data.where(pd.notnull(data), None)
 
-        # Add deterministic unique_key hash column to help dedupe/upsert decisions.
-        if "unique_key" not in data.columns:
+        # Add deterministic hbc_unique_key hash column to help dedupe/upsert decisions.
+        key_col = "hbc_unique_key"
+        if key_col not in data.columns:
             def _hash_row(row):
-                payload = {k: row[k] for k in data.columns if k != "unique_key"}
+                payload = {k: row[k] for k in data.columns if k != key_col}
                 serialized = json.dumps(payload, sort_keys=True, default=str)
                 return hashlib.sha1(serialized.encode("utf-8")).hexdigest()
 
-            data["unique_key"] = data.apply(_hash_row, axis=1)
+            data[key_col] = data.apply(_hash_row, axis=1)
 
-        # Drop duplicates on unique_key within this payload.
-        data = data.drop_duplicates(subset=["unique_key"])
+        # Drop duplicates on key within this payload.
+        data = data.drop_duplicates(subset=[key_col])
 
         records = data.to_dict(orient="records")
         if not records:
@@ -72,15 +78,16 @@ class RestApi:
         for i in range(0, len(records), chunk_size):
             batch = records[i : i + chunk_size]
             self.logger.info(
-                "Posting batch %s-%s/%s to %s/surveys/batch (verify=%s)",
+                "Posting batch %s-%s/%s to %s/%s/batch (verify=%s)",
                 i + 1,
                 i + len(batch),
                 len(records),
                 self.api_base,
+                table,
                 verify_flag,
             )
             resp = requests.post(
-                f"{self.api_base}/surveys/batch",
+                f"{self.api_base}/{table}/batch",
                 json=batch,
                 timeout=60,
                 verify=verify_flag,
@@ -88,11 +95,12 @@ class RestApi:
             status_codes.extend([resp.status_code] * len(batch))
             if resp.status_code >= 400:
                 self.logger.error(
-                    "Batch POST /surveys/batch failed with status %s: %s",
+                    "Batch POST %s failed with status %s: %s",
+                    f"/{table}/batch",
                     resp.status_code,
                     resp.text,
                 )
                 resp.raise_for_status()
 
-        self.logger.info("Synced %s survey rows via batch API", len(status_codes))
+        self.logger.info("Synced %s rows via batch API", len(status_codes))
         return status_codes
