@@ -1,4 +1,6 @@
-# HBC: General Library for Data Pipelining & Analytics
+# HBC_TSY_ENCHANCED: Data LTP + Analytical Dashboard
+
+Rich-features library for data retrieval, transformations, persistance, analytics and web-presentation.
 
 ## Structure:
 
