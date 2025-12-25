@@ -4,8 +4,8 @@ set -euo pipefail
 # Launch classic Jupyter pointing at the project notebooks folder and open Demo.ipynb.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-NOTEBOOK_DIR="${REPO_ROOT}/notebooks"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+NOTEBOOK_DIR="${REPO_ROOT}/hbc_py/notebooks"
 DEFAULT_NOTEBOOK="Demo.ipynb"
 
 # Load shared env defaults (HBC_API_URL, HBC_DB_PATH, etc.) if available.
