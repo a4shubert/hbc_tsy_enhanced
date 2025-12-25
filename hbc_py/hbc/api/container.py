@@ -1,4 +1,3 @@
-import datetime
 import logging
 import hashlib
 import json
@@ -7,9 +6,7 @@ import pandas as pd
 
 from hbc import utils as ul
 from hbc.ltp.loading import Fetcher, Validator
-from hbc.ltp.persistence.cache import Cache
 from hbc.ltp.persistence.rest import RestApi
-from hbc.ltp.persistence.db import SqlLiteDataBase
 
 logger = logging.getLogger()
 
@@ -41,11 +38,6 @@ class DataContainer:
         """DataFrame backing the container; validated against config schema."""
         return self._df
 
-    @property
-    def all_cached_dates(self):
-        """List cached date folder names (sorted descending)."""
-        return Cache.get_all_cached_dates(self)
-
     @df.setter
     def df(self, value: pd.DataFrame):
         """Set DataFrame and validate it against configured schema."""
@@ -54,26 +46,14 @@ class DataContainer:
         self._valid_schema(value)
         self._df = value
 
-    def to_cache(self, as_of: datetime.date = None):
-        """Persist the current DataFrame. Special-case service requests to SQLite."""
-        if self.moniker == "nyc_open_data_311_customer_satisfaction_survey":
-            RestApi().post(self.moniker, self.df, verify=False)
-            return
-        Cache.to_cache(self, as_of)
+    def to_cache(self):
+        """Persist the current DataFrame via REST API."""
+        RestApi().post(self.moniker, self.df, verify=False)
 
-    def from_cache(
-        self, as_of: datetime.date = None, retrieve_if_missing=False, query=None
-    ):
-        """Load cached data for the date; optionally fetch if cache is empty."""
-        if self.moniker == "nyc_open_data_311_customer_satisfaction_survey":
-            api = RestApi()
-            query_str = query if query else None
-            return api.get(self.moniker, query_str)
-        self.df = Cache.from_cache(self, as_of)
-        if not len(self.df) and retrieve_if_missing:
-            self.get()
-            self.to_cache(as_of)
-        return self.df
+    def from_cache(self, query=None):
+        """Load cached data via REST API."""
+        api = RestApi()
+        return api.get(self.moniker, query if query else None)
 
     def _valid_schema(self, df: pd.DataFrame) -> bool:
         """Check that df contains all schema columns; log errors when missing."""
