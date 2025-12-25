@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HbcRest.Migrations
 {
     [DbContext(typeof(HbcContext))]
-    [Migration("20251225220954_InitialCreate")]
+    [Migration("20251225222625_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
