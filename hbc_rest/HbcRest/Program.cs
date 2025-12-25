@@ -1,31 +1,11 @@
 using System;
 using HbcRest.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load .env for HBC_DB_PATH if present at repo root
-var envFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", ".env"));
-var envVars = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-if (File.Exists(envFile))
-{
-    foreach (var line in File.ReadAllLines(envFile))
-    {
-        var trimmed = line.Trim();
-        if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
-        var parts = trimmed.Split('=', 2);
-        if (parts.Length == 2)
-        {
-            envVars[parts[0]] = parts[1];
-        }
-    }
-}
-
-var envDbPath = Environment.GetEnvironmentVariable("HBC_DB_PATH")
-               ?? (envVars.TryGetValue("HBC_DB_PATH", out var p) ? p : null);
+var envDbPath = Environment.GetEnvironmentVariable("HBC_DB_PATH");
 
 var connString = builder.Configuration.GetConnectionString("HbcSqlite");
 if (!string.IsNullOrWhiteSpace(envDbPath))
@@ -39,10 +19,7 @@ Console.WriteLine($"[HbcRest] Using SQLite connection: {connString}");
 var urlsToUse = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 if (string.IsNullOrWhiteSpace(urlsToUse))
 {
-    urlsToUse = envVars.TryGetValue("ASPNETCORE_URLS", out var urls) &&
-                !string.IsNullOrWhiteSpace(urls)
-        ? urls
-        : "http://localhost:5047";
+    urlsToUse = "http://localhost:5047";
 }
 builder.WebHost.UseUrls(urlsToUse);
 Console.WriteLine($"[HbcRest] Binding URLs: {urlsToUse}");
