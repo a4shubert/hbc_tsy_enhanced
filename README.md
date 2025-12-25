@@ -37,41 +37,41 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
     ```
 2.  macOS/Linux:
 
-- One-shot setup (env, venv, hbc_py install, start API):
+    - One-shot setup (env, venv, hbc_py install, start API):
 
-  ```bash
-  ./install.sh
-  ```
+      ```bash
+      ./install.sh
+      ```
 
-  - Python only: `pip install -e hbc_py`
-  - API only: `hbc_rest/scripts/run_prod.sh`
-    (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
-    <br>
+      - Python only: `pip install -e hbc_py`
+      - API only: `hbc_rest/scripts/run_prod.sh`
+        (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
+        <br>
 
-- Demo notebook (classic):
+    - Demo notebook (classic):
 
-  ```bash
-  hbc_py/scripts/run_demo_notebook.sh
-  ```
+      ```bash
+      hbc_py/scripts/run_demo_notebook.sh
+      ```
 
 3.  Windows (PowerShell):
 
-- One-shot setup:
+    - One-shot setup:
 
-  ```bash
-  .\install.ps1
-  ```
+      ```bash
+      .\install.ps1
+      ```
 
-  - Python only: `pip install -e hbc_py`
-  - API only: `hbc_rest\scripts\run_prod.ps1`
-    (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
-    <br>
+      - Python only: `pip install -e hbc_py`
+      - API only: `hbc_rest\scripts\run_prod.ps1`
+        (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
+        <br>
 
-- Demo notebook (classic):
+    - Demo notebook (classic):
 
-  ```bash
-  hbc_py\scripts\run_demo_notebook.ps1
-  ```
+      ```bash
+      hbc_py\scripts\run_demo_notebook.ps1
+      ```
 
 ---
 
