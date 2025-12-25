@@ -30,21 +30,48 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 
 # Installation
 
-1. Clone and enter the repo:
-   ```bash
-   git clone https://github.com/a4shubert/hbc_tsy_enhanced.git
-   cd hbc_tsy_enhanced
-   ```
-2. One-shot setup (loads env vars, creates venv, installs `hbc_py`, starts the published REST API):
-   ```bash
-   ./install.sh
-   ```
-   - Python only (installs notebook/nbclassic deps too): `pip install -e hbc_py`
-   - Start API only (published build): `hbc_rest/scripts/run_prod.sh` (Swagger UI lives at `$ASPNETCORE_URLS/swagger/index.html`)
-3. Open the demo notebook (classic Jupyter):
-   ```bash
-   hbc_py/scripts/run_demo_notebook.sh
-   ```
+1.  Clone and enter the repo:
+    ```bash
+    git clone https://github.com/a4shubert/hbc_tsy_enhanced.git
+    cd hbc_tsy_enhanced
+    ```
+2.  macOS/Linux:
+
+- One-shot setup (env, venv, hbc_py install, start API):
+
+  ```bash
+  ./install.sh
+  ```
+
+  - Python only: `pip install -e hbc_py`
+  - API only: `hbc_rest/scripts/run_prod.sh`
+    (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
+    <br>
+
+- Demo notebook (classic):
+
+  ```bash
+  hbc_py/scripts/run_demo_notebook.sh
+  ```
+
+3.  Windows (PowerShell):
+
+- One-shot setup:
+
+  ```bash
+  .\install.ps1
+  ```
+
+  - Python only: `pip install -e hbc_py`
+  - API only: `hbc_rest\scripts\run_prod.ps1`
+    (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
+    <br>
+
+- Demo notebook (classic):
+
+  ```bash
+  hbc_py\scripts\run_demo_notebook.ps1
+  ```
 
 ---
 
