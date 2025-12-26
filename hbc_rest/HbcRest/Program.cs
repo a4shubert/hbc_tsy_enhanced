@@ -22,11 +22,13 @@ if (!string.IsNullOrWhiteSpace(envDbPath))
 }
 Console.WriteLine($"[HbcRest] Using SQLite connection: {connString}");
 
-// Configure URLs from env if provided
+// Configure URLs strictly from env; fail fast if missing.
 var urlsToUse = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 if (string.IsNullOrWhiteSpace(urlsToUse))
 {
-    urlsToUse = "http://localhost:5047";
+    const string urlError = "[HbcRest] ASPNETCORE_URLS not set. Please set ASPNETCORE_URLS to the binding URL(s).";
+    Console.Error.WriteLine(urlError);
+    throw new InvalidOperationException(urlError);
 }
 builder.WebHost.UseUrls(urlsToUse);
 Console.WriteLine($"[HbcRest] Binding URLs: {urlsToUse}");
