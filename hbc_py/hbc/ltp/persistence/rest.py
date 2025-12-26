@@ -101,7 +101,11 @@ class RestApi:
             col_lower = str(col).lower()
             if "date" in col_lower or "time" in col_lower:
                 try:
-                    data[col] = pd.to_datetime(data[col])
+                    data[col] = pd.to_datetime(
+                        data[col],
+                        errors="coerce",
+                        format="ISO8601",  # fallback compatible with ISO-like strings
+                    )
                 except Exception:
                     pass
         # convert datetime columns to isoformat strings

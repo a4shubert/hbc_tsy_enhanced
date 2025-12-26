@@ -46,5 +46,3 @@ fi
 echo "[install] Upgrading pip and installing hbc_py (editable) using venv python"
 "${VENV_PY}" -m pip install --upgrade pip
 "${VENV_PY}" -m pip install -e "${REPO_ROOT}/hbc_py"
-
-source "${REPO_ROOT}/scripts/activate_venv.sh"
