@@ -60,6 +60,7 @@ const string MonikerSurvey = "nyc_open_data_311_customer_satisfaction_survey";
 const string MonikerCall = "nyc_open_data_311_call_center_inquiry";
 const string MonikerService = "nyc_open_data_311_service_requests";
 const int MaxTop = 100;
+const int DefaultTopWhenNoFilter = MaxTop;
 
 app.MapGet($"/{MonikerSurvey}", async (
     [FromQuery(Name = "$top")] long? top,
@@ -277,7 +278,7 @@ app.MapGet($"/{MonikerCall}", async (
     }
     else if (string.IsNullOrWhiteSpace(filter) && count != true)
     {
-        query = query.Take(10);
+        query = query.Take(DefaultTopWhenNoFilter);
     }
 
     var results = await query.AsNoTracking().ToListAsync();
@@ -394,7 +395,7 @@ app.MapGet($"/{MonikerService}", async (
     }
     else if (string.IsNullOrWhiteSpace(filter) && count != true)
     {
-        query = query.Take(10);
+        query = query.Take(DefaultTopWhenNoFilter);
     }
 
     var results = await query.AsNoTracking().ToListAsync();
@@ -860,3 +861,6 @@ static void CopyFieldsService(ServiceRequest target, ServiceRequest source)
     target.XCoordinateStatePlane = source.XCoordinateStatePlane;
     target.YCoordinateStatePlane = source.YCoordinateStatePlane;
 }
+
+// Needed for WebApplicationFactory in tests
+public partial class Program;

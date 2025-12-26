@@ -28,7 +28,6 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 - `scripts`: Shared helpers (`env.sh` for env vars) and REST build/run scripts under `hbc_rest/scripts`.
 
 # Installation
-
 **Prerequisites**: Python 3.10+, .NET 8 SDK, and optionally Miniconda/conda if you prefer conda-based environments.
 
 1.  Clone and enter the repo:
@@ -65,7 +64,7 @@ python -m hbc.jobs.dispatch \
   --as-of=20091231
 ```
 
-5. Run tests from command line:
+5. Run py-tests from command line:
 ```bash
 # macOS/Linux
 source scripts/activate_venv.sh
@@ -76,6 +75,12 @@ export HBC_INTEGRATION=1   # set only if you want live integration tests
 $env:HBC_INTEGRATION = 1   # set only if you want live integration tests
 
 pytest -vv -s
+```
+
+6. Run C# tests from command line:
+```bash
+cd hbc_rest/HbcRest.Tests
+dotnet test
 ```
 
 ## Scripts
