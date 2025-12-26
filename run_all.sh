@@ -22,17 +22,21 @@ fi
 rest_cmd="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; bash hbc_rest/scripts/run_prod.sh"
 nb_cmd="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; bash hbc_py/scripts/run_demo_notebook.sh"
 
+# Escape double quotes for AppleScript.
+rest_cmd_escaped=${rest_cmd//\"/\\\"}
+nb_cmd_escaped=${nb_cmd//\"/\\\"}
+
 echo "[run_all] Opening REST API in new Terminal window..."
 osascript <<APPLESCRIPT
 tell application "Terminal"
-  do script "${rest_cmd}"
+  do script "${rest_cmd_escaped}"
 end tell
 APPLESCRIPT
 
 echo "[run_all] Opening demo notebook in new Terminal window..."
 osascript <<APPLESCRIPT
 tell application "Terminal"
-  do script "${nb_cmd}"
+  do script "${nb_cmd_escaped}"
 end tell
 APPLESCRIPT
 
