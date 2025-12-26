@@ -35,19 +35,19 @@ start_nb_cmd="cd \"${REPO_ROOT}\" && source .venv/bin/activate && source scripts
 
 if [[ "$(uname)" == "Darwin" ]]; then
   rest_cmd_escaped=${start_rest_cmd//\\/\\\\}      # escape backslashes
-  rest_cmd_escaped=${rest_cmd_escaped//\'/\'"\'"\'} # escape single quotes
+  rest_cmd_escaped=${rest_cmd_escaped//\"/\\\"}    # escape double quotes
   nb_cmd_escaped=${start_nb_cmd//\\/\\\\}
-  nb_cmd_escaped=${nb_cmd_escaped//\'/\'"\'"\'}
+  nb_cmd_escaped=${nb_cmd_escaped//\"/\\\"}
   echo "[run_all] Opening REST API in new Terminal window..."
   osascript >/dev/null <<OSA
 tell application "Terminal"
-  do script "bash -lc '${rest_cmd_escaped}'"
+  do script "bash -lc \"${rest_cmd_escaped}\""
 end tell
 OSA
   echo "[run_all] Opening notebook in new Terminal window..."
   osascript >/dev/null <<OSA
 tell application "Terminal"
-  do script "bash -lc '${nb_cmd_escaped}'"
+  do script "bash -lc \"${nb_cmd_escaped}\""
 end tell
 OSA
   echo "[run_all] Terminals started for REST and notebook. This shell stays free for commands (venv active)."
