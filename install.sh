@@ -41,6 +41,7 @@ echo "[install] Upgrading pip and installing hbc_py (editable)"
 pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
 
-echo "[install] venv activated. 'python' now points to ${VIRTUAL_ENV:-system python}"
-
-echo "[install] Done. Use ./run_all.sh (or run_all.ps1 on Windows) to start REST + notebook, or run jobs from this shell."
+echo "[install] Launching interactive shell with env + venv activated..."
+NEW_SHELL="${SHELL:-/bin/bash}"
+ACTIVATE_CMDS="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; echo 'env + venv activated'; exec ${NEW_SHELL} -i"
+exec "${NEW_SHELL}" -i -c "${ACTIVATE_CMDS}"
