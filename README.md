@@ -135,7 +135,7 @@ path = ul.path_to_str(
                 ul.mk_dir(app_context.dir_analytics / "plots")
                 / "closed_requests_by_location.html"
             )
-_ = PlotEngine.plot_geo_map(
+PlotEngine.plot_geo_map(
             df=df_closed_not_same_day,
             col_latitude=cols.latitude,
             col_longitude=cols.longitude,
