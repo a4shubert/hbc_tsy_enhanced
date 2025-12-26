@@ -51,5 +51,4 @@ pip install -e "${REPO_ROOT}/hbc_py"
 
 echo "[install] Launching interactive shell with env + venv activated..."
 NEW_SHELL="${SHELL:-/bin/bash}"
-ACTIVATE_CMDS="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; echo 'env + venv activated'; exec ${NEW_SHELL} -i"
-exec "${NEW_SHELL}" -i -c "${ACTIVATE_CMDS}"
+exec "${NEW_SHELL}" -i
