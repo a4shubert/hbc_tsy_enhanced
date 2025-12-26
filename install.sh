@@ -7,7 +7,15 @@ set -euo pipefail
 # - installs the Python package from the hbc_py subfolder
 # - starts the published ASP.NET Core REST API (foreground) via run_prod.sh
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve script location for bash/zsh.
+if [ -n "${BASH_SOURCE:-}" ]; then
+  _SELF="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  _SELF="${(%):-%N}"
+else
+  _SELF="$0"
+fi
+SCRIPT_DIR="$(cd "$(dirname "${_SELF}")" && pwd)"
 REPO_ROOT="${SCRIPT_DIR}"
 
 # Load environment defaults.
@@ -44,4 +52,10 @@ pip install -e "${REPO_ROOT}/hbc_py"
 echo "[install] Launching interactive shell with env + venv activated..."
 NEW_SHELL="${SHELL:-/bin/bash}"
 ACTIVATE_CMDS="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; echo 'env + venv activated'; exec ${NEW_SHELL} -i"
+# If activation script is missing, bail with a helpful message.
+if [[ ! -f "${REPO_ROOT}/.venv/bin/activate" ]]; then
+  echo "[install] ERROR: ${REPO_ROOT}/.venv/bin/activate not found. Rerun install.sh to recreate the venv."
+  exit 1
+fi
+
 exec "${NEW_SHELL}" -i -c "${ACTIVATE_CMDS}"
