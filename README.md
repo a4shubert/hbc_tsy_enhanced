@@ -218,6 +218,10 @@ python -m hbc.jobs.runner
 - **Fetchers** (`hbc/ltp/loading/fetchers`): fetch only `FetcherNYCOpenData` wraps Socrata with retries/backoff, pagination, etc. Fetcher factory resolves by name from config.
 - **Validators** (`hbc/ltp/loading/validators`): clean/normalize/validate/finalize via `Validator.parse`. Default is `ValidatorGeneric` (no-op); `ValidatorNYCOpen311Service` implements NYC-specific rules and logging.
 
+- **Persistence**:
+  - **REST API client** (`hbc/ltp/persistence/rest.py`): `RestApi.get/post` round-trip data through the ASP\.NET backend/SQLite cache. Honors `HBC_API_URL` and uses `hbc_unique_key` for idempotent upserts.
+  - **SQLite helpers** (`hbc/ltp/persistence/db.py`): direct DB utilities (querying, table creation), generally replaced by REST-based cache flows.
+
 ### jobs:
 
 - **Jobs**: (`hbc_py/hbc/jobs`) with dispatch tooling for CLI runs.

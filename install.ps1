@@ -50,4 +50,5 @@ Write-Host "[install] Upgrading pip and installing hbc_py (editable)"
 & $Python -m pip install --upgrade pip
 & $Python -m pip install -e "$RepoRoot\hbc_py"
 
-Write-Host "[install] Done. You can start the REST API with hbc_rest\\scripts\\run_prod.ps1 when ready."
+Write-Host "[install] venv activated. 'python' now points to $Env:VIRTUAL_ENV"
+Write-Host "[install] Done. You can start the REST API with hbc_rest\\scripts\\run_prod.ps1 when ready, or run jobs from this shell."
