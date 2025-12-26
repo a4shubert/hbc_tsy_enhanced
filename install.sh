@@ -50,4 +50,5 @@ pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
 
 VENV_DIR="${REPO_ROOT}/.venv"
+echo $VENV_DIR
 source "${VENV_DIR}/bin/activate"
