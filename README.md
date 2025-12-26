@@ -43,13 +43,44 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
    # Windows (PowerShell)
    .\install.ps1
    ```
-3. Run everything (REST API + demo notebook) in background:
+3. Run everything (REST API + demo notebook) in new terminals:
    ```bash
    # macOS/Linux
    ./run_all.sh
    # Windows (PowerShell)
    .\run_all.ps1
    ```
+
+4. Run jobs from command line:
+```bash
+# macOS/Linux
+source scripts/activate_venv.sh
+
+# Windows (PowerShell)
+. .\scripts\activate_venv.ps1
+
+
+#job:
+python -m hbc.jobs.dispatch \
+  --job-name=job_fetch_nyc_open_data_311_service_requests \
+  --as-of=20091231 
+```
+
+
+5. Run tests from command line:
+```bash
+
+# macOS/Linux
+source scripts/activate_venv.sh
+export HBC_INTEGRATION=1   # set only if you want live integration tests
+
+# Windows (PowerShell)
+. .\scripts\activate_venv.ps1
+$env:HBC_INTEGRATION = 1   # set only if you want live integration tests
+
+pytest -vv -s
+
+```
 
 ## Scripts
 - `install.sh` / `install.ps1`: set up env, venv, install `hbc_py` (no servers started).
