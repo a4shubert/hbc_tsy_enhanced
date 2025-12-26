@@ -4,7 +4,15 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve script path in bash or zsh.
+if [ -n "${BASH_SOURCE:-}" ]; then
+  _SRC="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  _SRC="${(%):-%N}"
+else
+  _SRC="$0"
+fi
+SCRIPT_DIR="$(cd "$(dirname "${_SRC}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
