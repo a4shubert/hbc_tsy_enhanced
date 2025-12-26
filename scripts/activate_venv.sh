@@ -21,7 +21,7 @@ if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
 fi
 
 VENV_DIR="${REPO_ROOT}/.venv"
-if [[ ! -x "${VENV_DIR}/bin/activate" ]]; then
+if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
   echo "[activate_venv] .venv not found. Run ./install.sh first."
   return 1 2>/dev/null || exit 1
 fi
