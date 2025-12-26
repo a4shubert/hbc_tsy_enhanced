@@ -76,20 +76,100 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 
 ## Library
 
-_Fetch 311 service requests from Socrata_:
+_Data Container_:
 
 ```python
-from hbc import DataContainer
-dc = DataContainer("nyc_open_data_311_service_requests")
-dc.get(query="$filter=created_date ge '2010-01-01' and agency eq 'NYPD'&$top=100")
-dc.to_cache()  # persists via REST into SQLite
+dc = DataContainer("nyc_open_data_311_customer_satisfaction_survey")
+
+# retrieve: query first 100 rows
+dc.get()
+dc.df.shape
+
+# retrieve: query distinct
+dc.get(query="$apply=groupby((campaign))")
+dc.df.shape
+
+# retrieve: query with filter
+dc.get(query="$filter=campaign eq 'Campaign 4'")
+dc.df.shape
+
+# caching:
+dc.to_cache()
+
+# from_cache: get 10 rows
+dc.from_cache()
+dc.df.shape
+
+# from_cache: get by filter
+dc.from_cache(query="$filter=campaign eq 'Campaign 4'")
+dc.df.shape
+
+# from_cache: get distinct
+dc.from_cache(query="$apply=groupby((year))")
+dc.df.shape
+
+# from_cache: get page 2 with page size 50
+dc.from_cache(query="$top=50&$skip=50")
+dc.df.shape
+
+# from_cache: get total count
+dc.from_cache(query="$count=true")
+dc.df.shape
 ```
 
-_Read back cached rows_:
+_Analytics_:
 
 ```python
-dc.from_cache(query="$top=10")
-print(dc.df.head())
+app_context.as_of  = ul.str_as_date('20091231')
+
+dc = DataContainer('nyc_open_data_311_service_requests')
+
+# query / load / validate:
+dc.get(query=f"$filter=created_date eq '{ul.date_as_iso_format(app_context.as_of)}'")
+
+# persist:
+dc.to_cache()
+
+# retrieve from cache for analytics:
+dc.from_cache(query=f"$filter=created_date eq '{ul.date_as_iso_format(app_context.as_of)}'")
+
+# enrich:
+df = dc.df
+cols = ul.cols_as_named_tuple(df)
+df["hbc_days_to_close"] = (pd.to_datetime(df[cols.closed_date])- pd.to_datetime(df[cols.created_date])).dt.days.astype("Int64")
+cols = ul.cols_as_named_tuple(df)
+m = df[cols.hbc_days_to_close] == 0
+df_closed_not_same_day = df[~m]
+
+# plot:
+path = ul.path_to_str(
+                ul.mk_dir(app_context.dir_analytics / "plots")
+                / "closed_requests_by_location.html"
+            )
+_ = PlotEngine.plot_geo_map(
+            df=df_closed_not_same_day,
+            col_latitude=cols.latitude,
+            col_longitude=cols.longitude,
+            aggregation="count",
+            round_precision=3,
+            cluster=True,
+            start_zoom=11,
+            tiles="CartoDB positron",
+            savepath= path
+        )
+
+# analyze:
+## by agency:
+res = AnalyticalEngine.descriptive_stats(
+    n_best=10,
+    n_worst=10,
+    df=df_closed_not_same_day,
+    col_metric=cols.hbc_days_to_close,
+    group=[
+        cols.agency,
+        cols.agency_name,
+    ],
+)
 ```
 
 ## Jobs:
@@ -99,20 +179,34 @@ Use the job dispatcher to execute the built-in pipelines.
 _Poll one day of data into cache_:
 
 ```bash
-python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=True --log-level=INFO
+python -m hbc.jobs.dispatch \
+  --job-name=job_fetch_nyc_open_data_311_service_requests \
+  --as-of=20091231 \
+  --incremental=True \
+  --log-level=DEBUG
 ```
 
 _Run analytics for that date_:
 
 ```bash
-python -m hbc.jobs.dispatch --job-name=job_analyse_nyc_open_data_311_service_requests --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+python -m hbc.jobs.dispatch  \
+  --job-name=job_analyse_nyc_open_data_311_service_requests \
+  --as-of=20091231 \
+  --log-level=INFO \
+  --n-worst=10 \
+  --n-best=10 \
+  --n-days=10
 ```
 
 _Restore cache integrity for the last few missing dates (fetches multiple days)_:
 
 ```bash
-
-python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
+python -m hbc.jobs.dispatch  \
+  --job-name=job_fetch_nyc_open_data_311_service_requests \
+  --as-of=20091231 \
+  --incremental=false \
+  --log-level=INFO \
+  --last-missing-dates=10
 ```
 
 _Midnight Scheduler_:
