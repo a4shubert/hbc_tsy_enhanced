@@ -34,8 +34,8 @@ if (-not $Python) {
 try {
     & $Python -c "import jupyter" 2>$null | Out-Null
 } catch {
-    Write-Host "[demo] jupyter not found in $Python. Install with: $Python -m pip install notebook nbclassic"
-    exit 1
+    Write-Host "[demo] jupyter not found in $Python. Installing notebook/nbclassic..."
+    & $Python -m pip install notebook nbclassic
 }
 
 Write-Host "[demo] Starting nbclassic in $NotebookDir"

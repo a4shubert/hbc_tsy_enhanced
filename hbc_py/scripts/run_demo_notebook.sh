@@ -31,9 +31,10 @@ if [[ -z "${PY_BIN}" ]]; then
   exit 1
 fi
 
+# Ensure jupyter is installed in the chosen interpreter.
 if ! "${PY_BIN}" -c "import jupyter" >/dev/null 2>&1; then
-  echo "[demo] jupyter not found in ${PY_BIN}. Install with: ${PY_BIN} -m pip install notebook nbclassic"
-  exit 1
+  echo "[demo] jupyter not found in ${PY_BIN}. Installing notebook/nbclassic..."
+  "${PY_BIN}" -m pip install --quiet notebook nbclassic
 fi
 
 echo "[demo] Starting nbclassic in ${NOTEBOOK_DIR}"
