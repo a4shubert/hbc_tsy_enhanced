@@ -23,7 +23,7 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 - `hbc_db`: SQLite database location (`hbc.db` lives here by default).
 - `hbc_py`: Python package with DataContainer/fetchers/validators, jobs, and tests.
 - `hbc_rest`: ASP\.NET Core 8 minimal API + EF Core 8 exposing CRUD/batch endpoints over the same schemas.
-- `hbc_web`: Placeholder for a web/UI surface (no active code yet).
+- `hbc_web`: Next.js 14 app router + Tailwind UI (header with live world clocks, quick links to API/Docs, footer).
 
 - `scripts`: Shared helpers (`env.sh` for env vars) and build/run utilities under `scripts/linux` and `scripts/win`.
 
@@ -85,13 +85,17 @@ dotnet test
 
 ## Scripts
 - `scripts/linux/install.sh` / `scripts/win/install.ps1`: set up env, venv, install `hbc_py` (no servers started).
-- `scripts/linux/run_all.sh` / `scripts/win/run_all.ps1`: start REST API (published build) + demo notebook in background; logs in `logs/`.
+- `scripts/linux/run_all.sh` / `scripts/win/run_all.ps1`: start REST API (published build) + demo notebook; keeps your main shell free.
 - `scripts/linux/rest_start_prod.sh` / `scripts/win/rest_start_prod.ps1`: run published REST API.
-- `scripts/linux/run_dev.sh` / `scripts/win/run_dev.ps1`: run REST API in Development profile.
+- `scripts/linux/rest_start_dev.sh` / `scripts/win/rest_start_dev.ps1`: run REST API in Development profile.
 - `scripts/linux/rest_build.sh` / `scripts/win/rest_build.ps1`: clean/restore/migrate/publish REST API.
 - `scripts/linux/db_reset.sh` / `scripts/win/db_reset.ps1`: drop DB, recreate migrations, update database.
-- `scripts/linux/run_demo_notebook.sh` / `scripts/win/run_demo_notebook.ps1`: launch classic Jupyter for `hbc_py/notebooks/Demo.ipynb`.
 - `scripts/linux/db_count_rows.sh`: print row counts for all SQLite tables (uses `HBC_DB_PATH` or `hbc_db/hbc.db`).
+- `scripts/linux/run_demo_notebook.sh` / `scripts/win/run_demo_notebook.ps1`: launch classic Jupyter for `hbc_py/notebooks/Demo.ipynb`.
+- `scripts/linux/web_start_dev.sh` / `scripts/win/web_start_dev.ps1`: run Next.js dev server for `hbc_web`.
+- `scripts/linux/web_start_prod.sh` / `scripts/win/web_start_prod.ps1`: run the built Next.js site.
+- `scripts/linux/web_build.sh` / `scripts/win/web_build.ps1`: build the Next.js site for production.
+- `scripts/linux/vscode_extensions.sh` / `scripts/win/vscode_extensions.ps1`: install recommended VS Code extensions for this repo.
 
 # Usage Examples
 
@@ -366,4 +370,6 @@ classDiagram
 
 ## hbc_web (Next.js)
 
-- Reserved for future UI; currently empty.
+- Next.js 14 (app router) + Tailwind UI shell.
+- Sticky header with live world clocks (NY/London/Dubai/HK) and quick links to API (Swagger) and docs.
+- Footer with copyright; main area ready for dashboard content.

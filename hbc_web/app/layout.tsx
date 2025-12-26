@@ -23,7 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-slate-950 font-sans text-slate-50">
+      <body className="font-sans text-[color:var(--color-text)] bg-[color:var(--color-bg)]">
         <div className="flex min-h-screen flex-col">
           <div className="sticky top-0 z-20 px-[5vw] py-4 backdrop-blur bg-slate-950/90">
             <div className="w-full">

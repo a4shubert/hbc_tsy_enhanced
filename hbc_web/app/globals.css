@@ -5,6 +5,15 @@
 
 :root {
   color-scheme: dark;
+  --color-bg: #020617; /* slate-950 */
+  --color-card: #090e1b; /* slate-900 */
+  --color-text: #f8fafc;
+  --color-muted: #cbd5e1;
+  --color-accent: #ef4444; /* red-500 */
+  --color-success: #22c55e; /* green-500 */
+  --color-link: #6366f1; /* indigo-500 */
+  --color-link-surface: rgba(99, 102, 241, 0.15);
+  --color-link-surface-hover: rgba(99, 102, 241, 0.25);
 }
 
 * {
@@ -14,4 +23,5 @@
 body {
   margin: 0;
   font-family: "Space Grotesk", Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  color: var(--color-text);
 }
