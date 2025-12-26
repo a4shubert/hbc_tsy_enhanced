@@ -52,10 +52,10 @@ pip install -e "${REPO_ROOT}/hbc_py"
 echo "[install] Launching interactive shell with env + venv activated..."
 NEW_SHELL="${SHELL:-/bin/bash}"
 ACTIVATE_CMDS="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; echo 'env + venv activated'; exec ${NEW_SHELL} -i"
-# If activation script is missing, bail with a helpful message.
+# If activation script is missing, (re)create venv.
 if [[ ! -f "${REPO_ROOT}/.venv/bin/activate" ]]; then
-  echo "[install] ERROR: ${REPO_ROOT}/.venv/bin/activate not found. Rerun install.sh to recreate the venv."
-  exit 1
+  echo "[install] .venv missing; recreating..."
+  "${PYTHON_BIN}" -m venv "${REPO_ROOT}/.venv"
 fi
 
 exec "${NEW_SHELL}" -i -c "${ACTIVATE_CMDS}"
