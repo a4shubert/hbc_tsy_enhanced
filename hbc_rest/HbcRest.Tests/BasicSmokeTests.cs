@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -15,7 +16,14 @@ public class BasicSmokeTests : IClassFixture<WebApplicationFactory<Program>>
         // Point API to a throwaway SQLite file per test run.
         var tempDb = Path.Combine(Path.GetTempPath(), $"hbc_rest_test_{Guid.NewGuid():N}.db");
         Environment.SetEnvironmentVariable("HBC_DB_PATH", tempDb);
-        _factory = factory;
+        // Bind to an ephemeral port during tests.
+        Environment.SetEnvironmentVariable("ASPNETCORE_URLS", "http://localhost:0");
+
+        _factory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseSetting("ASPNETCORE_URLS", "http://localhost:0");
+            builder.UseEnvironment("Development");
+        });
 
         // Ensure database is created for this test host.
         using var scope = _factory.Services.CreateScope();
