@@ -50,3 +50,4 @@ pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
 
 
+source "${VENV_DIR}/bin/activate"
