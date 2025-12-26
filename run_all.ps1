@@ -19,15 +19,17 @@ if (-not (Test-Path $VenvPy)) {
 $Activate = Join-Path $VenvDir "Scripts\Activate.ps1"
 if (Test-Path $Activate) { . $Activate }
 
-$restScript = Join-Path $RepoRoot "hbc_rest\scripts\run_prod.ps1"
-$nbScript = Join-Path $RepoRoot "hbc_py\scripts\run_demo_notebook.ps1"
-$envCall = ". `"$RepoRoot\scripts\env.ps1`"; . `"$RepoRoot\.venv\Scripts\Activate.ps1`";"
+$LogDir = Join-Path $RepoRoot "logs"
+if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
 
-Write-Host "[run_all] Opening REST API in new PowerShell window..."
-$restProc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-NoExit","-Command","cd `"$RepoRoot`"; $envCall & `"$restScript`"" -PassThru
+# Build commands to run in new windows.
+$restScript = "Set-Location '$RepoRoot'; . scripts/env.ps1; & '$Activate'; & 'hbc_rest\scripts\run_prod.ps1'"
+$nbScript   = "Set-Location '$RepoRoot'; . scripts/env.ps1; & '$Activate'; & 'hbc_py\scripts\run_demo_notebook.ps1'"
 
-Write-Host "[run_all] Opening notebook in new PowerShell window..."
-$nbProc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-NoExit","-Command","cd `"$RepoRoot`"; $envCall & `"$nbScript`"" -PassThru
+Write-Host "[run_all] Starting REST API in new window..."
+Start-Process -FilePath "powershell" -ArgumentList "-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command", $restScript -WindowStyle Normal | Out-Null
 
-Write-Host "[run_all] REST PID: $($restProc.Id); Notebook PID: $($nbProc.Id)"
-Write-Host "[run_all] Close the spawned windows or Stop-Process to stop services. This shell stays free."
+Write-Host "[run_all] Starting demo notebook in new window..."
+Start-Process -FilePath "powershell" -ArgumentList "-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command", $nbScript -WindowStyle Normal | Out-Null
+
+Write-Host "[run_all] Two PowerShell windows started (REST API + notebook). This window remains free for job commands."

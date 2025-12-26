@@ -50,4 +50,7 @@ Write-Host "[install] Upgrading pip and installing hbc_py (editable)"
 & $Python -m pip install --upgrade pip
 & $Python -m pip install -e "$RepoRoot\hbc_py"
 
-Write-Host "[install] Done. You can start the REST API with hbc_rest\\scripts\\run_prod.ps1 when ready."
+Write-Host "[install] Opening a new PowerShell with env + venv activated..."
+$LaunchCmd = "cd `"$RepoRoot`"; . `"$RepoRoot\scripts\env.ps1`"; . `"$RepoRoot\.venv\Scripts\Activate.ps1`"; Write-Host 'env + venv activated; run jobs here.'"
+Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-NoExit","-Command",$LaunchCmd
+Write-Host "[install] New window started. Use that window for running jobs."
