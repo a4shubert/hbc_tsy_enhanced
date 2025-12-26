@@ -1,6 +1,6 @@
 <#
-  Start REST API (published build) and demo notebook in background,
-  leaving this PowerShell session free for running jobs.
+  Start REST API (published build) and demo notebook in separate PowerShell windows,
+  leaving this session free for running jobs.
 #>
 
 $RepoRoot = $PSScriptRoot
@@ -25,14 +25,15 @@ if (-not (Test-Path $VenvPy)) {
 $Activate = Join-Path $VenvDir "Scripts\Activate.ps1"
 if (Test-Path $Activate) { . $Activate }
 
-$LogDir = Join-Path $RepoRoot "logs"
-if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
+$restScript = Join-Path $RepoRoot "hbc_rest\scripts\run_prod.ps1"
+$nbScript = Join-Path $RepoRoot "hbc_py\scripts\run_demo_notebook.ps1"
+$envCall = ". `"$RepoRoot\scripts\env.ps1`"; . `"$RepoRoot\.venv\Scripts\Activate.ps1`";"
 
-Write-Host "[run_all] Starting REST API (logs: $LogDir\rest.log)"
-$restProc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-File", (Join-Path $RepoRoot "hbc_rest\scripts\run_prod.ps1") -RedirectStandardOutput "$LogDir\rest.log" -RedirectStandardError "$LogDir\rest.log" -PassThru -WindowStyle Hidden
+Write-Host "[run_all] Opening REST API in new PowerShell window..."
+$restProc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-NoExit","-Command","cd `"$RepoRoot`"; $envCall & `"$restScript`"" -PassThru
 
-Write-Host "[run_all] Starting demo notebook (logs: $LogDir\notebook.log)"
-$nbProc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-File", (Join-Path $RepoRoot "hbc_py\scripts\run_demo_notebook.ps1") -RedirectStandardOutput "$LogDir\notebook.log" -RedirectStandardError "$LogDir\notebook.log" -PassThru -WindowStyle Hidden
+Write-Host "[run_all] Opening notebook in new PowerShell window..."
+$nbProc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile","-ExecutionPolicy","Bypass","-NoExit","-Command","cd `"$RepoRoot`"; $envCall & `"$nbScript`"" -PassThru
 
-Write-Host "[run_all] PIDs -> REST: $($restProc.Id), Notebook: $($nbProc.Id)"
-Write-Host "[run_all] Use 'Stop-Process <PID>' to stop services. Shell remains free for job commands (venv activated)."
+Write-Host "[run_all] REST PID: $($restProc.Id); Notebook PID: $($nbProc.Id)"
+Write-Host "[run_all] Close the spawned windows or Stop-Process to stop services. This shell stays free."
