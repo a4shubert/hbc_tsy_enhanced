@@ -49,5 +49,5 @@ echo "[install] Upgrading pip and installing hbc_py (editable)"
 pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
 
-
+VENV_DIR="${REPO_ROOT}/.venv"
 source "${VENV_DIR}/bin/activate"
