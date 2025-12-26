@@ -14,37 +14,33 @@ if (Test-Path $EnvScript) {
 }
 
 # Resolve Python to run jupyter from (prefer repo venv).
-$Python = ""
+# Ensure repo venv exists; create if missing.
 $VenvPy = Join-Path $RepoRoot ".venv\Scripts\python.exe"
-if ($Env:VIRTUAL_ENV -and (Test-Path (Join-Path $Env:VIRTUAL_ENV "Scripts\python.exe"))) {
-    $Python = Join-Path $Env:VIRTUAL_ENV "Scripts\python.exe"
-} elseif (Test-Path $VenvPy) {
-    $Python = $VenvPy
-} elseif ($Env:CONDA_PYTHON_EXE -and (Test-Path $Env:CONDA_PYTHON_EXE)) {
-    $Python = $Env:CONDA_PYTHON_EXE
-} elseif (Get-Command conda -ErrorAction SilentlyContinue) {
-    try {
-        $base = (& conda info --base)
-        $condaPy = Join-Path $base "python.exe"
-        if (Test-Path $condaPy) { $Python = $condaPy }
-    } catch {}
-} elseif (Get-Command python -ErrorAction SilentlyContinue) {
-    $Python = "python"
-} elseif (Get-Command py -ErrorAction SilentlyContinue) {
-    $Python = "py"
+if (-not (Test-Path $VenvPy)) {
+    $BootPy = ""
+    if (Get-Command py -ErrorAction SilentlyContinue) { $BootPy = "py" }
+    elseif (Get-Command python -ErrorAction SilentlyContinue) { $BootPy = "python" }
+    if (-not $BootPy) {
+        Write-Host "[demo] Python not found. Install Python 3.10+ and rerun."
+        exit 1
+    }
+    Write-Host "[demo] Creating venv at $($RepoRoot)\.venv using $BootPy"
+    & $BootPy -m venv (Join-Path $RepoRoot ".venv")
 }
 
-if (-not $Python) {
-    Write-Host "[demo] Python not found. Install Python 3.10+ and rerun."
-    exit 1
-}
+$Python = $VenvPy
 
 try {
     & $Python -c "import jupyter" 2>$null | Out-Null
 } catch {
-    Write-Host "[demo] jupyter not found in $Python. Installing notebook/nbclassic..."
-    & $Python -m pip install notebook nbclassic
+    Write-Host "[demo] jupyter not found in $Python. Installing notebook/nbclassic/ipykernel..."
+    & $Python -m pip install notebook nbclassic ipykernel
 }
+
+# Register kernel for this venv (best-effort).
+try {
+    & $Python -m ipykernel install --user --name hbc-venv --display-name "Python (hbc)" 2>$null | Out-Null
+} catch {}
 
 Write-Host "[demo] Starting nbclassic in $NotebookDir"
 & $Python -m jupyter nbclassic `

@@ -14,36 +14,36 @@ if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
   source "${REPO_ROOT}/scripts/env.sh"
 fi
 
-# Resolve a Python to run jupyter from (prefer repo venv).
-PY_BIN=""
-if [[ -n "${VIRTUAL_ENV:-}" && -x "${VIRTUAL_ENV}/bin/python" ]]; then
-  PY_BIN="${VIRTUAL_ENV}/bin/python"
-elif [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then
-  PY_BIN="${REPO_ROOT}/.venv/bin/python"
-# Use conda python if available
-elif [[ -n "${CONDA_PYTHON_EXE:-}" && -x "${CONDA_PYTHON_EXE}" ]]; then
-  PY_BIN="${CONDA_PYTHON_EXE}"
-elif command -v conda >/dev/null 2>&1; then
-  CONDA_BASE="$(conda info --base 2>/dev/null || true)"
-  if [[ -n "${CONDA_BASE}" && -x "${CONDA_BASE}/bin/python" ]]; then
-    PY_BIN="${CONDA_BASE}/bin/python"
+# Ensure repo venv exists; create if missing.
+VENV_PY="${REPO_ROOT}/.venv/bin/python"
+if [[ ! -x "${VENV_PY}" ]]; then
+  BOOT_PY=""
+  if command -v python3 >/dev/null 2>&1; then
+    BOOT_PY="$(command -v python3)"
+  elif command -v python >/dev/null 2>&1; then
+    BOOT_PY="$(command -v python)"
   fi
-elif command -v python3 >/dev/null 2>&1; then
-  PY_BIN="$(command -v python3)"
-elif command -v python >/dev/null 2>&1; then
-  PY_BIN="$(command -v python)"
+  if [[ -z "${BOOT_PY}" ]]; then
+    echo "[demo] Python not found. Install Python 3.10+ and rerun."
+    exit 1
+  fi
+  echo "[demo] Creating venv at ${REPO_ROOT}/.venv using ${BOOT_PY}"
+  "${BOOT_PY}" -m venv "${REPO_ROOT}/.venv"
 fi
 
-if [[ -z "${PY_BIN}" ]]; then
-  echo "[demo] Python not found. Install Python 3.10+ and rerun."
-  exit 1
-fi
+# Always use repo venv python to avoid Windows app aliases.
+PY_BIN="${VENV_PY}"
 
 # Ensure jupyter is installed in the chosen interpreter.
 if ! "${PY_BIN}" -c "import jupyter" >/dev/null 2>&1; then
-  echo "[demo] jupyter not found in ${PY_BIN}. Installing notebook/nbclassic..."
-  "${PY_BIN}" -m pip install --quiet notebook nbclassic
+  echo "[demo] jupyter not found in ${PY_BIN}. Installing notebook/nbclassic/ipykernel..."
+  "${PY_BIN}" -m pip install --quiet notebook nbclassic ipykernel
 fi
+
+# Ensure kernel registered for this venv.
+"${PY_BIN}" -m ipykernel install --user --name hbc-venv --display-name "Python (hbc)" >/dev/null 2>&1 || true
+
+echo "[demo] Using python: ${PY_BIN}"
 
 echo "[demo] Starting nbclassic in ${NOTEBOOK_DIR}"
 exec "${PY_BIN}" -m jupyter nbclassic \
