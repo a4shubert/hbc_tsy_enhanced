@@ -14,8 +14,9 @@ if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
   source "${REPO_ROOT}/scripts/env.sh"
 fi
 
-# Ensure repo venv exists; create if missing.
-VENV_PY="${REPO_ROOT}/.venv/bin/python"
+# Ensure repo venv exists; create if missing, then activate it so PATH/python point to it.
+VENV_DIR="${REPO_ROOT}/.venv"
+VENV_PY="${VENV_DIR}/bin/python"
 if [[ ! -x "${VENV_PY}" ]]; then
   BOOT_PY=""
   if command -v python3 >/dev/null 2>&1; then
@@ -27,11 +28,13 @@ if [[ ! -x "${VENV_PY}" ]]; then
     echo "[demo] Python not found. Install Python 3.10+ and rerun."
     exit 1
   fi
-  echo "[demo] Creating venv at ${REPO_ROOT}/.venv using ${BOOT_PY}"
-  "${BOOT_PY}" -m venv "${REPO_ROOT}/.venv"
+  echo "[demo] Creating venv at ${VENV_DIR} using ${BOOT_PY}"
+  "${BOOT_PY}" -m venv "${VENV_DIR}"
 fi
 
-# Always use repo venv python to avoid Windows app aliases.
+# Activate venv for this shell (affects PATH), then use its python explicitly.
+# shellcheck source=/dev/null
+source "${VENV_DIR}/bin/activate"
 PY_BIN="${VENV_PY}"
 
 # Ensure jupyter is installed in the chosen interpreter.

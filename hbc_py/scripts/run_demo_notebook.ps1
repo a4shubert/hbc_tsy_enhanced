@@ -14,8 +14,9 @@ if (Test-Path $EnvScript) {
 }
 
 # Resolve Python to run jupyter from (prefer repo venv).
-# Ensure repo venv exists; create if missing.
-$VenvPy = Join-Path $RepoRoot ".venv\Scripts\python.exe"
+# Ensure repo venv exists; create if missing, then activate it so PATH is set.
+$VenvDir = Join-Path $RepoRoot ".venv"
+$VenvPy = Join-Path $VenvDir "Scripts\python.exe"
 if (-not (Test-Path $VenvPy)) {
     $BootPy = ""
     if (Get-Command py -ErrorAction SilentlyContinue) { $BootPy = "py" }
@@ -24,10 +25,13 @@ if (-not (Test-Path $VenvPy)) {
         Write-Host "[demo] Python not found. Install Python 3.10+ and rerun."
         exit 1
     }
-    Write-Host "[demo] Creating venv at $($RepoRoot)\.venv using $BootPy"
-    & $BootPy -m venv (Join-Path $RepoRoot ".venv")
+    Write-Host "[demo] Creating venv at $VenvDir using $BootPy"
+    & $BootPy -m venv $VenvDir
 }
 
+# Activate venv to set PATH and then use its python explicitly.
+$Activate = Join-Path $VenvDir "Scripts\Activate.ps1"
+if (Test-Path $Activate) { . $Activate }
 $Python = $VenvPy
 
 try {
