@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 # Common environment setup for local runs (API + notebooks).
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve this script's directory in both bash and zsh.
+if [ -n "${BASH_SOURCE:-}" ]; then
+  _SRC="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  _SRC="${(%):-%N}"
+else
+  _SRC="$0"
+fi
+SCRIPT_DIR="$(cd "$(dirname "${_SRC}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Paths/URLs
