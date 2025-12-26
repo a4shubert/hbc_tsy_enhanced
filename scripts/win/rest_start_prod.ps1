@@ -8,11 +8,11 @@ $RepoRoot = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 $PublishDir = Join-Path $RepoRoot "publish"
 
 # Load env defaults if available.
-$EnvScript = Join-Path $RepoRoot "scripts/env.ps1"
+$EnvScript = Join-Path $ScriptDir "env.ps1"
 if (Test-Path $EnvScript) { . $EnvScript }
 
 if (-not (Test-Path $PublishDir)) {
-    Write-Host "[run_prod] publish directory not found at $PublishDir. Run scripts/build_prod.sh or build_prod.ps1 first."
+    Write-Host "[rest_start_prod] publish directory not found at $PublishDir. Run scripts/linux/rest_build.sh or scripts/win/rest_build.ps1 first."
     exit 1
 }
 

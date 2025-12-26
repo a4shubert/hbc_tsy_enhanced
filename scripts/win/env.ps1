@@ -1,10 +1,10 @@
 <#
   Common environment setup for Windows/PowerShell runs (API + notebooks).
   Usage:
-    .\scripts\env.ps1
+    .\scripts\win\env.ps1
 #>
 
-$RepoRoot = Split-Path -Parent $PSScriptRoot
+$RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 if (-not $Env:HBC_DB_PATH -or [string]::IsNullOrWhiteSpace($Env:HBC_DB_PATH)) {
     $Env:HBC_DB_PATH = Join-Path $RepoRoot "hbc_db/hbc.db"

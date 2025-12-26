@@ -8,13 +8,13 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 PUBLISH_DIR="${REPO_ROOT}/publish"
 
 # Load shared environment defaults (DB path, URLs, etc.) if available.
-if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
+if [[ -f "${SCRIPT_DIR}/env.sh" ]]; then
   # shellcheck source=/dev/null
-  source "${REPO_ROOT}/scripts/env.sh"
+  source "${SCRIPT_DIR}/env.sh"
 fi
 
 if [ ! -d "${PUBLISH_DIR}" ]; then
-  echo "[run_prod] publish directory not found at ${PUBLISH_DIR}. Run scripts/build_prod.sh first."
+  echo "[rest_start_prod] publish directory not found at ${PUBLISH_DIR}. Run scripts/linux/rest_build.sh first."
   exit 1
 fi
 

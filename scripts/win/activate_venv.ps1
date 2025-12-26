@@ -4,17 +4,17 @@
 #>
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RepoRoot  = Resolve-Path (Join-Path $ScriptDir "..")
+$RepoRoot  = Resolve-Path (Join-Path $ScriptDir "..\\..")
 
 # Load env defaults if present.
-$EnvScript = Join-Path $RepoRoot "scripts/env.ps1"
+$EnvScript = Join-Path $ScriptDir "env.ps1"
 if (Test-Path $EnvScript) { . $EnvScript }
 
 $VenvDir   = Join-Path $RepoRoot ".venv"
 $Activate  = Join-Path $VenvDir "Scripts\Activate.ps1"
 
 if (-not (Test-Path $Activate)) {
-    Write-Host "[activate_venv] .venv not found. Run .\install.ps1 first."
+    Write-Host "[activate_venv] .venv not found. Run .\scripts\win\install.ps1 first."
     exit 1
 }
 

@@ -25,7 +25,7 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 - `hbc_rest`: ASP\.NET Core 8 minimal API + EF Core 8 exposing CRUD/batch endpoints over the same schemas.
 - `hbc_web`: Placeholder for a web/UI surface (no active code yet).
 
-- `scripts`: Shared helpers (`env.sh` for env vars) and REST build/run scripts under `hbc_rest/scripts`.
+- `scripts`: Shared helpers (`env.sh` for env vars) and build/run utilities under `scripts/linux` and `scripts/win`.
 
 # Installation
 **Prerequisites**: Python 3.10+, .NET 8 SDK, and optionally Miniconda/conda if you prefer conda-based environments.
@@ -38,25 +38,25 @@ cd hbc_tsy_enhanced
 2. One-shot setup:
 ```bash
 # macOS/Linux
-./install.sh
+./scripts/linux/install.sh
 # Windows (PowerShell)
-.\install.ps1
+.\scripts\win\install.ps1
 ```
 3. Run everything (REST API + demo notebook) in new terminals:
 ```bash
 # macOS/Linux
-./run_all.sh
+./scripts/linux/run_all.sh
 # Windows (PowerShell)
-.\run_all.ps1
+.\scripts\win\run_all.ps1
 ```
 
 4. Run jobs from command line:
 ```bash
 # macOS/Linux
-source scripts/activate_venv.sh
+source scripts/linux/activate_venv.sh
 
 # Windows (PowerShell)
-. .\scripts\activate_venv.ps1
+. .\scripts\win\activate_venv.ps1
 
 # job:
 python -m hbc.jobs.dispatch \
@@ -67,11 +67,11 @@ python -m hbc.jobs.dispatch \
 5. Run py-tests from command line:
 ```bash
 # macOS/Linux
-source scripts/activate_venv.sh
+source scripts/linux/activate_venv.sh
 export HBC_INTEGRATION=1   # set only if you want live integration tests
 
 # Windows (PowerShell)
-. .\scripts\activate_venv.ps1
+. .\scripts\win\activate_venv.ps1
 $env:HBC_INTEGRATION = 1   # set only if you want live integration tests
 
 pytest -vv -s
@@ -84,14 +84,14 @@ dotnet test
 ```
 
 ## Scripts
-- `install.sh` / `install.ps1`: set up env, venv, install `hbc_py` (no servers started).
-- `run_all.sh` / `run_all.ps1`: start REST API (published build) + demo notebook in background; logs in `logs/`.
-- `hbc_rest/scripts/run_prod.sh` / `run_prod.ps1`: run published REST API.
-- `hbc_rest/scripts/run_dev.sh` / `run_dev.ps1`: run REST API in Development profile.
-- `hbc_rest/scripts/run_build.sh` / `run_build.ps1`: clean/restore/migrate/publish REST API.
-- `hbc_rest/scripts/reset_db.sh` / `reset_db.ps1`: drop DB, recreate migrations, update database.
-- `hbc_py/scripts/run_demo_notebook.sh` / `run_demo_notebook.ps1`: launch classic Jupyter for `hbc_py/notebooks/Demo.ipynb`.
-- `hbc_db/scripts/count_rows.sh`: print row counts for all SQLite tables (uses `HBC_DB_PATH` or `hbc_db/hbc.db`).
+- `scripts/linux/install.sh` / `scripts/win/install.ps1`: set up env, venv, install `hbc_py` (no servers started).
+- `scripts/linux/run_all.sh` / `scripts/win/run_all.ps1`: start REST API (published build) + demo notebook in background; logs in `logs/`.
+- `scripts/linux/rest_start_prod.sh` / `scripts/win/rest_start_prod.ps1`: run published REST API.
+- `scripts/linux/run_dev.sh` / `scripts/win/run_dev.ps1`: run REST API in Development profile.
+- `scripts/linux/rest_build.sh` / `scripts/win/rest_build.ps1`: clean/restore/migrate/publish REST API.
+- `scripts/linux/db_reset.sh` / `scripts/win/db_reset.ps1`: drop DB, recreate migrations, update database.
+- `scripts/linux/run_demo_notebook.sh` / `scripts/win/run_demo_notebook.ps1`: launch classic Jupyter for `hbc_py/notebooks/Demo.ipynb`.
+- `scripts/linux/db_count_rows.sh`: print row counts for all SQLite tables (uses `HBC_DB_PATH` or `hbc_db/hbc.db`).
 
 # Usage Examples
 
@@ -232,7 +232,7 @@ python -m hbc.jobs.runner
 
 ## hbc_db (sqlite)
 
-- Default SQLite database location. `reset_db.sh` recreates it with the latest migrations.
+- Default SQLite database location. `db_reset.sh` recreates it with the latest migrations.
 
 ## hbc_py (Python)
 

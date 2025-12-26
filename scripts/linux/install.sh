@@ -5,7 +5,7 @@ set -euo pipefail
 # - loads shared env defaults (DB path, API URL, etc.)
 # - creates a local venv under .venv if missing
 # - installs the Python package from the hbc_py subfolder (editable)
-# - starts the published ASP.NET Core REST API (foreground) via run_prod.sh
+# - starts the published ASP.NET Core REST API (foreground) via rest_start_prod.sh
 
 # Resolve script location for bash/zsh.
 if [ -n "${BASH_SOURCE:-}" ]; then
@@ -16,11 +16,11 @@ else
   _SELF="$0"
 fi
 SCRIPT_DIR="$(cd "$(dirname "${_SELF}")" && pwd)"
-REPO_ROOT="${SCRIPT_DIR}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Load environment defaults.
 # shellcheck source=/dev/null
-source "${REPO_ROOT}/scripts/env.sh"
+source "${SCRIPT_DIR}/env.sh"
 
 # Check for optional runtimes/tools.
 if ! command -v dotnet >/dev/null 2>&1; then

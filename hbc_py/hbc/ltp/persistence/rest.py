@@ -19,8 +19,8 @@ class RestApi:
         if not raw_base:
             raise RuntimeError(
                 "HBC_API_URL is not set. Please export the REST base URL (e.g., http://localhost:5047) "
-                "or source scripts/env.sh before using RestApi."
-            )
+            "or source scripts/linux/env.sh before using RestApi."
+        )
         self.api_base = raw_base.rstrip("/")
 
     def get(

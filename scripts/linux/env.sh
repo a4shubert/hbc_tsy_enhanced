@@ -10,7 +10,7 @@ else
   _SRC="$0"
 fi
 SCRIPT_DIR="$(cd "$(dirname "${_SRC}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Paths/URLs
 export HBC_DB_PATH="${HBC_DB_PATH:-${REPO_ROOT}/hbc_db/hbc.db}"
