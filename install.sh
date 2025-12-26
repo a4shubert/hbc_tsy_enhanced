@@ -49,6 +49,4 @@ echo "[install] Upgrading pip and installing hbc_py (editable)"
 pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
 
-echo "[install] Launching interactive shell with env + venv activated..."
-NEW_SHELL="${SHELL:-/bin/bash}"
-exec "${NEW_SHELL}" -i
+
