@@ -9,18 +9,12 @@ $RepoRoot = $PSScriptRoot
 $EnvScript = Join-Path $RepoRoot "scripts/env.ps1"
 if (Test-Path $EnvScript) { . $EnvScript }
 
-# Ensure venv exists and activate.
+# Ensure venv exists (basic install check) and activate.
 $VenvDir = Join-Path $RepoRoot ".venv"
 $VenvPy = Join-Path $VenvDir "Scripts\python.exe"
 if (-not (Test-Path $VenvPy)) {
-    $BootPy = ""
-    if (Get-Command py -ErrorAction SilentlyContinue) { $BootPy = "py" }
-    elseif (Get-Command python -ErrorAction SilentlyContinue) { $BootPy = "python" }
-    if (-not $BootPy) {
-        Write-Host "[run_all] Python not found. Install Python 3.10+ and rerun."
-        exit 1
-    }
-    & $BootPy -m venv $VenvDir
+    Write-Host "[run_all] .venv not found. Please run .\install.ps1 first."
+    exit 1
 }
 $Activate = Join-Path $VenvDir "Scripts\Activate.ps1"
 if (Test-Path $Activate) { . $Activate }

@@ -14,15 +14,10 @@ if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
   source "${REPO_ROOT}/scripts/env.sh"
 fi
 
-# Ensure venv exists for notebook and activate it.
+# Ensure venv exists (basic install check).
 if [[ ! -x "${REPO_ROOT}/.venv/bin/python" ]]; then
-  PY_BOOT=""
-  if command -v python3 >/dev/null 2>&1; then PY_BOOT="$(command -v python3)"; elif command -v python >/dev/null 2>&1; then PY_BOOT="$(command -v python)"; fi
-  if [[ -z "${PY_BOOT}" ]]; then
-    echo "[run_all] Python not found. Install Python 3.10+ and rerun."
-    exit 1
-  fi
-  "${PY_BOOT}" -m venv "${REPO_ROOT}/.venv"
+  echo "[run_all] .venv not found. Please run ./install.sh first."
+  exit 1
 fi
 # shellcheck source=/dev/null
 source "${REPO_ROOT}/.venv/bin/activate"
