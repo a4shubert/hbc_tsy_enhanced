@@ -77,7 +77,9 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 
 # Usage Examples
 
-- Fetch 311 service requests from Socrata:
+## Library
+
+_Fetch 311 service requests from Socrata_:
 
 ```python
 from hbc import DataContainer
@@ -86,14 +88,45 @@ dc.get(query="$filter=created_date ge '2010-01-01' and agency eq 'NYPD'&$top=100
 dc.to_cache()  # persists via REST into SQLite
 ```
 
-- Read back cached rows:
+_Read back cached rows_:
 
 ```python
-dc.from_cache(query="$filter=hbc_unique_key eq 'test_123'&$top=1")
+dc.from_cache(query="$top=10")
 print(dc.df.head())
 ```
 
-## Testing
+## Jobs:
+
+Use the job dispatcher to execute the built-in pipelines.
+
+_Poll one day of data into cache_:
+
+```bash
+python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=True --log-level=INFO
+```
+
+_Run analytics for that date_:
+
+```bash
+python -m hbc.jobs.dispatch --job-name=job_analyse_nyc_open_data_311_service_requests --as-of=2009-12-31 --n-worst=10 --n-best=10 --n-days=10 --log-level=INFO
+```
+
+_Restore cache integrity for the last few missing dates (fetches multiple days)_:
+
+```bash
+
+python -m hbc.jobs.dispatch --job-name=job_fetch_nyc_open_data_311_service_requests --as-of=2009-12-31 --incremental=False --last-missing-dates=5 --log-level=INFO
+```
+
+_Midnight Scheduler_:
+
+```bash
+python -m hbc.jobs.runner
+```
+
+<hr>
+
+# Testing
 
 - Lint: `ruff check hbc_py/hbc`
 - Unit tests: `pytest hbc_py/hbc/tests/unit`
@@ -114,20 +147,36 @@ print(dc.df.head())
 
 ## hbc_py (Python)
 
-- **DataContainer**: entry point for each moniker (`dc = DataContainer("nyc_open_data_311_service_requests")`).
+### api:
+
+- **Context** (`hbc/api/context`): carries logical date and dirs; CLI dispatch can override dirs/date, and utility helpers honor an overridden base dir for consistent artifact locations.
+- **DataContainer** (`hbc/api/container`): entry point for each moniker (`dc = DataContainer("nyc_open_data_311_service_requests")`).
   - Fetch upstream via Socrata-like query strings: `dc.get(query="$filter=agency eq 'NYPD'&$top=250")`
   - Cache to REST API/SQLite: `dc.to_cache()`
-  - Read from cache: `dc.from_cache(query="$filter=hbc_unique_key eq '...'&$top=1")`
+  - Read from cache: `dc.from_cache(query="$top=10")`
   - Schema enforcement: missing columns are added as `None`; `hbc_unique_key` is auto-generated and retained end-to-end.
-- **Fetchers/validators**: `FetcherNYCOpenData` translates OData-ish query params to Socrata; validators normalize/clean per moniker.
-- **Jobs**: under `hbc_py/hbc/jobs` with dispatch tooling for CLI runs.
-- **Tests**:
-  - Unit benchmarks in `hbc_py/hbc/tests/unit/benchmarks`
-  - Integration tests hit live Socrata/REST; enable with `HBC_INTEGRATION=1` and provide tokens in `hbc_py/hbc/tests/integration/.env`.
 
-### UML (High-Level)
+### ltp:
 
-#### Library
+- **Fetchers** (`hbc/ltp/loading/fetchers`): fetch only `FetcherNYCOpenData` wraps Socrata with retries/backoff, pagination, etc. Fetcher factory resolves by name from config.
+- **Validators** (`hbc/ltp/loading/validators`): clean/normalize/validate/finalize via `Validator.parse`. Default is `ValidatorGeneric` (no-op); `ValidatorNYCOpen311Service` implements NYC-specific rules and logging.
+
+### jobs:
+
+- **Jobs**: (`hbc_py/hbc/jobs`) with dispatch tooling for CLI runs.
+
+### quant:
+
+- **Analytics/Plots** (`hbc/quant/analysis.py`, `hbc/quant/plots.py`): `AnalyticalEngine` provides ranking/summary helpers (best/worst/mean/median); `PlotEngine` offers plotting utilities for time series, bars, and geo bubbles.
+
+### tests:
+
+- Unit tests: (`pytest hbc_py/hbc/tests/unit`)
+- Integration (live Socrata + REST): `HBC_INTEGRATION=1 pytest hbc_py/hbc/tests/integration` (requires running REST API and valid tokens in `.env`).
+
+#### UML (High-Level)
+
+##### Library
 
 ```mermaid
 classDiagram
@@ -186,7 +235,7 @@ classDiagram
     RestApi ..> PlotEngine : supplies cached data
 ```
 
-### Jobs
+#### Jobs
 
 ```mermaid
 classDiagram
