@@ -18,6 +18,7 @@ setup(
     install_requires=[
         "numpy",
         "pandas",
+        "sqlalchemy",
         "openpyxl",
         "PyYAML",
         "schedule",
@@ -27,6 +28,7 @@ setup(
         "ipython",
         "notebook",
         "nbclassic",
+        "pytest",
     ],
     entry_points={
         "console_scripts": [

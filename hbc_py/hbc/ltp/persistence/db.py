@@ -1,26 +1,31 @@
 import logging
-import sqlite3
 import os
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Mapping, Optional
 
 import pandas as pd
+from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.engine import Engine
 
 
 class SqlLiteDataBase:
-    """Lightweight helper for executing raw SQLite queries.
-       Not to be used in production - just for prototyping
+    """
+    Lightweight helper built on SQLAlchemy for executing SQLite queries.
+    Keeps the same surface as the previous sqlite3 wrapper but gains
+    connection pooling and richer introspection.
     """
 
-    def __init__(self, db_path: Optional[str | Path] = None):
+    def __init__(self, db_path: Optional[str | Path] = None, echo: bool = False):
         """
-        Establish a connection to the SQLite file (created if missing).
+        Establish an engine to the SQLite file (created if missing).
 
         Parameters
         ----------
         db_path : Optional[str | Path]
             Path to the SQLite database file. Defaults to env HBC_DB_PATH
             or `<repo>/hbc_db/hbc.db`.
+        echo : bool
+            Whether to enable SQLAlchemy echo logging for debugging.
         """
         env_path = os.environ.get("HBC_DB_PATH")
         if env_path:
@@ -30,9 +35,11 @@ class SqlLiteDataBase:
             default_path = repo_root / "hbc_db" / "hbc.db"
         self.db_path = Path(db_path) if db_path is not None else default_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(self.db_path)
-        self.conn.row_factory = sqlite3.Row
-        self.logger = logging.getLogger()
+
+        self.engine: Engine = create_engine(
+            f"sqlite:///{self.db_path}", future=True, echo=echo
+        )
+        self.logger = logging.getLogger(__name__)
 
     @property
     def all_dbs(self) -> list[str]:
@@ -42,104 +49,40 @@ class SqlLiteDataBase:
 
     @property
     def all_tables(self) -> list[str]:
+        """List user tables in the current database."""
+        insp = inspect(self.engine)
+        names = insp.get_table_names()
+        filtered = [
+            n
+            for n in names
+            if not n.startswith("sqlite_") and n != "__EFMigrationsHistory"
+        ]
+        return sorted(filtered)
+
+    def run_query(
+        self, query: str, params: Optional[Mapping[str, Any] | Mapping] = None
+    ):
         """
-        List tables in the current database as `db_name:table_name`.
+        Execute SQL and return a DataFrame for SELECT-like results or rowcount for DML.
         """
-        df = self.run_query(
-            """
-            SELECT name
-            FROM sqlite_master
-            WHERE type='table'
-              AND name NOT LIKE 'sqlite_%'
-              AND name NOT LIKE '__EFMigrationsHistory'
-            ORDER BY name;
-            """
-        )
-        if df.empty:
-            return []
-        return df["name"].tolist()
+        with self.engine.begin() as conn:
+            result = conn.execute(text(query), params or {})
+            if result.returns_rows:
+                rows = result.fetchall()
+                cols = result.keys()
+                return pd.DataFrame(rows, columns=cols)
+            return result.rowcount
 
-    def run_query(self, query: str, params: Optional[Iterable[Any]] = None):
-        """
-        Execute a native SQLite query and return the result.
-
-        - For SELECT-like statements (cursor has a description), returns a pandas DataFrame.
-        - For non-SELECT statements, commits and returns the affected rowcount.
-        """
-        cur = self.conn.cursor()
-        cur.execute(query, params or [])
-        if cur.description:
-            rows = cur.fetchall()
-            cols = [desc[0] for desc in cur.description]
-            return pd.DataFrame(rows, columns=cols)
-        self.conn.commit()
-        return cur.rowcount
-
-    def create_table_from_df(self, table_name: str, df: pd.DataFrame) -> None:
-        """
-        Create/replace a table from a DataFrame, inferring SQLite column types.
-
-        - Drops any existing table of the same name.
-        - Commits inserts on success; logs outcome.
-        """
-        if df.empty:
-            self.logger.warning(
-                "DataFrame is empty; skipping table creation for %s", table_name
-            )
-            return
-
-        type_map = {
-            "int64": "INTEGER",
-            "int32": "INTEGER",
-            "float64": "REAL",
-            "float32": "REAL",
-            "bool": "INTEGER",
-            
-            "datetime64[ns]": "TEXT",
-        }
-
-        col_defs = []
-        for col, dtype in df.dtypes.items():
-            sqlite_type = type_map.get(str(dtype), "TEXT")
-            col_defs.append(f'"{col}" {sqlite_type}')
-        create_sql = (
-            f'DROP TABLE IF EXISTS "{table_name}";\n'
-            f'CREATE TABLE "{table_name}" ({", ".join(col_defs)});'
-        )
-
-        try:
-            cur = self.conn.cursor()
-            cur.executescript(create_sql)
-
-            placeholders = ", ".join(["?"] * len(df.columns))
-            insert_sql = (
-                f'INSERT INTO "{table_name}" ({", ".join([f"{c}" for c in df.columns])}) '
-                f"VALUES ({placeholders})"
-            )
-            cur.executemany(insert_sql, df.itertuples(index=False, name=None))
-            self.conn.commit()
-            self.logger.info(
-                "Created table %s with %s rows", table_name, len(df)
-            )
-        except Exception as exc:
-            self.conn.rollback()
-            self.logger.error(
-                "Failed to create table %s: %s", table_name, exc, exc_info=True
-            )
-            raise
-
-    def execute(self, command: str, params: Optional[Iterable[Any]] = None) -> int:
-        """
-        Execute a non-SELECT SQL command; returns affected rowcount.
-        """
-        cur = self.conn.cursor()
-        cur.execute(command, params or [])
-        self.conn.commit()
-        return cur.rowcount
+    def execute(
+        self, command: str, params: Optional[Mapping[str, Any] | Mapping] = None
+    ) -> int:
+        """Execute a non-SELECT SQL command; returns affected rowcount."""
+        res = self.run_query(command, params=params)
+        return int(res if res is not None else 0)
 
     def close(self) -> None:
-        """Close the open SQLite connection."""
+        """Dispose the SQLAlchemy engine."""
         try:
-            self.conn.close()
+            self.engine.dispose()
         except Exception:
             pass
