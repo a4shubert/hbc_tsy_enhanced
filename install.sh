@@ -13,11 +13,10 @@ REPO_ROOT="${SCRIPT_DIR}"
 # Load environment defaults.
 source "${REPO_ROOT}/scripts/env.sh"
 
-# Check for required runtimes/tools.
+# Check for optional runtimes/tools.
 if ! command -v dotnet >/dev/null 2>&1; then
-  echo "[install] dotnet SDK not found. Please install .NET 8 SDK:"
+  echo "[install] Warning: dotnet SDK not found. Install .NET 8 SDK if you plan to run the REST API:"
   echo "  https://dotnet.microsoft.com/en-us/download/dotnet/8.0"
-  exit 1
 fi
 
 if ! command -v conda >/dev/null 2>&1; then
@@ -41,6 +40,3 @@ fi
 echo "[install] Upgrading pip and installing hbc_py (editable)"
 pip install --upgrade pip
 pip install -e "${REPO_ROOT}/hbc_py"
-
-echo "[install] Starting REST API from published build..."
-exec bash "${REPO_ROOT}/hbc_rest/scripts/run_prod.sh"

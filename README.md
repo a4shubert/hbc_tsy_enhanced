@@ -36,41 +36,20 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
     git clone https://github.com/a4shubert/hbc_tsy_enhanced.git
     cd hbc_tsy_enhanced
     ```
-2.  macOS/Linux:
-
-    - One-shot setup (env, venv, hbc_py install, start API):
-
-      ```bash
-      ./install.sh
-      ```
-
-      - Python only: `pip install -e hbc_py`
-      - API only: `hbc_rest/scripts/run_prod.sh` (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
-        <br>
-
-    - Demo notebook (classic):
-
-      ```bash
-      hbc_py/scripts/run_demo_notebook.sh
-      ```
-
-3.  Windows (PowerShell):
-
-    - One-shot setup (env, venv, hbc_py install, start API):
-
-      ```bash
-      .\install.ps1
-      ```
-
-      - Python only: `pip install -e hbc_py`
-      - API only: `hbc_rest\scripts\run_prod.ps1` (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
-        <br>
-
-    - Demo notebook (classic):
-
-      ```bash
-      hbc_py\scripts\run_demo_notebook.ps1
-      ```
+2. One-shot setup:
+   ```bash
+   # macOS/Linux
+   ./install.sh
+   # Windows (PowerShell)
+   .\install.ps1
+   ```
+3. Run everything (REST API + demo notebook) in background:
+   ```bash
+   # macOS/Linux
+   ./run_all.sh
+   # Windows (PowerShell)
+   .\run_all.ps1
+   ```
 
 # Usage Examples
 
