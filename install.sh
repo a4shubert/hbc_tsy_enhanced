@@ -15,12 +15,14 @@ source "${REPO_ROOT}/scripts/env.sh"
 
 # Check for required runtimes/tools.
 if ! command -v dotnet >/dev/null 2>&1; then
-  echo "[install] dotnet SDK not found. Please install .NET 8 SDK (https://dotnet.microsoft.com/en-us/download) and retry."
+  echo "[install] dotnet SDK not found. Please install .NET 8 SDK:"
+  echo "  https://dotnet.microsoft.com/en-us/download/dotnet/8.0"
   exit 1
 fi
 
 if ! command -v conda >/dev/null 2>&1; then
-  echo "[install] Warning: conda/miniconda not found. If you prefer conda, install Miniconda (https://docs.conda.io/en/latest/miniconda.html) and rerun."
+  echo "[install] Warning: conda/miniconda not found. If you prefer conda, install Miniconda:"
+  echo "  https://docs.conda.io/en/latest/miniconda.html"
 fi
 
 PYTHON_BIN="${PYTHON:-python3}"

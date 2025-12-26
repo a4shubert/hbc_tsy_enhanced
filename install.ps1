@@ -13,12 +13,14 @@ $RepoRoot = $PSScriptRoot
 
 # Check for required tools.
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Host "[install] dotnet SDK not found. Install .NET 8 SDK (https://dotnet.microsoft.com/en-us/download) and retry."
+    Write-Host "[install] dotnet SDK not found. Install .NET 8 SDK:"
+    Write-Host "  https://dotnet.microsoft.com/en-us/download/dotnet/8.0"
     exit 1
 }
 
 if (-not (Get-Command conda -ErrorAction SilentlyContinue)) {
-    Write-Host "[install] Warning: conda/miniconda not found. If you prefer conda, install Miniconda (https://docs.conda.io/en/latest/miniconda.html)."
+    Write-Host "[install] Warning: conda/miniconda not found. If you prefer conda, install Miniconda:"
+    Write-Host "  https://docs.conda.io/en/latest/miniconda.html"
 }
 
 # Resolve a Python executable
