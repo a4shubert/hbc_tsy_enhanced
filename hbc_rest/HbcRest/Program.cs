@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Connections;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -460,6 +461,24 @@ app.MapPost($"/{MonikerService}/batch", async ([FromBody] List<ServiceRequest> i
 var saved = await db.SaveChangesAsync();
 Console.WriteLine($"[HbcRest] POST /{MonikerService}/batch saved {saved} row(s), updated {updated} existing");
 return Results.Ok(inputs);
+});
+
+// Try to open Swagger in the default browser when the app starts.
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var swaggerUrl = $"{urlsToUse.TrimEnd('/')}/swagger/index.html";
+    try
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = swaggerUrl,
+            UseShellExecute = true
+        });
+    }
+    catch
+    {
+        // Best-effort only; ignore if not available (headless/server, etc.)
+    }
 });
 
 try
