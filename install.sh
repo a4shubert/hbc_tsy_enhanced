@@ -13,6 +13,16 @@ REPO_ROOT="${SCRIPT_DIR}"
 # Load environment defaults.
 source "${REPO_ROOT}/scripts/env.sh"
 
+# Check for required runtimes/tools.
+if ! command -v dotnet >/dev/null 2>&1; then
+  echo "[install] dotnet SDK not found. Please install .NET 8 SDK (https://dotnet.microsoft.com/en-us/download) and retry."
+  exit 1
+fi
+
+if ! command -v conda >/dev/null 2>&1; then
+  echo "[install] Warning: conda/miniconda not found. If you prefer conda, install Miniconda (https://docs.conda.io/en/latest/miniconda.html) and rerun."
+fi
+
 PYTHON_BIN="${PYTHON:-python3}"
 
 # Use existing venv if already active; otherwise create one under repo.

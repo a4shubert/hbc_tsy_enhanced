@@ -30,6 +30,8 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 
 # Installation
 
+**Prerequisites**: Python 3.10+, .NET 8 SDK, and optionally Miniconda/conda if you prefer conda-based environments.
+
 1.  Clone and enter the repo:
     ```bash
     git clone https://github.com/a4shubert/hbc_tsy_enhanced.git
