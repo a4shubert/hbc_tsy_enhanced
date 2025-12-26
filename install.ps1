@@ -11,11 +11,10 @@ $RepoRoot = $PSScriptRoot
 # Load env defaults
 . "$RepoRoot\scripts\env.ps1"
 
-# Check for required tools.
+# Check for optional tools.
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Host "[install] dotnet SDK not found. Install .NET 8 SDK:"
+    Write-Host "[install] Warning: dotnet SDK not found. Install .NET 8 SDK if you plan to run the REST API:"
     Write-Host "  https://dotnet.microsoft.com/en-us/download/dotnet/8.0"
-    exit 1
 }
 
 if (-not (Get-Command conda -ErrorAction SilentlyContinue)) {
@@ -51,5 +50,4 @@ Write-Host "[install] Upgrading pip and installing hbc_py (editable)"
 & $Python -m pip install --upgrade pip
 & $Python -m pip install -e "$RepoRoot\hbc_py"
 
-Write-Host "[install] Starting REST API from published build..."
-& "$RepoRoot\hbc_rest\scripts\run_prod.ps1"
+Write-Host "[install] Done. You can start the REST API with hbc_rest\\scripts\\run_prod.ps1 when ready."

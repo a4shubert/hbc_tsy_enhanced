@@ -36,41 +36,30 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
     git clone https://github.com/a4shubert/hbc_tsy_enhanced.git
     cd hbc_tsy_enhanced
     ```
-2.  macOS/Linux:
+2. One-shot setup:
+   ```bash
+   # macOS/Linux
+   ./install.sh
+   # Windows (PowerShell)
+   .\install.ps1
+   ```
+3. Run everything (REST API + demo notebook) in background:
+   ```bash
+   # macOS/Linux
+   ./run_all.sh
+   # Windows (PowerShell)
+   .\run_all.ps1
+   ```
 
-    - One-shot setup (env, venv, hbc_py install, start API):
-
-      ```bash
-      ./install.sh
-      ```
-
-      - Python only: `pip install -e hbc_py`
-      - API only: `hbc_rest/scripts/run_prod.sh` (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
-        <br>
-
-    - Demo notebook (classic):
-
-      ```bash
-      hbc_py/scripts/run_demo_notebook.sh
-      ```
-
-3.  Windows (PowerShell):
-
-    - One-shot setup (env, venv, hbc_py install, start API):
-
-      ```bash
-      .\install.ps1
-      ```
-
-      - Python only: `pip install -e hbc_py`
-      - API only: `hbc_rest\scripts\run_prod.ps1` (Swagger UI at `$ASPNETCORE_URLS/swagger/index.html`)
-        <br>
-
-    - Demo notebook (classic):
-
-      ```bash
-      hbc_py\scripts\run_demo_notebook.ps1
-      ```
+## Scripts
+- `install.sh` / `install.ps1`: set up env, venv, install `hbc_py` (no servers started).
+- `run_all.sh` / `run_all.ps1`: start REST API (published build) + demo notebook in background; logs in `logs/`.
+- `hbc_rest/scripts/run_prod.sh` / `run_prod.ps1`: run published REST API.
+- `hbc_rest/scripts/run_dev.sh` / `run_dev.ps1`: run REST API in Development profile.
+- `hbc_rest/scripts/run_build.sh` / `run_build.ps1`: clean/restore/migrate/publish REST API.
+- `hbc_rest/scripts/reset_db.sh` / `reset_db.ps1`: drop DB, recreate migrations, update database.
+- `hbc_py/scripts/run_demo_notebook.sh` / `run_demo_notebook.ps1`: launch classic Jupyter for `hbc_py/notebooks/Demo.ipynb`.
+- `hbc_db/scripts/count_rows.sh`: print row counts for all SQLite tables (uses `HBC_DB_PATH` or `hbc_db/hbc.db`).
 
 # Usage Examples
 
