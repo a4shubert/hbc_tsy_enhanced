@@ -9,6 +9,8 @@ logger = logging.getLogger()
 class Fetcher(ABC):
     """Abstract base for fetch/clean/normalize/validate pipelines."""
 
+    MAX_TOP = 100
+
     @abstractmethod
     def fetch(self, config, query: str | None = None) -> pd.DataFrame:
         """Retrieve raw data for the given config/query string."""

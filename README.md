@@ -70,40 +70,34 @@ _Data Container_:
 ```python
 dc = DataContainer("nyc_open_data_311_customer_satisfaction_survey")
 
-# retrieve: query first 100 rows
+# fetch: first 100 rows
 dc.get()
 dc.df.shape
 
-# retrieve: query distinct
+# fetch: distinct
 dc.get(query="$apply=groupby((campaign))")
-dc.df.shape
 
-# retrieve: query with filter
+# fetch: with filter
 dc.get(query="$filter=campaign eq 'Campaign 4'")
-dc.df.shape
 
 # caching:
 dc.to_cache()
 
-# from_cache: get 10 rows
+# from_cache: get 100 rows
 dc.from_cache()
-dc.df.shape
 
 # from_cache: get by filter
 dc.from_cache(query="$filter=campaign eq 'Campaign 4'")
-dc.df.shape
 
 # from_cache: get distinct
 dc.from_cache(query="$apply=groupby((year))")
-dc.df.shape
 
 # from_cache: get page 2 with page size 50
 dc.from_cache(query="$top=50&$skip=50")
-dc.df.shape
 
 # from_cache: get total count
 dc.from_cache(query="$count=true")
-dc.df.shape
+
 ```
 
 _Analytics_:
@@ -122,20 +116,12 @@ dc.to_cache()
 # retrieve from cache for analytics:
 dc.from_cache(query=f"$filter=created_date eq '{ul.date_as_iso_format(app_context.as_of)}'")
 
-# enrich:
-df = dc.df
-cols = ul.cols_as_named_tuple(df)
-df["hbc_days_to_close"] = (pd.to_datetime(df[cols.closed_date])- pd.to_datetime(df[cols.created_date])).dt.days.astype("Int64")
-cols = ul.cols_as_named_tuple(df)
-m = df[cols.hbc_days_to_close] == 0
-df_closed_not_same_day = df[~m]
-
 # plot:
 path = ul.path_to_str(
                 ul.mk_dir(app_context.dir_analytics / "plots")
                 / "closed_requests_by_location.html"
             )
-_ = PlotEngine.plot_geo_map(
+PlotEngine.plot_geo_map(
             df=df_closed_not_same_day,
             col_latitude=cols.latitude,
             col_longitude=cols.longitude,
@@ -144,7 +130,7 @@ _ = PlotEngine.plot_geo_map(
             cluster=True,
             start_zoom=11,
             tiles="CartoDB positron",
-            savepath= path
+            savepath=path
         )
 
 # analyze:
@@ -159,6 +145,7 @@ res = AnalyticalEngine.descriptive_stats(
         cols.agency_name,
     ],
 )
+res.keys()
 ```
 
 ## Jobs:

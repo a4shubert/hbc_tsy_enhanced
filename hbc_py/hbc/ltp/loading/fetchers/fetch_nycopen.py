@@ -137,6 +137,6 @@ class FetcherNYCOpenData(Fetcher):
         has_filter = "where" in mapped and mapped["where"]
         has_apply = apply_seen or ("select" in mapped and "group" in mapped)
         if "limit" not in mapped and not has_filter and not has_apply:
-            mapped["limit"] = 100
+            mapped["limit"] = Fetcher.MAX_TOP
 
         return mapped
