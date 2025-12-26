@@ -108,10 +108,6 @@ app.MapGet($"/{MonikerSurvey}", async (
         query = query.Skip(skip.Value);
     }
 
-    // If $top is specified:
-    //   >0 => clamp to MaxTop; <=0 => no limit
-    // If $top is not specified:
-    //   apply default 10 only when no filter; otherwise no limit.
     if (top.HasValue)
     {
         if (top.Value > 0)
@@ -125,7 +121,7 @@ app.MapGet($"/{MonikerSurvey}", async (
     {
         if (string.IsNullOrWhiteSpace(filter) && count != true)
         {
-            query = query.Take(10); // default limit when not specified and no filter
+            query = query.Take(MaxTop); // default limit when not specified and no filter
         }
     }
 
@@ -459,9 +455,9 @@ app.MapPost($"/{MonikerService}/batch", async ([FromBody] List<ServiceRequest> i
         await db.ServiceRequests.AddRangeAsync(toInsert);
     }
 
-var saved = await db.SaveChangesAsync();
-Console.WriteLine($"[HbcRest] POST /{MonikerService}/batch saved {saved} row(s), updated {updated} existing");
-return Results.Ok(inputs);
+    var saved = await db.SaveChangesAsync();
+    Console.WriteLine($"[HbcRest] POST /{MonikerService}/batch saved {saved} row(s), updated {updated} existing");
+    return Results.Ok(inputs);
 });
 
 // Try to open Swagger in the default browser when the app starts.

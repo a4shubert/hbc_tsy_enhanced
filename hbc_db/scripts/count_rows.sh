@@ -19,5 +19,5 @@ if [[ -z "${tables}" ]]; then
 fi
 
 while IFS= read -r tbl; do
-  sqlite3 "${DB_PATH}" "SELECT '$tbl' AS name, COUNT(*) AS row_count FROM \"$tbl\";"
+  sqlite3 "${DB_PATH}" "SELECT '$tbl = ' || COUNT(*) AS row_count FROM \"$tbl\";"
 done <<< "${tables}"
