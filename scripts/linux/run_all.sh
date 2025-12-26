@@ -5,22 +5,22 @@ set -euo pipefail
 # leaving this shell free for running jobs inside the venv.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${SCRIPT_DIR}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Load env defaults.
-if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
+if [[ -f "${SCRIPT_DIR}/env.sh" ]]; then
   # shellcheck source=/dev/null
-  source "${REPO_ROOT}/scripts/env.sh"
+  source "${SCRIPT_DIR}/env.sh"
 fi
 
 # Ensure venv exists (basic install check).
 if [[ ! -f "${REPO_ROOT}/.venv/bin/activate" ]]; then
-  echo "[run_all] .venv not found. Please run ./install.sh first."
+    echo "[run_all] .venv not found. Please run scripts/linux/install.sh first."
   exit 1
 fi
 
-rest_cmd="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; bash hbc_rest/scripts/run_prod.sh"
-nb_cmd="cd \"${REPO_ROOT}\"; source scripts/env.sh; source .venv/bin/activate; bash hbc_py/scripts/run_demo_notebook.sh"
+rest_cmd="cd \"${REPO_ROOT}\"; source scripts/linux/env.sh; source .venv/bin/activate; bash scripts/linux/rest_start_prod.sh"
+nb_cmd="cd \"${REPO_ROOT}\"; source scripts/linux/env.sh; source .venv/bin/activate; bash scripts/linux/run_demo_notebook.sh"
 
 # Escape double quotes for AppleScript.
 rest_cmd_escaped=${rest_cmd//\"/\\\"}

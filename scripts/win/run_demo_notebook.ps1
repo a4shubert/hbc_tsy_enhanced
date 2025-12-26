@@ -8,7 +8,7 @@ $NotebookDir = Join-Path $RepoRoot "hbc_py/notebooks"
 $DefaultNotebook = "Demo.ipynb"
 
 # Load env defaults if available.
-$EnvScript = Join-Path $RepoRoot "scripts/env.ps1"
+$EnvScript = Join-Path $PSScriptRoot "env.ps1"
 if (Test-Path $EnvScript) {
     . $EnvScript
 }

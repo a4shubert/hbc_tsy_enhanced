@@ -9,9 +9,9 @@ NOTEBOOK_DIR="${REPO_ROOT}/hbc_py/notebooks"
 DEFAULT_NOTEBOOK="Demo.ipynb"
 
 # Load shared env defaults (HBC_API_URL, HBC_DB_PATH, etc.) if available.
-if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
+if [[ -f "${SCRIPT_DIR}/env.sh" ]]; then
   # shellcheck source=/dev/null
-  source "${REPO_ROOT}/scripts/env.sh"
+  source "${SCRIPT_DIR}/env.sh"
 fi
 
 # Ensure repo venv exists; create if missing, then activate it so PATH/python point to it.

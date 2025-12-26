@@ -13,16 +13,16 @@ else
   _SRC="$0"
 fi
 SCRIPT_DIR="$(cd "$(dirname "${_SRC}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
+if [[ -f "${SCRIPT_DIR}/env.sh" ]]; then
   # shellcheck source=/dev/null
-  source "${REPO_ROOT}/scripts/env.sh"
+  source "${SCRIPT_DIR}/env.sh"
 fi
 
 VENV_DIR="${REPO_ROOT}/.venv"
 if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
-  echo "[activate_venv] .venv not found. Run ./install.sh first."
+  echo "[activate_venv] .venv not found. Run ./scripts/linux/install.sh first."
   return 1 2>/dev/null || exit 1
 fi
 

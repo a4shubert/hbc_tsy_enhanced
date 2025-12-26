@@ -3,13 +3,13 @@
   - loads env defaults
   - creates/activates .venv if not active
   - installs hbc_py in editable mode
-  - starts published REST API via hbc_rest\scripts\run_prod.ps1
+  - starts published REST API via scripts\win\rest_start_prod.ps1
 #>
 
-$RepoRoot = $PSScriptRoot
+$RepoRoot = (Resolve-Path "$PSScriptRoot\..\..").Path
 
 # Load env defaults
-. "$RepoRoot\scripts\env.ps1"
+. "$PSScriptRoot\env.ps1"
 
 # Check for optional tools.
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
