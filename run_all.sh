@@ -34,16 +34,18 @@ start_rest_cmd="cd \"${REPO_ROOT}\" && source .venv/bin/activate && source scrip
 start_nb_cmd="cd \"${REPO_ROOT}\" && source .venv/bin/activate && source scripts/env.sh && bash hbc_py/scripts/run_demo_notebook.sh"
 
 if [[ "$(uname)" == "Darwin" ]]; then
+  rest_cmd_escaped=${start_rest_cmd//\'/\'"\'"\'}  # escape single quotes
+  nb_cmd_escaped=${start_nb_cmd//\'/\'"\'"\'}
   echo "[run_all] Opening REST API in new Terminal window..."
   osascript >/dev/null <<OSA
 tell application "Terminal"
-  do script "${start_rest_cmd}"
+  do script "bash -lc '${rest_cmd_escaped}'"
 end tell
 OSA
   echo "[run_all] Opening notebook in new Terminal window..."
   osascript >/dev/null <<OSA
 tell application "Terminal"
-  do script "${start_nb_cmd}"
+  do script "bash -lc '${nb_cmd_escaped}'"
 end tell
 OSA
   echo "[run_all] Terminals started for REST and notebook. This shell stays free for commands (venv active)."

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Connections;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -469,11 +470,22 @@ app.Lifetime.ApplicationStarted.Register(() =>
     var swaggerUrl = $"{urlsToUse.TrimEnd('/')}/swagger/index.html";
     try
     {
-        Process.Start(new ProcessStartInfo
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            FileName = swaggerUrl,
-            UseShellExecute = true
-        });
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {swaggerUrl}")
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Process.Start("open", swaggerUrl);
+        }
+        else
+        {
+            Process.Start("xdg-open", swaggerUrl);
+        }
     }
     catch
     {
