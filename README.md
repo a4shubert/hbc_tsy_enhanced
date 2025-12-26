@@ -4,6 +4,19 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 
 # Table of Contents
 
+- [Package Map](#package-map)
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+  - [Library](#library)
+  - [Jobs](#jobs)
+- [Components](#components)
+  - [hbc_configs (yaml)](#hbc_configs-yaml)
+  - [hbc_db (sqlite)](#hbc_db-sqlite)
+  - [hbc_py (Python)](#hbc_py-python)
+    - [UML (High-Level)](#uml-high-level)
+  - [hbc_rest (ASPNet EF Core)](#hbc_rest-aspnet-ef-core)
+  - [hbc_web (Next.js)](#hbc_web-nextjs)
+
 # Package Map
 
 - `hbc_configs`: Source configs (YAML) defining schemas, types, and source tokens for each moniker.
