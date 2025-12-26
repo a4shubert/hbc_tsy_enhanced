@@ -13,13 +13,33 @@ if (Test-Path $EnvScript) {
     . $EnvScript
 }
 
-if (-not (Get-Command jupyter -ErrorAction SilentlyContinue)) {
-    Write-Host "[demo] jupyter not found on PATH. Install with: pip install notebook nbclassic"
+# Resolve Python to run jupyter from (prefer repo venv).
+$Python = ""
+$VenvPy = Join-Path $RepoRoot ".venv\Scripts\python.exe"
+if ($Env:VIRTUAL_ENV -and (Test-Path (Join-Path $Env:VIRTUAL_ENV "Scripts\python.exe"))) {
+    $Python = Join-Path $Env:VIRTUAL_ENV "Scripts\python.exe"
+} elseif (Test-Path $VenvPy) {
+    $Python = $VenvPy
+} elseif (Get-Command python -ErrorAction SilentlyContinue) {
+    $Python = "python"
+} elseif (Get-Command py -ErrorAction SilentlyContinue) {
+    $Python = "py"
+}
+
+if (-not $Python) {
+    Write-Host "[demo] Python not found. Install Python 3.10+ and rerun."
+    exit 1
+}
+
+try {
+    & $Python -c "import jupyter" 2>$null | Out-Null
+} catch {
+    Write-Host "[demo] jupyter not found in $Python. Install with: $Python -m pip install notebook nbclassic"
     exit 1
 }
 
 Write-Host "[demo] Starting nbclassic in $NotebookDir"
-jupyter nbclassic `
+& $Python -m jupyter nbclassic `
   --NotebookApp.open_browser=True `
   --ServerApp.root_dir="$NotebookDir" `
   --NotebookApp.default_url="/tree/$DefaultNotebook"

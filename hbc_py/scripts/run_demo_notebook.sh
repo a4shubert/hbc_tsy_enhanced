@@ -14,13 +14,30 @@ if [[ -f "${REPO_ROOT}/scripts/env.sh" ]]; then
   source "${REPO_ROOT}/scripts/env.sh"
 fi
 
-if ! command -v jupyter >/dev/null 2>&1; then
-  echo "[demo] jupyter not found on PATH. Install with: pip install notebook nbclassic"
+# Resolve a Python to run jupyter from (prefer repo venv).
+PY_BIN=""
+if [[ -n "${VIRTUAL_ENV:-}" && -x "${VIRTUAL_ENV}/bin/python" ]]; then
+  PY_BIN="${VIRTUAL_ENV}/bin/python"
+elif [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then
+  PY_BIN="${REPO_ROOT}/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+  PY_BIN="$(command -v python3)"
+elif command -v python >/dev/null 2>&1; then
+  PY_BIN="$(command -v python)"
+fi
+
+if [[ -z "${PY_BIN}" ]]; then
+  echo "[demo] Python not found. Install Python 3.10+ and rerun."
+  exit 1
+fi
+
+if ! "${PY_BIN}" -c "import jupyter" >/dev/null 2>&1; then
+  echo "[demo] jupyter not found in ${PY_BIN}. Install with: ${PY_BIN} -m pip install notebook nbclassic"
   exit 1
 fi
 
 echo "[demo] Starting nbclassic in ${NOTEBOOK_DIR}"
-exec jupyter nbclassic \
+exec "${PY_BIN}" -m jupyter nbclassic \
   --NotebookApp.open_browser=True \
   --ServerApp.root_dir="${NOTEBOOK_DIR}" \
   --NotebookApp.default_url="/tree/${DEFAULT_NOTEBOOK}"
