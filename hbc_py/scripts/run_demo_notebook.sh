@@ -20,6 +20,14 @@ if [[ -n "${VIRTUAL_ENV:-}" && -x "${VIRTUAL_ENV}/bin/python" ]]; then
   PY_BIN="${VIRTUAL_ENV}/bin/python"
 elif [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then
   PY_BIN="${REPO_ROOT}/.venv/bin/python"
+# Use conda python if available
+elif [[ -n "${CONDA_PYTHON_EXE:-}" && -x "${CONDA_PYTHON_EXE}" ]]; then
+  PY_BIN="${CONDA_PYTHON_EXE}"
+elif command -v conda >/dev/null 2>&1; then
+  CONDA_BASE="$(conda info --base 2>/dev/null || true)"
+  if [[ -n "${CONDA_BASE}" && -x "${CONDA_BASE}/bin/python" ]]; then
+    PY_BIN="${CONDA_BASE}/bin/python"
+  fi
 elif command -v python3 >/dev/null 2>&1; then
   PY_BIN="$(command -v python3)"
 elif command -v python >/dev/null 2>&1; then

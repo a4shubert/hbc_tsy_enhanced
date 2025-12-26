@@ -20,6 +20,14 @@ if ($Env:VIRTUAL_ENV -and (Test-Path (Join-Path $Env:VIRTUAL_ENV "Scripts\python
     $Python = Join-Path $Env:VIRTUAL_ENV "Scripts\python.exe"
 } elseif (Test-Path $VenvPy) {
     $Python = $VenvPy
+} elseif ($Env:CONDA_PYTHON_EXE -and (Test-Path $Env:CONDA_PYTHON_EXE)) {
+    $Python = $Env:CONDA_PYTHON_EXE
+} elseif (Get-Command conda -ErrorAction SilentlyContinue) {
+    try {
+        $base = (& conda info --base)
+        $condaPy = Join-Path $base "python.exe"
+        if (Test-Path $condaPy) { $Python = $condaPy }
+    } catch {}
 } elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $Python = "python"
 } elseif (Get-Command py -ErrorAction SilentlyContinue) {
