@@ -97,11 +97,11 @@ export function HbcAgTable<T extends Record<string, unknown>>({
           getRowId={
             rowIdField
               ? (p) => {
-                const raw = p.data?.[rowIdField]
-                if (typeof raw === "string" && raw.length) return raw
-                if (typeof raw === "number") return String(raw)
-                return JSON.stringify(p.data)
-              }
+                  const raw = p.data?.[rowIdField]
+                  if (typeof raw === "string" && raw.length) return raw
+                  if (typeof raw === "number") return String(raw)
+                  return JSON.stringify(p.data)
+                }
               : undefined
           }
         />

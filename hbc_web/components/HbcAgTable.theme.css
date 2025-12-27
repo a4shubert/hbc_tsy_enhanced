@@ -1,61 +1,43 @@
+/* HbcAgTable.theme.css */
+
 .hbc-ag-grid.ag-theme-quartz-dark {
+  /* Base surfaces */
   --ag-background-color: var(--color-card);
   --ag-foreground-color: var(--color-text);
   --ag-secondary-foreground-color: var(--color-muted);
   --ag-header-background-color: var(--color-card);
   --ag-border-color: var(--color-border);
 
-  /* subtle interaction colors */
-  --ag-row-hover-color: rgba(255, 255, 255, 0.04);
-  --ag-selected-row-background-color: rgba(255, 255, 255, 0.06);
-  --ag-range-selection-background-color: rgba(255, 255, 255, 0.08);
-}
+  /* Accent driving “active” UI bits */
+  --ag-active-color: var(--color-accent);
 
-/* Horizontal scrollbar styling (WebKit + Firefox) */
-.hbc-ag-grid.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport,
-.hbc-ag-grid.ag-theme-quartz-dark .ag-center-cols-viewport {
-  scrollbar-color: var(--color-accent) transparent;
-  scrollbar-width: thin;
-}
+  /* Hover */
+  --ag-row-hover-color: color-mix(in oklab, var(--color-text) 4%, transparent);
 
-.hbc-ag-grid.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
-.hbc-ag-grid.ag-theme-quartz-dark .ag-center-cols-viewport::-webkit-scrollbar {
-  height: 10px;
-}
+  /* Selection (row) */
+  --ag-selected-row-background-color: color-mix(in oklab, var(--color-accent) 14%, transparent);
 
-.hbc-ag-grid.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
-.hbc-ag-grid.ag-theme-quartz-dark .ag-center-cols-viewport::-webkit-scrollbar-track {
-  background: transparent;
-}
+  /* Range selection (drag / fill) */
+  --ag-range-selection-border-color: var(--color-accent);
+  --ag-range-selection-border-style: solid;
 
-.hbc-ag-grid.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
-.hbc-ag-grid.ag-theme-quartz-dark .ag-center-cols-viewport::-webkit-scrollbar-thumb {
-  background: var(--color-accent);
-  border-radius: 999px;
-}
+  --ag-range-selection-background-color: color-mix(in oklab, var(--color-accent) 12%, transparent);
+  --ag-range-selection-background-color-2: color-mix(
+    in oklab,
+    var(--color-accent) 18%,
+    transparent
+  );
+  --ag-range-selection-background-color-3: color-mix(
+    in oklab,
+    var(--color-accent) 24%,
+    transparent
+  );
+  --ag-range-selection-background-color-4: color-mix(
+    in oklab,
+    var(--color-accent) 30%,
+    transparent
+  );
 
-.hbc-ag-grid.ag-theme-quartz-dark .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
-.hbc-ag-grid.ag-theme-quartz-dark .ag-center-cols-viewport::-webkit-scrollbar-thumb:hover {
-  filter: brightness(1.05);
-}
-
-/* ----------------------------
-   AG Grid: always show horizontal scrollbar
-   Scoped to HbcAgTable wrapper class: .hbc-ag-grid
----------------------------- */
-.hbc-ag-grid .ag-body-horizontal-scroll {
-  display: block !important;
-}
-
-.hbc-ag-grid .ag-body-horizontal-scroll-viewport {
-  overflow-x: scroll !important; /* forces a scrollbar track */
-  scrollbar-width: auto; /* Firefox */
-}
-
-.hbc-ag-grid .ag-body-horizontal-scroll-viewport::-webkit-scrollbar {
-  height: 12px; /* WebKit: make it visible */
-}
-
-.hbc-ag-grid .ag-body-horizontal-scroll-container {
-  min-height: 1px; /* prevents collapse in some layouts */
+  /* Optional: quick “flash” highlight (copy/paste) */
+  --ag-range-selection-highlight-color: color-mix(in oklab, var(--color-accent) 30%, transparent);
 }
