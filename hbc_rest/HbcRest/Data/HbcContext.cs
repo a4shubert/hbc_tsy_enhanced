@@ -4,9 +4,9 @@ namespace HbcRest.Data;
 
 public class HbcContext : DbContext
 {
-    public DbSet<CustomerSatisfactionSurvey> CustomerSatisfactionSurveys => Set<CustomerSatisfactionSurvey>();
-    public DbSet<CallCenterInquiry> CallCenterInquiries => Set<CallCenterInquiry>();
-    public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
+    public DbSet<NycOpenData311CustomerSatisfactionSurvey> CustomerSatisfactionSurveys => Set<NycOpenData311CustomerSatisfactionSurvey>();
+    public DbSet<NycOpenData311CallCenterInquiry> CallCenterInquiries => Set<NycOpenData311CallCenterInquiry>();
+    public DbSet<NycOpenData311ServiceRequests> ServiceRequests => Set<NycOpenData311ServiceRequests>();
 
     public HbcContext(DbContextOptions<HbcContext> options) : base(options) { }
 
@@ -14,15 +14,15 @@ public class HbcContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<CustomerSatisfactionSurvey>()
+        modelBuilder.Entity<NycOpenData311CustomerSatisfactionSurvey>()
             .HasIndex(c => c.HbcUniqueKey)
             .IsUnique();
 
-        modelBuilder.Entity<CallCenterInquiry>()
+        modelBuilder.Entity<NycOpenData311CallCenterInquiry>()
             .HasIndex(c => c.HbcUniqueKey)
             .IsUnique();
 
-        modelBuilder.Entity<ServiceRequest>()
+        modelBuilder.Entity<NycOpenData311ServiceRequests>()
             .HasIndex(c => c.HbcUniqueKey)
             .IsUnique();
     }

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace HbcRest.Data;
 
 [Table("nyc_open_data_311_call_center_inquiry")]
-public class CallCenterInquiry
+public class NycOpenData311CallCenterInquiry
 {
     [Key]
     [Column("id")]

@@ -81,7 +81,7 @@ app.MapGet($"/{MonikerSurvey}", async (
     [FromQuery(Name = "$expand")] string? expand,
     HbcContext db) =>
 {
-    IQueryable<CustomerSatisfactionSurvey> query = db.CustomerSatisfactionSurveys.AsQueryable();
+    IQueryable<NycOpenData311CustomerSatisfactionSurvey> query = db.CustomerSatisfactionSurveys.AsQueryable();
 
     try
     {
@@ -189,7 +189,7 @@ app.MapGet($"/{MonikerService}/{{id}}", async (string id, HbcContext db) =>
         ? Results.Ok(row)
         : Results.NotFound()).WithTags(MonikerService);
 
-app.MapPost($"/{MonikerSurvey}", async (CustomerSatisfactionSurvey survey, HbcContext db) =>
+app.MapPost($"/{MonikerSurvey}", async (NycOpenData311CustomerSatisfactionSurvey survey, HbcContext db) =>
 {
     if (!string.IsNullOrWhiteSpace(survey.HbcUniqueKey))
     {
@@ -210,12 +210,12 @@ app.MapPost($"/{MonikerSurvey}", async (CustomerSatisfactionSurvey survey, HbcCo
     return Results.Created($"/{MonikerSurvey}/{survey.Id}", survey);
 }).WithTags(MonikerSurvey);
 
-app.MapPost($"/{MonikerSurvey}/batch", async ([FromBody] List<CustomerSatisfactionSurvey> surveys, HbcContext db) =>
+app.MapPost($"/{MonikerSurvey}/batch", async ([FromBody] List<NycOpenData311CustomerSatisfactionSurvey> surveys, HbcContext db) =>
 {
     if (surveys is null || surveys.Count == 0) return Results.BadRequest("No surveys provided");
 
     int updated = 0;
-    var toInsert = new List<CustomerSatisfactionSurvey>();
+    var toInsert = new List<NycOpenData311CustomerSatisfactionSurvey>();
 
     foreach (var survey in surveys)
     {
@@ -243,7 +243,7 @@ app.MapPost($"/{MonikerSurvey}/batch", async ([FromBody] List<CustomerSatisfacti
     return Results.Ok(surveys);
 }).WithTags(MonikerSurvey);
 
-app.MapPut($"/{MonikerSurvey}/{{id}}", async (string id, CustomerSatisfactionSurvey input, HbcContext db) =>
+app.MapPut($"/{MonikerSurvey}/{{id}}", async (string id, NycOpenData311CustomerSatisfactionSurvey input, HbcContext db) =>
 {
     var survey = await db.CustomerSatisfactionSurveys.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
 
@@ -255,7 +255,7 @@ app.MapPut($"/{MonikerSurvey}/{{id}}", async (string id, CustomerSatisfactionSur
     return Results.NoContent();
 }).WithTags(MonikerSurvey);
 
-app.MapPut($"/{MonikerCall}/{{id}}", async (string id, CallCenterInquiry input, HbcContext db) =>
+app.MapPut($"/{MonikerCall}/{{id}}", async (string id, NycOpenData311CallCenterInquiry input, HbcContext db) =>
 {
     var row = await db.CallCenterInquiries.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
 
@@ -267,7 +267,7 @@ app.MapPut($"/{MonikerCall}/{{id}}", async (string id, CallCenterInquiry input, 
     return Results.NoContent();
 }).WithTags(MonikerCall);
 
-app.MapPut($"/{MonikerService}/{{id}}", async (string id, ServiceRequest input, HbcContext db) =>
+app.MapPut($"/{MonikerService}/{{id}}", async (string id, NycOpenData311ServiceRequests input, HbcContext db) =>
 {
     var row = await db.ServiceRequests.FirstOrDefaultAsync(s => s.HbcUniqueKey == id);
 
@@ -317,7 +317,7 @@ app.MapGet($"/{MonikerCall}", async (
     [FromQuery(Name = "$expand")] string? expand,
     HbcContext db) =>
 {
-    IQueryable<CallCenterInquiry> query = db.CallCenterInquiries.AsQueryable();
+    IQueryable<NycOpenData311CallCenterInquiry> query = db.CallCenterInquiries.AsQueryable();
 
     try
     {
@@ -409,7 +409,7 @@ app.MapGet($"/{MonikerCall}", async (
     return Results.Ok(projected);
 }).WithTags(MonikerCall);
 
-app.MapPost($"/{MonikerCall}", async (CallCenterInquiry input, HbcContext db) =>
+app.MapPost($"/{MonikerCall}", async (NycOpenData311CallCenterInquiry input, HbcContext db) =>
 {
     if (!string.IsNullOrWhiteSpace(input.HbcUniqueKey))
     {
@@ -430,12 +430,12 @@ app.MapPost($"/{MonikerCall}", async (CallCenterInquiry input, HbcContext db) =>
     return Results.Created($"/{MonikerCall}/{input.Id}", input);
 }).WithTags(MonikerCall);
 
-app.MapPost($"/{MonikerCall}/batch", async ([FromBody] List<CallCenterInquiry> inputs, HbcContext db) =>
+app.MapPost($"/{MonikerCall}/batch", async ([FromBody] List<NycOpenData311CallCenterInquiry> inputs, HbcContext db) =>
 {
     if (inputs is null || inputs.Count == 0) return Results.BadRequest("No call center inquiries provided");
 
     int updated = 0;
-    var toInsert = new List<CallCenterInquiry>();
+    var toInsert = new List<NycOpenData311CallCenterInquiry>();
 
     foreach (var input in inputs)
     {
@@ -474,7 +474,7 @@ app.MapGet($"/{MonikerService}", async (
     [FromQuery(Name = "$expand")] string? expand,
     HbcContext db) =>
 {
-    IQueryable<ServiceRequest> query = db.ServiceRequests.AsQueryable();
+    IQueryable<NycOpenData311ServiceRequests> query = db.ServiceRequests.AsQueryable();
 
     try
     {
@@ -566,7 +566,7 @@ app.MapGet($"/{MonikerService}", async (
     return Results.Ok(projected);
 }).WithTags(MonikerService);
 
-app.MapPost($"/{MonikerService}", async (ServiceRequest input, HbcContext db) =>
+app.MapPost($"/{MonikerService}", async (NycOpenData311ServiceRequests input, HbcContext db) =>
 {
     if (!string.IsNullOrWhiteSpace(input.HbcUniqueKey))
     {
@@ -587,12 +587,12 @@ app.MapPost($"/{MonikerService}", async (ServiceRequest input, HbcContext db) =>
     return Results.Created($"/{MonikerService}/{input.Id}", input);
 }).WithTags(MonikerService);
 
-app.MapPost($"/{MonikerService}/batch", async ([FromBody] List<ServiceRequest> inputs, HbcContext db) =>
+app.MapPost($"/{MonikerService}/batch", async ([FromBody] List<NycOpenData311ServiceRequests> inputs, HbcContext db) =>
 {
     if (inputs is null || inputs.Count == 0) return Results.BadRequest("No service requests provided");
 
     int updated = 0;
-    var toInsert = new List<ServiceRequest>();
+    var toInsert = new List<NycOpenData311ServiceRequests>();
 
     foreach (var input in inputs)
     {

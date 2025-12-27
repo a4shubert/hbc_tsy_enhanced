@@ -551,7 +551,7 @@ internal static class ApiHelpers
             .ToList();
     }
 
-    public static IQueryable<CustomerSatisfactionSurvey> ApplyFilter(string filter, IQueryable<CustomerSatisfactionSurvey> query)
+    public static IQueryable<NycOpenData311CustomerSatisfactionSurvey> ApplyFilter(string filter, IQueryable<NycOpenData311CustomerSatisfactionSurvey> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
         var parts = filter.Split(" and ", System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
@@ -590,7 +590,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IQueryable<CustomerSatisfactionSurvey> ApplyOrderBy(string orderBy, IQueryable<CustomerSatisfactionSurvey> query)
+    public static IQueryable<NycOpenData311CustomerSatisfactionSurvey> ApplyOrderBy(string orderBy, IQueryable<NycOpenData311CustomerSatisfactionSurvey> query)
     {
         var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts.Reverse())
@@ -609,7 +609,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IEnumerable<dynamic> ApplySelect(string? select, IEnumerable<CustomerSatisfactionSurvey> items)
+    public static IEnumerable<dynamic> ApplySelect(string? select, IEnumerable<NycOpenData311CustomerSatisfactionSurvey> items)
     {
         if (string.IsNullOrWhiteSpace(select))
         {
@@ -637,7 +637,7 @@ internal static class ApiHelpers
         }.Where(kv => cols.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value));
     }
 
-    public static async Task<IResult> ApplyGroupBy(string apply, IQueryable<CustomerSatisfactionSurvey> query)
+    public static async Task<IResult> ApplyGroupBy(string apply, IQueryable<NycOpenData311CustomerSatisfactionSurvey> query)
     {
         // support $apply=groupby((field))
         var match = Regex.Match(apply, @"groupby\(\(([^)]+)\)\)", RegexOptions.IgnoreCase);
@@ -659,7 +659,7 @@ internal static class ApiHelpers
         return Results.BadRequest("Unsupported groupby field");
     }
 
-    public static IQueryable<CallCenterInquiry> ApplyFilterCall(string filter, IQueryable<CallCenterInquiry> query)
+    public static IQueryable<NycOpenData311CallCenterInquiry> ApplyFilterCall(string filter, IQueryable<NycOpenData311CallCenterInquiry> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
         var parts = filter.Split(" and ", System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
@@ -692,7 +692,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IQueryable<CallCenterInquiry> ApplyOrderByCall(string orderBy, IQueryable<CallCenterInquiry> query)
+    public static IQueryable<NycOpenData311CallCenterInquiry> ApplyOrderByCall(string orderBy, IQueryable<NycOpenData311CallCenterInquiry> query)
     {
         var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts.Reverse())
@@ -714,7 +714,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IEnumerable<dynamic> ApplySelectCall(string? select, IEnumerable<CallCenterInquiry> items)
+    public static IEnumerable<dynamic> ApplySelectCall(string? select, IEnumerable<NycOpenData311CallCenterInquiry> items)
     {
         if (string.IsNullOrWhiteSpace(select))
         {
@@ -738,7 +738,7 @@ internal static class ApiHelpers
         }.Where(kv => cols.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value));
     }
 
-    public static IQueryable<ServiceRequest> ApplyFilterService(string filter, IQueryable<ServiceRequest> query)
+    public static IQueryable<NycOpenData311ServiceRequests> ApplyFilterService(string filter, IQueryable<NycOpenData311ServiceRequests> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
         var parts = filter.Split(" and ", System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
@@ -773,7 +773,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IQueryable<ServiceRequest> ApplyOrderByService(string orderBy, IQueryable<ServiceRequest> query)
+    public static IQueryable<NycOpenData311ServiceRequests> ApplyOrderByService(string orderBy, IQueryable<NycOpenData311ServiceRequests> query)
     {
         var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts.Reverse())
@@ -792,7 +792,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IEnumerable<dynamic> ApplySelectService(string? select, IEnumerable<ServiceRequest> items)
+    public static IEnumerable<dynamic> ApplySelectService(string? select, IEnumerable<NycOpenData311ServiceRequests> items)
     {
         if (string.IsNullOrWhiteSpace(select))
         {
@@ -817,7 +817,7 @@ internal static class ApiHelpers
         }.Where(kv => cols.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value));
     }
 
-    public static void CopyFields(CustomerSatisfactionSurvey target, CustomerSatisfactionSurvey source)
+    public static void CopyFields(NycOpenData311CustomerSatisfactionSurvey target, NycOpenData311CustomerSatisfactionSurvey source)
     {
         target.HbcUniqueKey = source.HbcUniqueKey;
         target.Year = source.Year;
@@ -835,7 +835,7 @@ internal static class ApiHelpers
         target.Nps = source.Nps;
     }
 
-    public static void CopyFieldsCall(CallCenterInquiry target, CallCenterInquiry source)
+    public static void CopyFieldsCall(NycOpenData311CallCenterInquiry target, NycOpenData311CallCenterInquiry source)
     {
         target.HbcUniqueKey = source.HbcUniqueKey;
         target.UniqueId = source.UniqueId;
@@ -849,7 +849,7 @@ internal static class ApiHelpers
         target.CallResolution = source.CallResolution;
     }
 
-    public static void CopyFieldsService(ServiceRequest target, ServiceRequest source)
+    public static void CopyFieldsService(NycOpenData311ServiceRequests target, NycOpenData311ServiceRequests source)
     {
         target.HbcUniqueKey = source.HbcUniqueKey;
         target.UniqueKey = source.UniqueKey;
