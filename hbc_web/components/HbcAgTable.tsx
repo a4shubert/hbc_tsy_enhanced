@@ -1,7 +1,9 @@
+// HbcAgTable.tsx
 "use client"
 
 import "ag-grid-community/styles/ag-grid.css"
 import "ag-grid-community/styles/ag-theme-quartz.css"
+import "./HbcAgTable.theme.css"
 
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community"
 import type { ColDef, GridOptions } from "ag-grid-community"
@@ -45,9 +47,9 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     () => ({
       resizable: true,
       sortable: true,
+      unSortIcon: true,
       filter: true,
       floatingFilter: true,
-      flex: 1,
       minWidth: 140,
     }),
     []
@@ -60,13 +62,18 @@ export function HbcAgTable<T extends Record<string, unknown>>({
       rowSelection: "single",
       suppressCellFocus: true,
       pagination: false,
+
+      // key bits
+      alwaysShowHorizontalScroll: true,
+      suppressHorizontalScroll: false,
+
       ...(gridOptions ?? {}),
     }),
     [gridOptions]
   )
 
   const finalClassName = [
-    "ag-theme-quartz-dark w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-card)]",
+    "hbc-ag-grid ag-theme-quartz-dark w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-card)]",
     className,
   ]
     .filter(Boolean)
