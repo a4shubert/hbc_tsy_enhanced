@@ -9,7 +9,7 @@
 
   --color-bg: #020617;
   --color-card: #090e1b;
-  --color-border: rgba(255, 255, 255, 0.10);
+  --color-border: rgba(255, 255, 255, 0.1);
 
   --color-text: #f8fafc;
   --color-muted: #cbd5e1;
@@ -21,6 +21,7 @@
   --color-link-surface: rgba(99, 102, 241, 0.15);
   --color-link-surface-hover: rgba(99, 102, 241, 0.25);
 
+  /* used for anchor offset + consistent spacing */
   --hbc-header-h: 112px;
 }
 
@@ -54,11 +55,23 @@ body {
   margin: 0;
   font-family: var(--font-dm-sans), system-ui, -apple-system, Segoe UI, sans-serif;
   color: var(--color-text);
-  overflow-x: hidden;
+  background: var(--color-bg);
 }
 
+/* Keep anchor jumps from hiding behind the sticky header */
 html {
   scroll-padding-top: var(--hbc-header-h);
+  font-size: 17px;
+}
+
+/*
+  Sticky headers fail when you’re not scrolling the document (common in dashboards).
+  This makes ONE explicit scroll container (the one in layout.tsx) and keeps sticky reliable.
+*/
+#app-scroll {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 a,
@@ -76,7 +89,11 @@ select {
   letter-spacing: -0.02em;
   font-weight: 100;
   text-wrap: balance;
-  hyphens: auto;
+
+  /* prevent “Analyt- ical” */
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 @media (min-width: 1920px) {
