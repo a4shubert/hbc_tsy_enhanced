@@ -25,7 +25,7 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
   useEffect(() => {
     const update = () => {
       const next: Record<string, string> = {};
-      cities.forEach((c) => {
+      for (const c of cities) {
         next[c.label] = new Intl.DateTimeFormat("en-GB", {
           hour: "2-digit",
           minute: "2-digit",
@@ -33,26 +33,29 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
           hour12: false,
           timeZone: c.zone,
         }).format(new Date());
-      });
+      }
       setTimes(next);
     };
 
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [cities, showSeconds]);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-200 sm:text-base">
+    <div className="hidden xl:flex flex-nowrap items-center gap-3 text-sm text-slate-200 sm:text-base">
       {cities.map((c) => (
         <div
           key={c.label}
           className="flex flex-col items-center rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2 shadow-sm"
         >
           <div className="text-indigo-100 text-lg text-center font-normal">
-            {times[c.label] ?? "--:--:--"}
+            {times[c.label] ?? (showSeconds ? "--:--:--" : "--:--")}
           </div>
-          <div className="font-normal text-white text-center mt-1">{c.label}</div>
+          <div className="mt-1 w-full text-center font-normal text-white whitespace-nowrap overflow-hidden text-ellipsis">
+            {c.label}
+          </div>
+
         </div>
       ))}
     </div>

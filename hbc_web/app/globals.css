@@ -31,7 +31,7 @@
   --color-muted: #a7b3c3; /* blue-gray muted */
 
   /* Accents (teal + lime) */
-  --color-accent: #1ea289; /* teal */
+  --color-accent: #1ea289; /* teal 95 154 137 */
   --color-success: #89a64e; /* lime */
 
   /* Links (cool blue) */
@@ -49,6 +49,7 @@ body {
   margin: 0;
   font-family: var(--font-dm-sans), system-ui, -apple-system, Segoe UI, sans-serif;
   color: var(--color-text);
+  overflow-x: hidden;
 }
 
 a,
@@ -57,4 +58,29 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+/* Title: big by default (when clocks/nav are hidden) */
+.hbc-title {
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 100;
+  text-wrap: balance;
+  hyphens: auto;
+}
+
+/* 2xl: clocks+nav appear, so shrink title to avoid collisions */
+@media (min-width: 1536px) {
+  .hbc-title {
+    font-size: clamp(2.6rem, 3.0vw, 4.6rem);
+  }
+}
+
+
+/* Ultra-wide: allow it to grow again */
+@media (min-width: 1920px) {
+  .hbc-title {
+    font-size: clamp(2.8rem, 3.2vw, 5.2rem);
+  }
 }
