@@ -49,21 +49,8 @@ const samples = [
 
 export default function Home() {
   return (
-    <div className="w-full rounded-lg border-2 border-[color:var(--color-success)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
-      <h2 className="mb-4 text-3xl text-[color:var(--color-accent)]">
-        Title font samples
-      </h2>
-      <div className="space-y-3 text-4xl">
-        {samples.map((sample) => (
-          <div
-            key={sample.label}
-            className={`${sample.className ?? ""} rounded-md bg-[color:var(--color-card)]/60 px-4 py-3 ring-1 ring-[color:var(--color-link-surface)]`}
-            style={sample.style}
-          >
-            HBC TSY Analytical Dashboard — {sample.label}
-          </div>
-        ))}
-      </div>
+    <div className="w-full h-screen rounded-lg border-2 border-[color:var(--color-accent)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
+
     </div>
   );
 }

@@ -31,7 +31,7 @@
   --color-muted: #a7b3c3; /* blue-gray muted */
 
   /* Accents (teal + lime) */
-  --color-accent: #1ea289; /* teal 95 154 137 */
+  --color-accent: #08f1d6; /* teal 95 154 137 */
   --color-success: #89a64e; /* lime */
 
   /* Links (cool blue) */
@@ -60,7 +60,6 @@ select {
   font: inherit;
 }
 
-/* Title: big by default (when clocks/nav are hidden) */
 .hbc-title {
   font-size: clamp(2.6rem, 5vw, 6rem);
   line-height: 1.05;
@@ -70,17 +69,9 @@ select {
   hyphens: auto;
 }
 
-/* 2xl: clocks+nav appear, so shrink title to avoid collisions */
-@media (min-width: 1536px) {
-  .hbc-title {
-    font-size: clamp(2.6rem, 3.0vw, 4.6rem);
-  }
-}
 
-
-/* Ultra-wide: allow it to grow again */
 @media (min-width: 1920px) {
   .hbc-title {
-    font-size: clamp(2.8rem, 3.2vw, 5.2rem);
+    font-size: clamp(4.7rem, 1.0vw, 5rem);
   }
 }

@@ -43,19 +43,19 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
   }, [cities, showSeconds]);
 
   return (
-    <div className="hidden xl:flex flex-nowrap items-center gap-3 text-sm text-slate-200 sm:text-base">
+    <div className="flex min-w-0 flex-nowrap items-center gap-4 text-base text-slate-200">
       {cities.map((c) => (
         <div
           key={c.label}
-          className="flex flex-col items-center rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2 shadow-sm"
+          className="min-w-0 flex flex-col items-center rounded-md border border-slate-800 bg-slate-900/60 px-4 py-3 shadow-sm"
         >
-          <div className="text-indigo-100 text-lg text-center font-normal">
+          <div className="w-full text-center font-normal text-indigo-100 tabular-nums text-2xl">
             {times[c.label] ?? (showSeconds ? "--:--:--" : "--:--")}
           </div>
-          <div className="mt-1 w-full text-center font-normal text-white whitespace-nowrap overflow-hidden text-ellipsis">
+
+          <div className="mt-1 w-full text-center font-medium text-white truncate text-base 2xl:text-lg">
             {c.label}
           </div>
-
         </div>
       ))}
     </div>

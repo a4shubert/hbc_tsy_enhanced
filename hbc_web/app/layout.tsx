@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700"], // load 300 so font-light isn't faked
+  weight: ["100", "300", "400", "500", "700"],
   variable: "--font-dm-sans",
   display: "swap",
 });
@@ -24,10 +24,9 @@ export default function RootLayout({
     <html lang="en" className={dmSans.variable} data-theme="hbc">
       <body className="antialiased bg-[var(--color-bg)] text-[var(--color-text)]">
         <div className="flex min-h-screen flex-col">
-          <div className="sticky top-0 z-20 px-[5vw] py-4 backdrop-blur bg-[var(--color-bg)]">
-            <div className="w-full">
-              <Header />
-            </div>
+          {/* SINGLE sticky wrapper */}
+          <div className="sticky top-0 z-50 px-[5vw] py-4 backdrop-blur bg-[var(--color-bg)]/90">
+            <Header />
           </div>
 
           <main className="flex-1 px-[5vw] py-10">{children}</main>
