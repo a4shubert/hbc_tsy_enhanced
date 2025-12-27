@@ -52,9 +52,9 @@ body {
   margin: 0;
   font-family: var(--font-dm-sans), system-ui, -apple-system, Segoe UI, sans-serif;
   color: var(--color-text);
-  overflow-x: hidden;
-  font-size: 16px;
+  overflow-x: hidden;  
 }
+
 
 html {
   scroll-padding-top: var(--hbc-header-h);
@@ -87,3 +87,4 @@ select {
     --hbc-header-h: 140px;
   }
 }
+

@@ -3,8 +3,8 @@ import { Clocks } from "./Clocks";
 
 export function Header() {
   return (
-    <div className="w-full rounded-xl border-0 bg-[color:var(--color-bg)]">
-      <header className="grid w-full grid-cols-1 items-center gap-4 px-0 py-4 lg:grid-cols-[auto_minmax(0,1fr)_auto]">
+    <header className="w-full rounded-xl border-0 bg-[color:var(--color-bg)] sticky top-0 z-50 px-[5vw] py-4 backdrop-blur bg-[var(--color-bg)]/90">
+      <div className="grid w-full grid-cols-1 items-center gap-4 px-0 py-4 lg:grid-cols-[auto_minmax(0,1fr)_auto]">
         <div className="hidden items-center justify-start lg:flex">
           <Clocks
             showSeconds={false}
@@ -35,7 +35,8 @@ export function Header() {
             Documentation
           </a>
         </nav>
-      </header>
-    </div>
+      </div>
+    </header>
+
   );
 }
