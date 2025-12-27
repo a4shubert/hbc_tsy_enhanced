@@ -15,7 +15,7 @@
   --ag-row-hover-color: color-mix(in oklab, var(--color-text) 4%, transparent);
 
   /* Selection (row) */
-  --ag-selected-row-background-color: color-mix(in oklab, var(--color-accent) 14%, transparent);
+  --ag-selected-row-background-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
 
   /* Range selection (drag / fill) */
   --ag-range-selection-border-color: var(--color-accent);
