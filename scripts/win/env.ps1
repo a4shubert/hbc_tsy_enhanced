@@ -18,8 +18,12 @@ if (-not $Env:ASPNETCORE_URLS -or [string]::IsNullOrWhiteSpace($Env:ASPNETCORE_U
 if (-not $Env:ASPNETCORE_ENVIRONMENT -or [string]::IsNullOrWhiteSpace($Env:ASPNETCORE_ENVIRONMENT)) {
     $Env:ASPNETCORE_ENVIRONMENT = "Production"
 }
+if (-not $Env:HBC_WEB_URL -or [string]::IsNullOrWhiteSpace($Env:HBC_WEB_URL)) {
+    $Env:HBC_WEB_URL = "http://localhost:3000"
+}
 
 Write-Host "[env] HBC_DB_PATH=$Env:HBC_DB_PATH"
 Write-Host "[env] HBC_API_URL=$Env:HBC_API_URL"
 Write-Host "[env] ASPNETCORE_URLS=$Env:ASPNETCORE_URLS"
 Write-Host "[env] ASPNETCORE_ENVIRONMENT=$Env:ASPNETCORE_ENVIRONMENT"
+Write-Host "[env] HBC_WEB_URL=$Env:HBC_WEB_URL"

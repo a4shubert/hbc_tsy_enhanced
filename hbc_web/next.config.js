@@ -2,7 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
-    const backend = (process.env.HBC_API_URL || "http://localhost:5047").replace(/\/$/, "")
+    const apiUrl = process.env.HBC_API_URL
+    if (!apiUrl) return []
+    const backend = apiUrl.replace(/\/$/, "")
     return [
       {
         source: "/backend/:path*",
