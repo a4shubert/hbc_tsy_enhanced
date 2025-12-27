@@ -3,8 +3,8 @@ import { Clocks } from "./Clocks";
 
 export function Header() {
   return (
-    <header className="w-full rounded-xl border-0 bg-[color:var(--color-bg)] sticky top-0 z-50 px-[5vw] py-4 backdrop-blur bg-[var(--color-bg)]/90">
-      <div className="grid w-full grid-cols-1 items-center gap-4 px-0 py-4 lg:grid-cols-[auto_minmax(0,1fr)_auto]">
+    <div className="w-full px-[5vw] py-4">
+      <div className="grid w-full grid-cols-1 items-center gap-4 py-4 lg:grid-cols-[auto_minmax(0,1fr)_auto]">
         <div className="hidden items-center justify-start lg:flex">
           <Clocks
             showSeconds={false}
@@ -17,26 +17,25 @@ export function Header() {
           />
         </div>
 
-        <h1 className="hbc-title min-w-0 w-full text-center text-white whitespace-normal break-words">
+        <h1 className="hbc-title min-w-0 w-full whitespace-normal break-words text-center text-white">
           HBC TSY Analytical Dashboard
         </h1>
 
         <nav className="hidden items-center justify-end gap-4 text-xl font-normal lg:flex">
           <a
             href="http://localhost:5047/swagger/index.html"
-            className="rounded-md px-3 py-2 text-2xl text-[color:var(--color-text)] bg-[color:var(--color-link-surface)] hover:bg-[color:var(--color-link-surface-hover)]"
+            className="rounded-md bg-[color:var(--color-link-surface)] px-3 py-2 text-2xl text-[color:var(--color-text)] hover:bg-[color:var(--color-link-surface-hover)]"
           >
             API (Swagger)
           </a>
           <a
             href="https://github.com/a4shubert/hbc_tsy_enhanced"
-            className="rounded-md px-3 py-2 text-2xl text-[color:var(--color-text)] bg-[color:var(--color-link-surface)] hover:bg-[color:var(--color-link-surface-hover)]"
+            className="rounded-md bg-[color:var(--color-link-surface)] px-3 py-2 text-2xl text-[color:var(--color-text)] hover:bg-[color:var(--color-link-surface-hover)]"
           >
             Documentation
           </a>
         </nav>
       </div>
-    </header>
-
+    </div>
   );
 }
