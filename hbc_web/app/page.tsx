@@ -53,7 +53,7 @@ const samples: Array<
 
 export default function Home() {
   return (
-    <div className="w-full rounded-lg border-2 border-[color:var(--color-accent)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
+    <div className="w-full rounded-lg border-0 border-[color:var(--color-accent)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
       <h1 className="text-xl text-[color:var(--color-accent)]">Main Contents</h1>
 
       <div className="mt-8 space-y-4">

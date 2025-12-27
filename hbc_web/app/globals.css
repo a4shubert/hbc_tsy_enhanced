@@ -43,6 +43,18 @@
   --color-link-surface: var(--color-bg);
   --color-link-surface-hover: var(--color-card);
 
+  /* Background gradient (linear-only): keep within bg -> darker range */
+--color-bg-gradient:
+  radial-gradient(1400px 900px at 50% -10%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.00) 55%),
+  radial-gradient(1000px 650px at 15% 85%, rgba(122, 162, 247, 0.08) 0%, rgba(122, 162, 247, 0.00) 62%),
+  radial-gradient(1000px 650px at 85% 85%, rgba(99, 102, 241, 0.07) 0%, rgba(99, 102, 241, 0.00) 62%),
+  linear-gradient(180deg, #141c34 0%, #0f1630 55%, #070b1d 100%);
+
+
+
+
+
+
   --hbc-header-h: 112px;
 }
 
@@ -56,6 +68,7 @@ body {
   font-family: var(--font-dm-sans), system-ui, -apple-system, Segoe UI, sans-serif;
   color: var(--color-text);
   background: var(--color-bg);
+  background: var(--color-bg-gradient, var(--color-bg));
 }
 
 /* Keep anchor jumps from hiding behind the sticky header */
