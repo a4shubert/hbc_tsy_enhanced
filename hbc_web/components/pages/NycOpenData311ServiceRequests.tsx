@@ -1,5 +1,4 @@
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+
 
 import type { ColDef } from "ag-grid-community";
 
@@ -60,6 +59,7 @@ async function getFirst50(): Promise<{
         }
 
         const json = await res.json();
+        console.log(`[hbc_web] GET ${url} ->`, json);
         const payload = typeof json === "object" && json && "value" in json ? (json as any).value : json;
         return parseNycOpenData311ServiceRequests(payload);
     } catch (e) {
@@ -104,6 +104,7 @@ export default async function NycOpenData311ServiceRequests() {
                     columnDefs={columnDefs}
                     error={error ?? null}
                     rowIdField="hbc_unique_key"
+                    height={'50vh'}
                 />
             </div>
         </div>

@@ -1,0 +1,10 @@
+{
+  "typescript.tsdk": "hbc_web/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.workingDirectories": [
+    {
+      "directory": "hbc_web",
+      "changeProcessCWD": true
+    }
+  ]
+}

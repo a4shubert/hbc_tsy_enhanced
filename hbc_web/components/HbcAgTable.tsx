@@ -3,9 +3,16 @@
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
+import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import type { ColDef, GridOptions } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useMemo } from "react";
+
+let agGridRegistered = false;
+if (!agGridRegistered) {
+  ModuleRegistry.registerModules([AllCommunityModule]);
+  agGridRegistered = true;
+}
 
 export type HbcAgTableProps<T extends Record<string, unknown>> = {
   rowData: T[];
