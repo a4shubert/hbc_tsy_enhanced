@@ -4,8 +4,7 @@ import { Clocks } from "./Clocks";
 export function Header() {
   return (
     <div className="w-full rounded-xl border-0 bg-[color:var(--color-bg)]">
-      <header className="grid w-full items-center gap-4 px-6 py-4 grid-cols-1 min-[1920px]:grid-cols-[auto_minmax(0,1fr)_auto]">
-        {/* Left: clocks only on >=1920px */}
+      <header className="grid w-full items-center gap-4 px-1 py-4 grid-cols-1 min-[1920px]:grid-cols-[auto_minmax(0,1fr)_auto]">
         <div className="hidden min-[1920px]:flex items-center justify-start">
           <Clocks
             showSeconds={false}
@@ -18,12 +17,10 @@ export function Header() {
           />
         </div>
 
-        {/* Center: always full title, wraps when needed */}
         <h1 className="hbc-title min-w-0 w-full text-center text-white whitespace-normal break-words">
           HBC TSY Analytical Dashboard
         </h1>
 
-        {/* Right: nav only on >=1920px */}
         <nav className="hidden min-[1920px]:flex items-center justify-end gap-4 text-xl font-normal">
           <a
             href="http://localhost:5047/swagger/index.html"

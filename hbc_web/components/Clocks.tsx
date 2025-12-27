@@ -47,7 +47,7 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
       {cities.map((c) => (
         <div
           key={c.label}
-          className="min-w-0 flex flex-col items-center rounded-md border border-slate-800 bg-slate-900/60 px-4 py-3 shadow-sm"
+          className="min-w-0 flex flex-col items-center rounded-md border border-slate-800 bg-[color:var(--color-bg)] px-4 py-3 shadow-sm"
         >
           <div className="w-full text-center font-normal text-indigo-100 tabular-nums text-2xl">
             {times[c.label] ?? (showSeconds ? "--:--:--" : "--:--")}

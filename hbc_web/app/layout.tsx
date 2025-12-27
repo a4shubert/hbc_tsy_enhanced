@@ -24,12 +24,10 @@ export default function RootLayout({
     <html lang="en" className={dmSans.variable} data-theme="hbc">
       <body className="antialiased bg-[var(--color-bg)] text-[var(--color-text)]">
         <div className="flex min-h-screen flex-col">
-          {/* SINGLE sticky wrapper */}
-          <div className="sticky top-0 z-50 px-[5vw] py-4 backdrop-blur bg-[var(--color-bg)]/90">
+          <header className="sticky top-0 z-50 w-full px-[5vw] py-4 backdrop-blur bg-[var(--color-bg)]/90">
             <Header />
-          </div>
-
-          <main className="flex-1 px-[5vw] py-10">{children}</main>
+          </header>
+          <main className="flex-1 px-[5vw] py-5">{children}</main>
           <Footer />
         </div>
       </body>
