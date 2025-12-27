@@ -49,10 +49,10 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
           key={c.label}
           className="flex flex-col items-center rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2 shadow-sm"
         >
-          <div className="font-mono text-indigo-200 text-lg text-center">
+          <div className="text-indigo-100 text-lg text-center font-normal">
             {times[c.label] ?? "--:--:--"}
           </div>
-          <div className="font-semibold text-white text-center mt-1">{c.label}</div>
+          <div className="font-normal text-white text-center mt-1">{c.label}</div>
         </div>
       ))}
     </div>
