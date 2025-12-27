@@ -2,304 +2,371 @@
 "use client"
 
 import type { ColDef } from "ag-grid-community"
-import { useEffect, useMemo, useState } from "react"
+import type { FilterChangedEvent, IFilterModel } from "ag-grid-community"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { HbcAgTable } from "@/components/HbcAgTable"
 import {
-    NYC_OPEN_DATA_311_SERVICE_REQUESTS_COLUMNS,
-    parseNycOpenData311ServiceRequests,
-    type NycOpenData311ServiceRequest,
+  NYC_OPEN_DATA_311_SERVICE_REQUESTS_COLUMNS,
+  parseNycOpenData311ServiceRequests,
+  type NycOpenData311ServiceRequest,
 } from "@/lib/models/nyc_open_data_311_service_requests"
 
 const TABLE = "nyc_open_data_311_service_requests"
 const PAGE_SIZE = 50
 
 type PageResult = {
-    rows: NycOpenData311ServiceRequest[]
-    invalidCount: number
-    issues: string[]
-    totalCount?: number
-    error?: string
+  rows: NycOpenData311ServiceRequest[]
+  invalidCount: number
+  issues: string[]
+  totalCount?: number
+  error?: string
 }
 
 function ChevronLeftIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-                d="M15 18l-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    )
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M15 18l-6-6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 function ChevronRightIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-                d="M9 6l6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    )
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 function ChevronsLeftIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-                d="M18 18l-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M12 18l-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    )
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M18 18l-6-6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 18l-6-6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 function ChevronsRightIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-                d="M6 6l6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M12 6l6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    )
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M6 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 export default function NycOpenData311ServiceRequests() {
-    const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [filterModel, setFilterModel] = useState<IFilterModel>({})
+  const [filterOData, setFilterOData] = useState<string | undefined>(undefined)
+  const [filterLabel, setFilterLabel] = useState<string | undefined>(undefined)
+  const filterDebounceRef = useRef<number | null>(null)
 
-    const columnDefs = useMemo<ColDef<NycOpenData311ServiceRequest>[]>(
-        () =>
-            NYC_OPEN_DATA_311_SERVICE_REQUESTS_COLUMNS.map((field) => ({
-                field: field as Extract<keyof NycOpenData311ServiceRequest, string>,
-                filter: field.includes("date") ? "agDateColumnFilter" : true,
-            })),
-        []
-    )
+  const columnDefs = useMemo<ColDef<NycOpenData311ServiceRequest>[]>(
+    () =>
+      NYC_OPEN_DATA_311_SERVICE_REQUESTS_COLUMNS.map((field) => ({
+        field: field as Extract<keyof NycOpenData311ServiceRequest, string>,
+        filter: field.includes("date")
+          ? "agDateColumnFilter"
+          : field === "latitude" ||
+              field === "longitude" ||
+              field.endsWith("_coordinate_state_plane_")
+            ? "agNumberColumnFilter"
+            : "agTextColumnFilter",
+        filterParams: { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 },
+      })),
+    []
+  )
 
-    const [loading, setLoading] = useState(false)
-    const [result, setResult] = useState<PageResult>({
-        rows: [],
-        invalidCount: 0,
-        issues: [],
-    })
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<PageResult>({
+    rows: [],
+    invalidCount: 0,
+    issues: [],
+  })
 
-    useEffect(() => {
-        const controller = new AbortController()
+  function escapeOdataString(value: string) {
+    return value.replace(/'/g, "''")
+  }
 
-        async function run() {
-            const apiBase = "/backend"
-            const skip = (currentPage - 1) * PAGE_SIZE
-            const url = `${apiBase}/${TABLE}?$top=${PAGE_SIZE}&$skip=${skip}&$count=true`
+  function filterModelToOData(model: IFilterModel | null | undefined) {
+    if (!model) return undefined
 
-            setLoading(true)
-            try {
-                const res = await fetch(url, { cache: "no-store", signal: controller.signal })
-                if (!res.ok) {
-                    setResult({
-                        rows: [],
-                        invalidCount: 0,
-                        issues: [],
-                        error: `REST API error ${res.status} on GET ${url}`,
-                    })
-                    return
-                }
+    const parts: string[] = []
 
-                const json = await res.json()
-                console.log(`[hbc_web] GET ${url} ->`, json)
+    for (const [field, raw] of Object.entries(model)) {
+      const f = String(field)
+      const m: any = raw
+      if (!m) continue
 
-                const hasValue = typeof json === "object" && json !== null && "value" in (json as any)
-                const payload = hasValue ? (json as any).value : json
-                const parsed = parseNycOpenData311ServiceRequests(payload)
+      const type = String(m.type || "").toLowerCase()
+      if (type && type !== "equals") continue
 
-                const totalCount =
-                    typeof json === "object" &&
-                        json !== null &&
-                        "count" in (json as any) &&
-                        typeof (json as any).count === "number"
-                        ? ((json as any).count as number)
-                        : undefined
+      if (typeof m.filter === "string") {
+        const v = escapeOdataString(m.filter.trim())
+        if (v) parts.push(`${f} eq '${v}'`)
+        continue
+      }
 
-                setResult({ ...parsed, totalCount })
-            } catch (e) {
-                if (controller.signal.aborted) return
-                setResult({
-                    rows: [],
-                    invalidCount: 0,
-                    issues: [],
-                    error: `Failed to fetch: ${e instanceof Error ? e.message : String(e)}`,
-                })
-            } finally {
-                if (!controller.signal.aborted) setLoading(false)
-            }
+      if (typeof m.filter === "number" && Number.isFinite(m.filter)) {
+        parts.push(`${f} eq ${m.filter}`)
+        continue
+      }
+
+      if (typeof m.dateFrom === "string" && m.dateFrom.trim()) {
+        const v = `${m.dateFrom.trim()}T00:00:00`
+        parts.push(`${f} eq '${v}'`)
+        continue
+      }
+    }
+
+    return parts.length ? parts.join(" and ") : undefined
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function run() {
+      const apiBase = "/backend"
+      const skip = (currentPage - 1) * PAGE_SIZE
+      const params = new URLSearchParams()
+      params.set("$top", String(PAGE_SIZE))
+      params.set("$skip", String(skip))
+      params.set("$count", "true")
+      if (filterOData) params.set("$filter", filterOData)
+      const url = `${apiBase}/${TABLE}?${params.toString()}`
+
+      setLoading(true)
+      try {
+        const res = await fetch(url, { cache: "no-store", signal: controller.signal })
+        if (!res.ok) {
+          setResult({
+            rows: [],
+            invalidCount: 0,
+            issues: [],
+            error: `REST API error ${res.status} on GET ${url}`,
+          })
+          return
         }
 
-        void run()
-        return () => controller.abort()
-    }, [currentPage])
+        const json = await res.json()
+        console.log(`[hbc_web] GET ${url} ->`, json)
 
-    const { rows, invalidCount, issues, error, totalCount } = result
+        const hasValue = typeof json === "object" && json !== null && "value" in (json as any)
+        const payload = hasValue ? (json as any).value : json
+        const parsed = parseNycOpenData311ServiceRequests(payload)
 
-    const hasPrev = currentPage > 1
-    const hasNext =
-        rows.length === PAGE_SIZE &&
-        (typeof totalCount === "number" ? currentPage * PAGE_SIZE < totalCount : true)
+        const totalCount =
+          typeof json === "object" &&
+          json !== null &&
+          "count" in (json as any) &&
+          typeof (json as any).count === "number"
+            ? ((json as any).count as number)
+            : undefined
 
-    const lastPage =
-        typeof totalCount === "number" ? Math.max(1, Math.ceil(totalCount / PAGE_SIZE)) : undefined
-    const canGoFirst = hasPrev
-    const canGoLast = typeof lastPage === "number" ? currentPage < lastPage : false
+        setResult({ ...parsed, totalCount })
+      } catch (e) {
+        if (controller.signal.aborted) return
+        setResult({
+          rows: [],
+          invalidCount: 0,
+          issues: [],
+          error: `Failed to fetch: ${e instanceof Error ? e.message : String(e)}`,
+        })
+      } finally {
+        if (!controller.signal.aborted) setLoading(false)
+      }
+    }
 
-    return (
-        <div className="w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-xl font-medium text-[color:var(--color-accent)]">
-                    NYC Open Data 311 Service Requests:
-                </h1>
-                {issues.length ? (
-                    <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">
-                        <div className="font-medium">Validation issues (sample)</div>
-                        <ul className="list-disc pl-5">
-                            {issues.map((x) => (
-                                <li key={x}>{x}</li>
-                            ))}
-                        </ul>
-                    </div>
-                ) : null}
-            </div>
+    void run()
+    return () => controller.abort()
+  }, [currentPage, filterOData])
 
-            <div className="mt-4">
-                <HbcAgTable<NycOpenData311ServiceRequest>
-                    rowData={rows}
-                    columnDefs={columnDefs}
-                    error={error ?? null}
-                    rowIdField="hbc_unique_key"
-                    height={"50vh"}
-                    loading={loading}
-                    gridOptions={{
-                        rowSelection: {
-                            mode: "multiRow",
-                            enableSelectionWithoutKeys: true,
-                            enableClickSelection: true,
-                            checkboxes: false,
-                            headerCheckbox: false,
-                        },
-                    }}
-                />
+  const { rows, invalidCount, issues, error, totalCount } = result
 
-                <div className="mt-3 flex items-center justify-between gap-3">
-                    <div className="text-sm text-[color:var(--color-muted)]">
-                        {(() => {
-                            const total = typeof totalCount === "number" ? totalCount : undefined
-                            const lastPage = total ? Math.max(1, Math.ceil(total / PAGE_SIZE)) : undefined
-                            const start = (currentPage - 1) * PAGE_SIZE + 1
-                            const end = (currentPage - 1) * PAGE_SIZE + rows.length
+  const hasPrev = currentPage > 1
+  const hasNext =
+    rows.length === PAGE_SIZE &&
+    (typeof totalCount === "number" ? currentPage * PAGE_SIZE < totalCount : true)
 
-                            return (
-                                <>
-                                    Page {currentPage}
-                                    {lastPage ? ` of ${lastPage}` : ""}
-                                    {"; "}
-                                    Rows: {rows.length ? `${start}-${end}` : "0"}
-                                    {total ? `; Total Rows ${total}` : ""}
-                                    {invalidCount ? `; filtered ${invalidCount}` : ""}
-                                </>
-                            )
-                        })()}
-                    </div>
+  const lastPage =
+    typeof totalCount === "number" ? Math.max(1, Math.ceil(totalCount / PAGE_SIZE)) : undefined
+  const canGoFirst = hasPrev
+  const canGoLast = typeof lastPage === "number" ? currentPage < lastPage : false
 
-                    <div className="flex items-center justify-end gap-2">
-                        <button
-                            type="button"
-                            aria-disabled={!canGoFirst}
-                            disabled={!canGoFirst}
-                            onClick={() => setCurrentPage(1)}
-                            className={[
-                                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
-                                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
-                                canGoFirst ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
-                            ].join(" ")}
-                            title="First page"
-                        >
-                            <ChevronsLeftIcon />
-                        </button>
+  return (
+    <div className="w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-xl font-medium text-[color:var(--color-accent)]">
+          NYC Open Data 311 Service Requests:
+        </h1>
+        {issues.length ? (
+          <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">
+            <div className="font-medium">Validation issues (sample)</div>
+            <ul className="list-disc pl-5">
+              {issues.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
 
-                        <button
-                            type="button"
-                            aria-disabled={!hasPrev}
-                            disabled={!hasPrev}
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            className={[
-                                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
-                                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
-                                hasPrev ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
-                            ].join(" ")}
-                            title="Previous page"
-                        >
-                            <ChevronLeftIcon />
-                        </button>
+      <div className="mt-4">
+        <HbcAgTable<NycOpenData311ServiceRequest>
+          rowData={rows}
+          columnDefs={columnDefs}
+          error={error ?? null}
+          rowIdField="hbc_unique_key"
+          height={"50vh"}
+          loading={loading}
+          onFilterChanged={(e: FilterChangedEvent<NycOpenData311ServiceRequest>) => {
+            if (filterDebounceRef.current) window.clearTimeout(filterDebounceRef.current)
+            filterDebounceRef.current = window.setTimeout(() => {
+              const next = e.api.getFilterModel()
+              const odata = filterModelToOData(next)
+              setFilterModel(next)
+              setFilterOData(odata)
+              setFilterLabel(odata)
+              setCurrentPage(1)
+            }, 250)
+          }}
+          gridOptions={{
+            rowSelection: {
+              mode: "multiRow",
+              enableSelectionWithoutKeys: true,
+              enableClickSelection: true,
+              checkboxes: false,
+              headerCheckbox: false,
+            },
+          }}
+        />
 
-                        <button
-                            type="button"
-                            aria-disabled={!hasNext}
-                            disabled={!hasNext}
-                            onClick={() => setCurrentPage((p) => p + 1)}
-                            className={[
-                                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
-                                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
-                                hasNext ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
-                            ].join(" ")}
-                            title="Next page"
-                        >
-                            <ChevronRightIcon />
-                        </button>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="text-sm text-[color:var(--color-muted)]">
+            {(() => {
+              const total = typeof totalCount === "number" ? totalCount : undefined
+              const lastPage = total ? Math.max(1, Math.ceil(total / PAGE_SIZE)) : undefined
+              const start = (currentPage - 1) * PAGE_SIZE + 1
+              const end = (currentPage - 1) * PAGE_SIZE + rows.length
 
-                        <button
-                            type="button"
-                            aria-disabled={!canGoLast}
-                            disabled={!canGoLast}
-                            onClick={() => {
-                                if (typeof lastPage === "number") setCurrentPage(lastPage)
-                            }}
-                            className={[
-                                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
-                                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
-                                canGoLast ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
-                            ].join(" ")}
-                            title={typeof lastPage === "number" ? `Last page (${lastPage})` : "Last page"}
-                        >
-                            <ChevronsRightIcon />
-                        </button>
-                    </div>
-                </div>
-            </div>
+              return (
+                <>
+                  Page {currentPage}
+                  {lastPage ? ` of ${lastPage}` : ""}
+                  {"; "}
+                  Rows: {rows.length ? `${start}-${end}` : "0"}
+                  {total ? `; Total Rows ${total}` : ""}
+                  {invalidCount ? `; filtered ${invalidCount}` : ""}
+                  {filterLabel ? `; filter ${filterLabel}` : ""}
+                </>
+              )
+            })()}
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              aria-disabled={!canGoFirst}
+              disabled={!canGoFirst}
+              onClick={() => setCurrentPage(1)}
+              className={[
+                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
+                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
+                canGoFirst ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
+              ].join(" ")}
+              title="First page"
+            >
+              <ChevronsLeftIcon />
+            </button>
+
+            <button
+              type="button"
+              aria-disabled={!hasPrev}
+              disabled={!hasPrev}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className={[
+                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
+                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
+                hasPrev ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
+              ].join(" ")}
+              title="Previous page"
+            >
+              <ChevronLeftIcon />
+            </button>
+
+            <button
+              type="button"
+              aria-disabled={!hasNext}
+              disabled={!hasNext}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className={[
+                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
+                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
+                hasNext ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
+              ].join(" ")}
+              title="Next page"
+            >
+              <ChevronRightIcon />
+            </button>
+
+            <button
+              type="button"
+              aria-disabled={!canGoLast}
+              disabled={!canGoLast}
+              onClick={() => {
+                if (typeof lastPage === "number") setCurrentPage(lastPage)
+              }}
+              className={[
+                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
+                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
+                canGoLast ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
+              ].join(" ")}
+              title={typeof lastPage === "number" ? `Last page (${lastPage})` : "Last page"}
+            >
+              <ChevronsRightIcon />
+            </button>
+          </div>
         </div>
-    )
+      </div>
+    </div>
+  )
 }

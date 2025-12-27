@@ -7,6 +7,7 @@ import "./HbcAgTable.theme.css"
 
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community"
 import type { ColDef, GridOptions } from "ag-grid-community"
+import type { FilterChangedEvent, GridReadyEvent, SortChangedEvent } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
 import { useMemo } from "react"
 
@@ -25,6 +26,9 @@ export type HbcAgTableProps<T extends Record<string, unknown>> = {
   error?: string | null
   gridOptions?: GridOptions<T>
   rowIdField?: Extract<keyof T, string>
+  onGridReady?: (event: GridReadyEvent<T>) => void
+  onFilterChanged?: (event: FilterChangedEvent<T>) => void
+  onSortChanged?: (event: SortChangedEvent<T>) => void
 }
 
 export function HbcAgTable<T extends Record<string, unknown>>({
@@ -36,6 +40,9 @@ export function HbcAgTable<T extends Record<string, unknown>>({
   error,
   gridOptions,
   rowIdField,
+  onGridReady,
+  onFilterChanged,
+  onSortChanged,
 }: HbcAgTableProps<T>) {
   const autoColumnDefs = useMemo<ColDef<T>[]>(() => {
     if (columnDefs && columnDefs.length) return columnDefs
@@ -94,6 +101,9 @@ export function HbcAgTable<T extends Record<string, unknown>>({
           defaultColDef={defaultColDef}
           gridOptions={mergedGridOptions}
           loading={loading}
+          onGridReady={onGridReady}
+          onFilterChanged={onFilterChanged}
+          onSortChanged={onSortChanged}
           getRowId={
             rowIdField
               ? (p) => {

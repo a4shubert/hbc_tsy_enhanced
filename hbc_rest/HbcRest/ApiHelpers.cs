@@ -5,11 +5,302 @@ using System.Threading.Tasks;
 using HbcRest.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Linq.Expressions;
+using System.Text.Json.Serialization;
 
 namespace HbcRest;
 
 internal static class ApiHelpers
 {
+    private static PropertyInfo? ResolveProperty<T>(string columnName)
+    {
+        if (string.IsNullOrWhiteSpace(columnName)) return null;
+        var name = columnName.Trim();
+
+        var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        foreach (var p in props)
+        {
+            if (p.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase)) return p;
+
+            var jsonName = p.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
+            if (!string.IsNullOrWhiteSpace(jsonName) &&
+                jsonName.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return p;
+            }
+
+            var colAttr = p.GetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.ColumnAttribute>()?.Name;
+            if (!string.IsNullOrWhiteSpace(colAttr) &&
+                colAttr.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
+    private static object? CoerceStringToType(string raw, System.Type targetType)
+    {
+        var t = System.Nullable.GetUnderlyingType(targetType) ?? targetType;
+        var s = (raw ?? "").Trim();
+
+        if (t == typeof(string)) return s;
+        if (t == typeof(int)) return int.TryParse(s, out var v) ? v : null;
+        if (t == typeof(long)) return long.TryParse(s, out var v) ? v : null;
+        if (t == typeof(double)) return double.TryParse(s, out var v) ? v : null;
+        if (t == typeof(float)) return float.TryParse(s, out var v) ? v : null;
+        if (t == typeof(decimal)) return decimal.TryParse(s, out var v) ? v : null;
+        if (t == typeof(bool))
+        {
+            if (bool.TryParse(s, out var bv)) return bv;
+            if (s == "1") return true;
+            if (s == "0") return false;
+            return null;
+        }
+        if (t == typeof(System.DateTime))
+        {
+            return System.DateTime.TryParse(s, out var dt) ? dt : null;
+        }
+
+        try
+        {
+            return System.Convert.ChangeType(s, t);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static Expression BuildBinary(Expression left, string op, Expression right)
+    {
+        return op.ToLowerInvariant() switch
+        {
+            "eq" or "=" => Expression.Equal(left, right),
+            "ne" or "!=" => Expression.NotEqual(left, right),
+            "gt" or ">" => Expression.GreaterThan(left, right),
+            "ge" or ">=" => Expression.GreaterThanOrEqual(left, right),
+            "lt" or "<" => Expression.LessThan(left, right),
+            "le" or "<=" => Expression.LessThanOrEqual(left, right),
+            _ => throw new System.NotSupportedException($"Unsupported operator: {op}")
+        };
+    }
+
+    public static IQueryable<T> ApplyFilterGeneric<T>(string filter, IQueryable<T> query)
+    {
+        if (string.IsNullOrWhiteSpace(filter)) return query;
+
+        // Minimal OData-ish support: "col op value" joined by "and"/"or".
+        // Fail-fast on unknown columns/operators to avoid silent no-op filters.
+        var parts = Regex.Split(filter, "\\s+(and|or)\\s+", RegexOptions.IgnoreCase)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToList();
+
+        Expression? combined = null;
+        string? pendingLogical = null;
+
+        var param = Expression.Parameter(typeof(T), "x");
+
+        foreach (var part in parts)
+        {
+            var lower = part.Trim().ToLowerInvariant();
+            if (lower == "and" || lower == "or")
+            {
+                pendingLogical = lower;
+                continue;
+            }
+
+            var tokens = part.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length < 3)
+            {
+                throw new System.ArgumentException($"Invalid $filter segment: {part}");
+            }
+
+            var col = tokens[0];
+            var op = tokens[1];
+            var valRaw = string.Join(" ", tokens.Skip(2)).Trim().Trim('\'', '"');
+
+            var prop = ResolveProperty<T>(col);
+            if (prop is null)
+            {
+                throw new System.ArgumentException($"Unknown filter column: {col}");
+            }
+
+            var left = Expression.Property(param, prop);
+
+            Expression expr;
+            if (valRaw.Equals("null", System.StringComparison.OrdinalIgnoreCase))
+            {
+                var nullConst = Expression.Constant(null, prop.PropertyType);
+                expr = BuildBinary(left, op, nullConst);
+            }
+            else
+            {
+                var coerced = CoerceStringToType(valRaw, prop.PropertyType);
+                if (coerced is null)
+                {
+                    throw new System.ArgumentException($"Could not parse value '{valRaw}' for column '{col}'.");
+                }
+
+                var underlying = System.Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                var right = Expression.Constant(coerced, underlying);
+
+                if (System.Nullable.GetUnderlyingType(prop.PropertyType) is not null)
+                {
+                    // For nullable types, comparisons should be (HasValue && Value op rhs) for range ops.
+                    if (!(op.Equals("eq", System.StringComparison.OrdinalIgnoreCase) || op == "="
+                          || op.Equals("ne", System.StringComparison.OrdinalIgnoreCase) || op == "!="))
+                    {
+                        var hasValue = Expression.Property(left, "HasValue");
+                        var value = Expression.Property(left, "Value");
+                        var inner = BuildBinary(value, op, right);
+                        expr = Expression.AndAlso(hasValue, inner);
+                    }
+                    else
+                    {
+                        expr = BuildBinary(left, op, Expression.Convert(right, prop.PropertyType));
+                    }
+                }
+                else
+                {
+                    expr = BuildBinary(left, op, right);
+                }
+            }
+
+            combined = combined is null
+                ? expr
+                : (pendingLogical == "or"
+                    ? Expression.OrElse(combined, expr)
+                    : Expression.AndAlso(combined, expr));
+            pendingLogical = null;
+        }
+
+        if (combined is null) return query;
+        var lambda = Expression.Lambda<System.Func<T, bool>>(combined, param);
+        return query.Where(lambda);
+    }
+
+    public static IQueryable<T> ApplyOrderByGeneric<T>(string orderBy, IQueryable<T> query)
+    {
+        if (string.IsNullOrWhiteSpace(orderBy)) return query;
+        var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
+
+        var isFirst = true;
+        foreach (var part in parts)
+        {
+            var tokens = part.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length == 0) continue;
+            var col = tokens[0];
+            var desc = tokens.Length > 1 && tokens[1].Equals("desc", System.StringComparison.OrdinalIgnoreCase);
+
+            var prop = ResolveProperty<T>(col);
+            if (prop is null)
+            {
+                throw new System.ArgumentException($"Unknown orderby column: {col}");
+            }
+
+            var param = Expression.Parameter(typeof(T), "x");
+            var body = Expression.Property(param, prop);
+            var lambda = Expression.Lambda(body, param);
+
+            var method = isFirst
+                ? (desc ? "OrderByDescending" : "OrderBy")
+                : (desc ? "ThenByDescending" : "ThenBy");
+
+            query = (IQueryable<T>)typeof(Queryable).GetMethods()
+                .Single(m => m.Name == method && m.GetParameters().Length == 2)
+                .MakeGenericMethod(typeof(T), prop.PropertyType)
+                .Invoke(null, new object[] { query, lambda })!;
+
+            isFirst = false;
+        }
+
+        return query;
+    }
+
+    public static IEnumerable<dynamic> ApplySelectGeneric<T>(string? select, IEnumerable<T> items)
+    {
+        if (string.IsNullOrWhiteSpace(select)) return items.Cast<dynamic>();
+
+        var cols = select.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries)
+            .Select(c => c.Trim())
+            .ToList();
+
+        var props = cols.Select(c => (col: c, prop: ResolveProperty<T>(c))).ToList();
+        var bad = props.FirstOrDefault(p => p.prop is null).col;
+        if (!string.IsNullOrWhiteSpace(bad))
+        {
+            throw new System.ArgumentException($"Unknown $select column: {bad}");
+        }
+
+        return items.Select(i =>
+        {
+            var dict = new Dictionary<string, object?>(System.StringComparer.OrdinalIgnoreCase);
+            foreach (var (col, prop) in props)
+            {
+                dict[col] = prop!.GetValue(i);
+            }
+            return dict;
+        });
+    }
+
+    public static async Task<IResult> ApplyGroupByGeneric<T>(string apply, IQueryable<T> query)
+    {
+        // Supports: $apply=groupby((field))
+        var match = Regex.Match(apply.Trim(), @"^groupby\(\(\s*([a-zA-Z0-9_]+)\s*\)\)\s*$", RegexOptions.IgnoreCase);
+        if (!match.Success)
+        {
+            return Results.BadRequest("Unsupported $apply. Only groupby((field)) is supported.");
+        }
+
+        var field = match.Groups[1].Value.Trim();
+        var prop = ResolveProperty<T>(field);
+        if (prop is null)
+        {
+            return Results.BadRequest($"Unknown groupby column: {field}");
+        }
+
+        // Use EF.Property<T> for strong translation, then shape to dictionaries in-memory
+        // so JSON uses the requested field name.
+        var list = await GroupByToDictAsync(query, prop, field);
+        return Results.Ok(list);
+    }
+
+    private static Task<List<Dictionary<string, object?>>> GroupByToDictAsync<T>(
+        IQueryable<T> query,
+        PropertyInfo prop,
+        string requestedFieldName)
+    {
+        var method = typeof(ApiHelpers)
+            .GetMethod(nameof(GroupByToDictAsyncImpl), BindingFlags.NonPublic | BindingFlags.Static)!
+            .MakeGenericMethod(typeof(T), prop.PropertyType);
+        return (Task<List<Dictionary<string, object?>>>)method.Invoke(
+            null,
+            new object[] { query, prop.Name, requestedFieldName }
+        )!;
+    }
+
+    private static async Task<List<Dictionary<string, object?>>> GroupByToDictAsyncImpl<T, TKey>(
+        IQueryable<T> query,
+        string propertyName,
+        string requestedFieldName)
+    {
+        var grouped = await query
+            .GroupBy(x => EF.Property<TKey>(x!, propertyName))
+            .Select(g => new { Key = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        return grouped
+            .Select(x => new Dictionary<string, object?>
+            {
+                [requestedFieldName] = x.Key,
+                ["count"] = x.Count
+            })
+            .ToList();
+    }
+
     public static IQueryable<CustomerSatisfactionSurvey> ApplyFilter(string filter, IQueryable<CustomerSatisfactionSurvey> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
