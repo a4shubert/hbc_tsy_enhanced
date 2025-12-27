@@ -1,5 +1,5 @@
 // components/Header.tsx
-import { Clocks } from "./Clocks";
+import { Clocks } from "./Clocks"
 
 export function Header() {
   return (
@@ -32,11 +32,12 @@ export function Header() {
           </a>
           <a
             href="https://github.com/a4shubert/hbc_tsy_enhanced"
-            className="rounded-md bg-[color:var(--color-link-surface)] px-3 py-2 text-2xl text-[color:var(--color-text)] transition-[text-decoration-color] hover:underline hover:decoration-2 hover:underline-offset-4 hover:decoration-[var(--color-accent)]">
+            className="rounded-md bg-[color:var(--color-link-surface)] px-3 py-2 text-2xl text-[color:var(--color-text)] transition-[text-decoration-color] hover:underline hover:decoration-2 hover:underline-offset-4 hover:decoration-[var(--color-accent)]"
+          >
             Documentation
           </a>
         </nav>
       </div>
     </div>
-  );
+  )
 }

@@ -1,29 +1,29 @@
-"use client";
+"use client"
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import "ag-grid-community/styles/ag-grid.css"
+import "ag-grid-community/styles/ag-theme-quartz.css"
 
-import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-import type { ColDef, GridOptions } from "ag-grid-community";
-import { AgGridReact } from "ag-grid-react";
-import { useMemo } from "react";
+import { AllCommunityModule, ModuleRegistry } from "ag-grid-community"
+import type { ColDef, GridOptions } from "ag-grid-community"
+import { AgGridReact } from "ag-grid-react"
+import { useMemo } from "react"
 
-let agGridRegistered = false;
+let agGridRegistered = false
 if (!agGridRegistered) {
-  ModuleRegistry.registerModules([AllCommunityModule]);
-  agGridRegistered = true;
+  ModuleRegistry.registerModules([AllCommunityModule])
+  agGridRegistered = true
 }
 
 export type HbcAgTableProps<T extends Record<string, unknown>> = {
-  rowData: T[];
-  columnDefs?: ColDef<T>[];
-  className?: string;
-  height?: number | string;
-  loading?: boolean;
-  error?: string | null;
-  gridOptions?: GridOptions<T>;
-  rowIdField?: Extract<keyof T, string>;
-};
+  rowData: T[]
+  columnDefs?: ColDef<T>[]
+  className?: string
+  height?: number | string
+  loading?: boolean
+  error?: string | null
+  gridOptions?: GridOptions<T>
+  rowIdField?: Extract<keyof T, string>
+}
 
 export function HbcAgTable<T extends Record<string, unknown>>({
   rowData,
@@ -36,10 +36,10 @@ export function HbcAgTable<T extends Record<string, unknown>>({
   rowIdField,
 }: HbcAgTableProps<T>) {
   const autoColumnDefs = useMemo<ColDef<T>[]>(() => {
-    if (columnDefs && columnDefs.length) return columnDefs;
-    const keys = Object.keys(rowData?.[0] ?? {});
-    return keys.map((field) => ({ field })) as ColDef<T>[];
-  }, [columnDefs, rowData]);
+    if (columnDefs && columnDefs.length) return columnDefs
+    const keys = Object.keys(rowData?.[0] ?? {})
+    return keys.map((field) => ({ field })) as ColDef<T>[]
+  }, [columnDefs, rowData])
 
   const defaultColDef = useMemo<ColDef<T>>(
     () => ({
@@ -51,7 +51,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
       minWidth: 140,
     }),
     []
-  );
+  )
 
   const mergedGridOptions = useMemo<GridOptions<T>>(
     () => ({
@@ -62,14 +62,14 @@ export function HbcAgTable<T extends Record<string, unknown>>({
       ...(gridOptions ?? {}),
     }),
     [gridOptions]
-  );
+  )
 
   const finalClassName = [
     "ag-theme-quartz-dark w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-card)]",
     className,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(" ")
 
   return (
     <div className="w-full">
@@ -89,15 +89,15 @@ export function HbcAgTable<T extends Record<string, unknown>>({
           getRowId={
             rowIdField
               ? (p) => {
-                const raw = p.data?.[rowIdField];
-                if (typeof raw === "string" && raw.length) return raw;
-                if (typeof raw === "number") return String(raw);
-                return JSON.stringify(p.data);
-              }
+                  const raw = p.data?.[rowIdField]
+                  if (typeof raw === "string" && raw.length) return raw
+                  if (typeof raw === "number") return String(raw)
+                  return JSON.stringify(p.data)
+                }
               : undefined
           }
         />
       </div>
     </div>
-  );
+  )
 }

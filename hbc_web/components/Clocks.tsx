@@ -1,30 +1,30 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 
 type CityClock = {
-  label: string;
-  zone: string;
-};
+  label: string
+  zone: string
+}
 
 type ClocksProps = {
-  cities?: CityClock[];
-  showSeconds?: boolean;
-};
+  cities?: CityClock[]
+  showSeconds?: boolean
+}
 
 const defaultCities: CityClock[] = [
   { label: "New York", zone: "America/New_York" },
   { label: "London", zone: "Europe/London" },
   { label: "Dubai", zone: "Asia/Dubai" },
   { label: "Hong Kong", zone: "Asia/Hong_Kong" },
-];
+]
 
 export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksProps) {
-  const [times, setTimes] = useState<Record<string, string>>({});
+  const [times, setTimes] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const update = () => {
-      const next: Record<string, string> = {};
+      const next: Record<string, string> = {}
       for (const c of cities) {
         next[c.label] = new Intl.DateTimeFormat("en-GB", {
           hour: "2-digit",
@@ -32,15 +32,15 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
           second: showSeconds ? "2-digit" : undefined,
           hour12: false,
           timeZone: c.zone,
-        }).format(new Date());
+        }).format(new Date())
       }
-      setTimes(next);
-    };
+      setTimes(next)
+    }
 
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, [cities, showSeconds]);
+    update()
+    const id = setInterval(update, 1000)
+    return () => clearInterval(id)
+  }, [cities, showSeconds])
 
   return (
     <div className="flex min-w-0 flex-nowrap items-center gap-4 text-base text-slate-200">
@@ -59,5 +59,5 @@ export function Clocks({ cities = defaultCities, showSeconds = false }: ClocksPr
         </div>
       ))}
     </div>
-  );
+  )
 }
