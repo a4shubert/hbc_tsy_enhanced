@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Start REST API (published build) and demo notebook in separate Terminal windows,
+# Start REST API (published build), web app (prod), and demo notebook in separate Terminal windows,
 # leaving this shell free for running jobs inside the venv.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,6 +41,19 @@ tell application "Terminal"
   do script "${web_cmd_escaped}"
 end tell
 APPLESCRIPT
+
+web_url="${HBC_WEB_URL:-http://localhost:3000}"
+echo "[run_all] Opening browser at ${web_url}..."
+(
+  sleep 2
+  if command -v open >/dev/null 2>&1; then
+    open "${web_url}"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "${web_url}" >/dev/null 2>&1 || true
+  else
+    echo "[run_all] Could not auto-open browser (missing open/xdg-open)."
+  fi
+) &
 
 echo "[run_all] Opening demo notebook in new Terminal window..."
 osascript <<APPLESCRIPT

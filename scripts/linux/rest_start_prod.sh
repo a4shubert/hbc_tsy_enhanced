@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-PUBLISH_DIR="${REPO_ROOT}/publish"
+PUBLISH_DIR="${REPO_ROOT}/hbc_rest/publish"
 
 # Load shared environment defaults (DB path, URLs, etc.) if available.
 if [[ -f "${SCRIPT_DIR}/env.sh" ]]; then

@@ -1,11 +1,11 @@
 <#
   Run the published Release build of HbcRest on Windows.
-  Assumes publish output is in /publish under the repo root.
+  Assumes publish output is in hbc_rest/publish under the repo root.
 #>
 
 $ScriptDir = $PSScriptRoot
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $ScriptDir)
-$PublishDir = Join-Path $RepoRoot "publish"
+$PublishDir = Join-Path $RepoRoot "hbc_rest/publish"
 
 # Load env defaults if available.
 $EnvScript = Join-Path $ScriptDir "env.ps1"

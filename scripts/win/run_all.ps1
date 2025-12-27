@@ -1,5 +1,5 @@
 <#
-  Start REST API (published build) and demo notebook in separate PowerShell windows,
+  Start REST API (published build), web app (prod), and demo notebook in separate PowerShell windows,
   leaving this session free for running jobs.
 #>
 
@@ -24,12 +24,22 @@ if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out
 
 # Build commands to run in new windows.
 $restScript = "Set-Location '$RepoRoot'; . scripts/win/env.ps1; & '$Activate'; & 'scripts/win/rest_start_prod.ps1'"
+$webScript  = "Set-Location '$RepoRoot'; . scripts/win/env.ps1; & 'scripts/win/web_start_prod.ps1'"
 $nbScript   = "Set-Location '$RepoRoot'; . scripts/win/env.ps1; & '$Activate'; & 'scripts/win/run_demo_notebook.ps1'"
 
 Write-Host "[run_all] Starting REST API in new window..."
 Start-Process -FilePath "powershell" -ArgumentList "-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command", $restScript -WindowStyle Normal | Out-Null
 
+Write-Host "[run_all] Starting web app (prod) in new window..."
+Start-Process -FilePath "powershell" -ArgumentList "-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command", $webScript -WindowStyle Normal | Out-Null
+
+if ($Env:HBC_WEB_URL) {
+    Start-Sleep -Seconds 2
+    Write-Host "[run_all] Opening browser at $Env:HBC_WEB_URL..."
+    Start-Process $Env:HBC_WEB_URL | Out-Null
+}
+
 Write-Host "[run_all] Starting demo notebook in new window..."
 Start-Process -FilePath "powershell" -ArgumentList "-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command", $nbScript -WindowStyle Normal | Out-Null
 
-Write-Host "[run_all] Two PowerShell windows started (REST API + notebook). This window remains free for job commands."
+Write-Host "[run_all] Three PowerShell windows started (REST API + web + notebook). This window remains free for job commands."

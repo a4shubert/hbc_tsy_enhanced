@@ -4,11 +4,12 @@ set -euo pipefail
 # Production build helper for HbcRest.
 # - Ensures HBC_DB_PATH is set (defaults to ../hbc_db/hbc.db).
 # - Runs migrations on that DB (if dotnet-ef is available).
-# - Publishes Release artifacts to ./publish under the repo root.
+# - Publishes Release artifacts to ./hbc_rest/publish.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 PROJECT_PATH="${REPO_ROOT}/hbc_rest/HbcRest/HbcRest.csproj"
+PUBLISH_DIR="${REPO_ROOT}/hbc_rest/publish"
 
 # Load shared env defaults (defines HBC_DB_PATH, ASPNETCORE_ENVIRONMENT, etc.).
 source "${SCRIPT_DIR}/env.sh"
@@ -30,7 +31,7 @@ else
 fi
 
 echo "[rest_build] Publishing Release build..."
-dotnet publish "${PROJECT_PATH}" -c Release -o "${REPO_ROOT}/publish"
+dotnet publish "${PROJECT_PATH}" -c Release -o "${PUBLISH_DIR}"
 
 echo "[rest_build] Done. To run:"
-echo "  cd ${REPO_ROOT}/publish && HBC_DB_PATH=${HBC_DB_PATH} ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT} dotnet HbcRest.dll"
+echo "  cd ${PUBLISH_DIR} && HBC_DB_PATH=${HBC_DB_PATH} ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT} dotnet HbcRest.dll"
