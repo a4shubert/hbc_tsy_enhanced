@@ -92,94 +92,344 @@ internal static class ApiHelpers
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
 
-        // Minimal OData-ish support: "col op value" joined by "and"/"or".
+        // Supports:
+        // - comparisons: col (eq|ne|gt|ge|lt|le|=|!=|>|>=|<|<=) literal
+        // - boolean operators: and/or
+        // - parentheses: ( ... )
+        // - string literals in single quotes (supports OData-style escaping: '' inside string)
+        //
         // Fail-fast on unknown columns/operators to avoid silent no-op filters.
-        var parts = Regex.Split(filter, "\\s+(and|or)\\s+", RegexOptions.IgnoreCase)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToList();
-
-        Expression? combined = null;
-        string? pendingLogical = null;
+        var tokenizer = new FilterTokenizer(filter);
+        var tokens = tokenizer.Tokenize();
+        var parser = new FilterParser(tokens);
+        var ast = parser.ParseExpression();
+        parser.ExpectEnd();
 
         var param = Expression.Parameter(typeof(T), "x");
+        var expr = BuildFilterExpression<T>(ast, param);
 
-        foreach (var part in parts)
+        var lambda = Expression.Lambda<System.Func<T, bool>>(expr, param);
+        return query.Where(lambda);
+    }
+
+    private static Expression BuildFilterExpression<T>(FilterNode node, ParameterExpression param)
+    {
+        return node switch
         {
-            var lower = part.Trim().ToLowerInvariant();
-            if (lower == "and" || lower == "or")
-            {
-                pendingLogical = lower;
-                continue;
-            }
+            FilterLogicalNode ln => ln.Op == "or"
+                ? Expression.OrElse(BuildFilterExpression<T>(ln.Left, param), BuildFilterExpression<T>(ln.Right, param))
+                : Expression.AndAlso(BuildFilterExpression<T>(ln.Left, param), BuildFilterExpression<T>(ln.Right, param)),
+            FilterComparisonNode cn => BuildComparisonExpression<T>(cn, param),
+            _ => throw new System.NotSupportedException("Unsupported filter AST node.")
+        };
+    }
 
-            var tokens = part.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
-            if (tokens.Length < 3)
-            {
-                throw new System.ArgumentException($"Invalid $filter segment: {part}");
-            }
-
-            var col = tokens[0];
-            var op = tokens[1];
-            var valRaw = string.Join(" ", tokens.Skip(2)).Trim().Trim('\'', '"');
-
-            var prop = ResolveProperty<T>(col);
-            if (prop is null)
-            {
-                throw new System.ArgumentException($"Unknown filter column: {col}");
-            }
-
-            var left = Expression.Property(param, prop);
-
-            Expression expr;
-            if (valRaw.Equals("null", System.StringComparison.OrdinalIgnoreCase))
-            {
-                var nullConst = Expression.Constant(null, prop.PropertyType);
-                expr = BuildBinary(left, op, nullConst);
-            }
-            else
-            {
-                var coerced = CoerceStringToType(valRaw, prop.PropertyType);
-                if (coerced is null)
-                {
-                    throw new System.ArgumentException($"Could not parse value '{valRaw}' for column '{col}'.");
-                }
-
-                var underlying = System.Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-                var right = Expression.Constant(coerced, underlying);
-
-                if (System.Nullable.GetUnderlyingType(prop.PropertyType) is not null)
-                {
-                    // For nullable types, comparisons should be (HasValue && Value op rhs) for range ops.
-                    if (!(op.Equals("eq", System.StringComparison.OrdinalIgnoreCase) || op == "="
-                          || op.Equals("ne", System.StringComparison.OrdinalIgnoreCase) || op == "!="))
-                    {
-                        var hasValue = Expression.Property(left, "HasValue");
-                        var value = Expression.Property(left, "Value");
-                        var inner = BuildBinary(value, op, right);
-                        expr = Expression.AndAlso(hasValue, inner);
-                    }
-                    else
-                    {
-                        expr = BuildBinary(left, op, Expression.Convert(right, prop.PropertyType));
-                    }
-                }
-                else
-                {
-                    expr = BuildBinary(left, op, right);
-                }
-            }
-
-            combined = combined is null
-                ? expr
-                : (pendingLogical == "or"
-                    ? Expression.OrElse(combined, expr)
-                    : Expression.AndAlso(combined, expr));
-            pendingLogical = null;
+    private static Expression BuildComparisonExpression<T>(FilterComparisonNode node, ParameterExpression param)
+    {
+        var prop = ResolveProperty<T>(node.Column);
+        if (prop is null)
+        {
+            throw new System.ArgumentException($"Unknown filter column: {node.Column}");
         }
 
-        if (combined is null) return query;
-        var lambda = Expression.Lambda<System.Func<T, bool>>(combined, param);
-        return query.Where(lambda);
+        var left = Expression.Property(param, prop);
+
+        if (node.IsNullLiteral)
+        {
+            var nullConst = Expression.Constant(null, prop.PropertyType);
+            return BuildBinary(left, node.Operator, nullConst);
+        }
+
+        var coerced = CoerceStringToType(node.RawValue, prop.PropertyType);
+        if (coerced is null)
+        {
+            throw new System.ArgumentException(
+                $"Could not parse value '{node.RawValue}' for column '{node.Column}'."
+            );
+        }
+
+        var underlying = System.Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+        var right = Expression.Constant(coerced, underlying);
+
+        if (System.Nullable.GetUnderlyingType(prop.PropertyType) is not null)
+        {
+            if (!(node.Operator.Equals("eq", System.StringComparison.OrdinalIgnoreCase) || node.Operator == "="
+                  || node.Operator.Equals("ne", System.StringComparison.OrdinalIgnoreCase) || node.Operator == "!="))
+            {
+                var hasValue = Expression.Property(left, "HasValue");
+                var value = Expression.Property(left, "Value");
+                var inner = BuildBinary(value, node.Operator, right);
+                return Expression.AndAlso(hasValue, inner);
+            }
+            return BuildBinary(left, node.Operator, Expression.Convert(right, prop.PropertyType));
+        }
+
+        return BuildBinary(left, node.Operator, right);
+    }
+
+    private enum FilterTokenKind
+    {
+        Identifier,
+        Operator,
+        String,
+        Number,
+        Null,
+        And,
+        Or,
+        LParen,
+        RParen,
+        End
+    }
+
+    private readonly record struct FilterToken(FilterTokenKind Kind, string Value);
+
+    private abstract record FilterNode;
+
+    private sealed record FilterLogicalNode(string Op, FilterNode Left, FilterNode Right) : FilterNode;
+
+    private sealed record FilterComparisonNode(string Column, string Operator, string RawValue, bool IsNullLiteral) : FilterNode;
+
+    private sealed class FilterTokenizer
+    {
+        private readonly string _s;
+        private int _i;
+
+        public FilterTokenizer(string s)
+        {
+            _s = s ?? "";
+            _i = 0;
+        }
+
+        public List<FilterToken> Tokenize()
+        {
+            var tokens = new List<FilterToken>();
+            while (true)
+            {
+                SkipWs();
+                if (_i >= _s.Length)
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.End, ""));
+                    return tokens;
+                }
+
+                var ch = _s[_i];
+                if (ch == '(')
+                {
+                    _i++;
+                    tokens.Add(new FilterToken(FilterTokenKind.LParen, "("));
+                    continue;
+                }
+                if (ch == ')')
+                {
+                    _i++;
+                    tokens.Add(new FilterToken(FilterTokenKind.RParen, ")"));
+                    continue;
+                }
+
+                if (ch == '\'')
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.String, ReadQuotedString()));
+                    continue;
+                }
+
+                // Operators: >= <= != = > <
+                if (ch is '>' or '<' or '!' or '=')
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.Operator, ReadSymbolOperator()));
+                    continue;
+                }
+
+                if (IsIdentStart(ch))
+                {
+                    var ident = ReadIdentifier();
+                    var lower = ident.ToLowerInvariant();
+                    if (lower == "and") tokens.Add(new FilterToken(FilterTokenKind.And, "and"));
+                    else if (lower == "or") tokens.Add(new FilterToken(FilterTokenKind.Or, "or"));
+                    else if (lower == "null") tokens.Add(new FilterToken(FilterTokenKind.Null, "null"));
+                    else if (IsWordOperator(lower)) tokens.Add(new FilterToken(FilterTokenKind.Operator, lower));
+                    else tokens.Add(new FilterToken(FilterTokenKind.Identifier, ident));
+                    continue;
+                }
+
+                if (char.IsDigit(ch) || (ch == '-' && _i + 1 < _s.Length && char.IsDigit(_s[_i + 1])))
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.Number, ReadNumber()));
+                    continue;
+                }
+
+                throw new System.ArgumentException($"Unexpected character in $filter: '{ch}'");
+            }
+        }
+
+        private static bool IsWordOperator(string lower) =>
+            lower is "eq" or "ne" or "gt" or "ge" or "lt" or "le";
+
+        private static bool IsIdentStart(char ch) =>
+            char.IsLetter(ch) || ch == '_' || ch == '$';
+
+        private static bool IsIdentChar(char ch) =>
+            char.IsLetterOrDigit(ch) || ch == '_' || ch == '$';
+
+        private void SkipWs()
+        {
+            while (_i < _s.Length && char.IsWhiteSpace(_s[_i])) _i++;
+        }
+
+        private string ReadIdentifier()
+        {
+            var start = _i;
+            while (_i < _s.Length && IsIdentChar(_s[_i])) _i++;
+            return _s.Substring(start, _i - start);
+        }
+
+        private string ReadNumber()
+        {
+            var start = _i;
+            if (_s[_i] == '-') _i++;
+            while (_i < _s.Length && char.IsDigit(_s[_i])) _i++;
+            if (_i < _s.Length && _s[_i] == '.')
+            {
+                _i++;
+                while (_i < _s.Length && char.IsDigit(_s[_i])) _i++;
+            }
+            return _s.Substring(start, _i - start);
+        }
+
+        private string ReadSymbolOperator()
+        {
+            var ch = _s[_i];
+            if (_i + 1 < _s.Length)
+            {
+                var two = _s.Substring(_i, 2);
+                if (two is ">=" or "<=" or "!=")
+                {
+                    _i += 2;
+                    return two;
+                }
+            }
+            _i++;
+            return ch.ToString();
+        }
+
+        private string ReadQuotedString()
+        {
+            // Reads OData-style single-quoted string with '' escape.
+            // Returns the unescaped raw string value (no surrounding quotes).
+            _i++; // consume opening '
+            var sb = new System.Text.StringBuilder();
+            while (_i < _s.Length)
+            {
+                var ch = _s[_i];
+                if (ch == '\'')
+                {
+                    if (_i + 1 < _s.Length && _s[_i + 1] == '\'')
+                    {
+                        sb.Append('\'');
+                        _i += 2;
+                        continue;
+                    }
+                    _i++; // closing '
+                    return sb.ToString();
+                }
+                sb.Append(ch);
+                _i++;
+            }
+            throw new System.ArgumentException("Unterminated string literal in $filter.");
+        }
+    }
+
+    private sealed class FilterParser
+    {
+        private readonly List<FilterToken> _tokens;
+        private int _pos;
+
+        public FilterParser(List<FilterToken> tokens)
+        {
+            _tokens = tokens;
+            _pos = 0;
+        }
+
+        private FilterToken Peek() => _tokens[_pos];
+        private FilterToken Next() => _tokens[_pos++];
+
+        public FilterNode ParseExpression() => ParseOr();
+
+        private FilterNode ParseOr()
+        {
+            var left = ParseAnd();
+            while (Peek().Kind == FilterTokenKind.Or)
+            {
+                Next();
+                var right = ParseAnd();
+                left = new FilterLogicalNode("or", left, right);
+            }
+            return left;
+        }
+
+        private FilterNode ParseAnd()
+        {
+            var left = ParsePrimary();
+            while (Peek().Kind == FilterTokenKind.And)
+            {
+                Next();
+                var right = ParsePrimary();
+                left = new FilterLogicalNode("and", left, right);
+            }
+            return left;
+        }
+
+        private FilterNode ParsePrimary()
+        {
+            if (Peek().Kind == FilterTokenKind.LParen)
+            {
+                Next();
+                var inner = ParseExpression();
+                if (Peek().Kind != FilterTokenKind.RParen)
+                {
+                    throw new System.ArgumentException("Missing ')' in $filter.");
+                }
+                Next();
+                return inner;
+            }
+
+            return ParseComparison();
+        }
+
+        private FilterNode ParseComparison()
+        {
+            var col = Next();
+            if (col.Kind != FilterTokenKind.Identifier)
+            {
+                throw new System.ArgumentException("Expected column name in $filter.");
+            }
+
+            var op = Next();
+            if (op.Kind != FilterTokenKind.Operator)
+            {
+                throw new System.ArgumentException("Expected operator in $filter.");
+            }
+
+            var val = Next();
+            if (val.Kind is not (FilterTokenKind.String or FilterTokenKind.Number or FilterTokenKind.Null or FilterTokenKind.Identifier))
+            {
+                throw new System.ArgumentException("Expected literal value in $filter.");
+            }
+
+            if (val.Kind == FilterTokenKind.Null || val.Value.Equals("null", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return new FilterComparisonNode(col.Value, op.Value, "null", true);
+            }
+
+            return new FilterComparisonNode(col.Value, op.Value, val.Value, false);
+        }
+
+        public void ExpectEnd()
+        {
+            if (Peek().Kind != FilterTokenKind.End)
+            {
+                throw new System.ArgumentException("Unexpected token at end of $filter.");
+            }
+        }
     }
 
     public static IQueryable<T> ApplyOrderByGeneric<T>(string orderBy, IQueryable<T> query)

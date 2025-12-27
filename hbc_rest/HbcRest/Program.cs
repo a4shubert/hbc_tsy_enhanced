@@ -150,9 +150,10 @@ app.MapGet($"/{MonikerSurvey}", async (
     }
     else
     {
-        if (string.IsNullOrWhiteSpace(filter) && count != true)
+        // Consistent default paging across all monikers unless caller explicitly sets $top.
+        if (count != true)
         {
-            query = query.Take(MaxTop); // default limit when not specified and no filter
+            query = query.Take(MaxTop);
         }
     }
 
@@ -381,10 +382,14 @@ app.MapGet($"/{MonikerCall}", async (
             var take = (int)Math.Min(top.Value, MaxTop);
             query = query.Take(take);
         }
+        // top <= 0 means no limit
     }
-    else if (string.IsNullOrWhiteSpace(filter) && count != true)
+    else
     {
-        query = query.Take(DefaultTopWhenNoFilter);
+        if (count != true)
+        {
+            query = query.Take(DefaultTopWhenNoFilter);
+        }
     }
 
     var results = await query.AsNoTracking().ToListAsync();
@@ -534,10 +539,14 @@ app.MapGet($"/{MonikerService}", async (
             var take = (int)Math.Min(top.Value, MaxTop);
             query = query.Take(take);
         }
+        // top <= 0 means no limit
     }
-    else if (string.IsNullOrWhiteSpace(filter) && count != true)
+    else
     {
-        query = query.Take(DefaultTopWhenNoFilter);
+        if (count != true)
+        {
+            query = query.Take(DefaultTopWhenNoFilter);
+        }
     }
 
     var results = await query.AsNoTracking().ToListAsync();

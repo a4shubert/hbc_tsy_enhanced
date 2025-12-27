@@ -3,6 +3,8 @@
 
 import type { ColDef } from "ag-grid-community"
 import type { FilterChangedEvent, IFilterModel } from "ag-grid-community"
+import type { GridApi, GridReadyEvent } from "ag-grid-community"
+import type { SelectionChangedEvent } from "ag-grid-community"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { HbcAgTable } from "@/components/HbcAgTable"
@@ -99,6 +101,8 @@ export default function NycOpenData311ServiceRequests() {
   const [filterOData, setFilterOData] = useState<string | undefined>(undefined)
   const [filterLabel, setFilterLabel] = useState<string | undefined>(undefined)
   const filterDebounceRef = useRef<number | null>(null)
+  const gridApiRef = useRef<GridApi<NycOpenData311ServiceRequest> | null>(null)
+  const [selectedCount, setSelectedCount] = useState(0)
 
   const columnDefs = useMemo<ColDef<NycOpenData311ServiceRequest>[]>(
     () =>
@@ -231,6 +235,7 @@ export default function NycOpenData311ServiceRequests() {
     typeof totalCount === "number" ? Math.max(1, Math.ceil(totalCount / PAGE_SIZE)) : undefined
   const canGoFirst = hasPrev
   const canGoLast = typeof lastPage === "number" ? currentPage < lastPage : false
+  const hasFilters = !!filterOData || Object.keys(filterModel).length > 0
 
   return (
     <div className="w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
@@ -258,6 +263,12 @@ export default function NycOpenData311ServiceRequests() {
           rowIdField="hbc_unique_key"
           height={"50vh"}
           loading={loading}
+          onGridReady={(e: GridReadyEvent<NycOpenData311ServiceRequest>) => {
+            gridApiRef.current = e.api
+          }}
+          onSelectionChanged={(e: SelectionChangedEvent<NycOpenData311ServiceRequest>) => {
+            setSelectedCount(e.api.getSelectedNodes().length)
+          }}
           onFilterChanged={(e: FilterChangedEvent<NycOpenData311ServiceRequest>) => {
             if (filterDebounceRef.current) window.clearTimeout(filterDebounceRef.current)
             filterDebounceRef.current = window.setTimeout(() => {
@@ -363,6 +374,57 @@ export default function NycOpenData311ServiceRequests() {
               title={typeof lastPage === "number" ? `Last page (${lastPage})` : "Last page"}
             >
               <ChevronsRightIcon />
+            </button>
+
+            <button
+              type="button"
+              aria-disabled={!hasFilters}
+              disabled={!hasFilters}
+              onClick={() => {
+                if (filterDebounceRef.current) {
+                  window.clearTimeout(filterDebounceRef.current)
+                  filterDebounceRef.current = null
+                }
+
+                gridApiRef.current?.setFilterModel(null)
+                setFilterModel({})
+                setFilterOData(undefined)
+                setFilterLabel(undefined)
+                setCurrentPage(1)
+              }}
+              className={[
+                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
+                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
+                hasFilters ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
+              ].join(" ")}
+              title="Reset filters"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M10 18h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              aria-disabled={selectedCount === 0}
+              disabled={selectedCount === 0}
+              onClick={() => {
+                gridApiRef.current?.deselectAll()
+                setSelectedCount(0)
+              }}
+              className={[
+                "inline-flex items-center justify-center rounded-md border px-2.5 py-2 text-sm",
+                "border-[color:var(--color-border)] bg-[color:var(--color-bg)] text-[color:var(--color-text)]",
+                selectedCount ? "hover:border-[color:var(--color-accent)]" : "opacity-50",
+              ].join(" ")}
+              title={selectedCount ? `Clear selection (${selectedCount})` : "Clear selection"}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
             </button>
           </div>
         </div>
