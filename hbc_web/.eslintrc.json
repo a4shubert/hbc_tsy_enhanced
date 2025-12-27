@@ -1,0 +1,15 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "semi": ["error", "never"],
+    "no-multiple-empty-lines": ["error", { "max": 1, "maxBOF": 0, "maxEOF": 0 }]
+  },
+  "overrides": [
+    {
+      "files": ["app/layout.tsx"],
+      "rules": {
+        "semi": "off"
+      }
+    }
+  ]
+}

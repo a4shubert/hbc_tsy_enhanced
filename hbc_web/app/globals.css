@@ -1,0 +1,119 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Default (base) theme */
+:root {
+  color-scheme: dark;
+
+  --color-bg: #020617;
+  --color-card: #090e1b;
+  --color-border: rgba(255, 255, 255, 0.1);
+
+  --color-text: #f8fafc;
+  --color-muted: #cbd5e1;
+
+  --color-accent: #ef4444;
+  --color-success: #22c55e;
+
+  --color-link: #6366f1;
+  --color-link-surface: rgba(99, 102, 241, 0.15);
+  --color-link-surface-hover: rgba(99, 102, 241, 0.25);
+
+  /* used for anchor offset + consistent spacing */
+  --hbc-header-h: 112px;
+}
+
+
+/* HBC theme override */
+:root[data-theme="hbc"] {
+  color-scheme: dark;
+  
+  --color-bg-gradient:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.00) 38%),
+    linear-gradient(240deg, rgba(122, 162, 247, 0.07) 0%, rgba(122, 162, 247, 0.00) 44%),
+    linear-gradient(200deg, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0.00) 48%),
+    linear-gradient(180deg, #141c34 0%, #0f1630 55%, #070b1d 100%);
+
+  --color-bg: var(--color-bg-gradient);
+  --color-card: #192244;
+  --color-border: #24305a;
+
+  --color-text: #e8f0f6;
+  --color-muted: #a7b3c3;
+
+  --color-accent: #2DD3B6;
+  --color-success: #89a64e;
+
+  --color-link: #7aa2f7;
+  --color-link-surface: var(--color-bg);
+  --color-link-surface-hover: var(--color-card);
+
+  /* Background gradient (linear-only): keep within bg -> darker range */
+
+
+  --hbc-header-h: 112px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font-dm-sans), system-ui, -apple-system, Segoe UI, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  background: var(--color-bg-gradient, var(--color-bg));
+}
+
+/* Keep anchor jumps from hiding behind the sticky header */
+html {
+  scroll-padding-top: var(--hbc-header-h);
+  font-size: 17px;
+}
+
+/*
+  Sticky headers fail when you’re not scrolling the document (common in dashboards).
+  This makes ONE explicit scroll container (the one in layout.tsx) and keeps sticky reliable.
+*/
+#app-scroll {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* HBC TITLE */
+.hbc-title {
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 100;
+  text-wrap: balance;
+
+  /* prevent “Analyt- ical” */
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+@media (min-width: 1920px) {
+  .hbc-title {
+    font-size: clamp(4.7rem, 1vw, 5rem);
+  }
+
+  :root[data-theme="hbc"] {
+    --hbc-header-h: 140px;
+  }
+}
+

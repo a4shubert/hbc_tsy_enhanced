@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+coverage
+
+# Don't auto-format these per project preference
+app/globals.css
+app/layout.tsx
+
+# Generated / noisy
+package-lock.json
+

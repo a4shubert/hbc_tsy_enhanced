@@ -20,16 +20,25 @@ if [[ ! -f "${REPO_ROOT}/.venv/bin/activate" ]]; then
 fi
 
 rest_cmd="cd \"${REPO_ROOT}\"; source scripts/linux/env.sh; source .venv/bin/activate; bash scripts/linux/rest_start_prod.sh"
+web_cmd="cd \"${REPO_ROOT}\"; source scripts/linux/env.sh; bash scripts/linux/web_start_prod.sh"
 nb_cmd="cd \"${REPO_ROOT}\"; source scripts/linux/env.sh; source .venv/bin/activate; bash scripts/linux/run_demo_notebook.sh"
 
 # Escape double quotes for AppleScript.
 rest_cmd_escaped=${rest_cmd//\"/\\\"}
+web_cmd_escaped=${web_cmd//\"/\\\"}
 nb_cmd_escaped=${nb_cmd//\"/\\\"}
 
 echo "[run_all] Opening REST API in new Terminal window..."
 osascript <<APPLESCRIPT
 tell application "Terminal"
   do script "${rest_cmd_escaped}"
+end tell
+APPLESCRIPT
+
+echo "[run_all] Opening web app (prod) in new Terminal window..."
+osascript <<APPLESCRIPT
+tell application "Terminal"
+  do script "${web_cmd_escaped}"
 end tell
 APPLESCRIPT
 
@@ -40,4 +49,4 @@ tell application "Terminal"
 end tell
 APPLESCRIPT
 
-echo "[run_all] Two Terminal windows started (REST API + notebook). This shell remains free for job commands."
+echo "[run_all] Three Terminal windows started (REST API + web + notebook). This shell remains free for job commands."

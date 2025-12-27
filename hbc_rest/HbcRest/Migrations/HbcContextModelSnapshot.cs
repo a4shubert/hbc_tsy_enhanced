@@ -17,7 +17,7 @@ namespace HbcRest.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.22");
 
-            modelBuilder.Entity("HbcRest.Data.CallCenterInquiry", b =>
+            modelBuilder.Entity("HbcRest.Data.NycOpenData311CallCenterInquiry", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -83,7 +83,7 @@ namespace HbcRest.Migrations
                     b.ToTable("nyc_open_data_311_call_center_inquiry");
                 });
 
-            modelBuilder.Entity("HbcRest.Data.CustomerSatisfactionSurvey", b =>
+            modelBuilder.Entity("HbcRest.Data.NycOpenData311CustomerSatisfactionSurvey", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -169,7 +169,7 @@ namespace HbcRest.Migrations
                     b.ToTable("nyc_open_data_311_customer_satisfaction_survey");
                 });
 
-            modelBuilder.Entity("HbcRest.Data.ServiceRequest", b =>
+            modelBuilder.Entity("HbcRest.Data.NycOpenData311ServiceRequests", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

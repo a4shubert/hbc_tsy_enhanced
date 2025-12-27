@@ -5,12 +5,553 @@ using System.Threading.Tasks;
 using HbcRest.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Linq.Expressions;
+using System.Text.Json.Serialization;
 
 namespace HbcRest;
 
 internal static class ApiHelpers
 {
-    public static IQueryable<CustomerSatisfactionSurvey> ApplyFilter(string filter, IQueryable<CustomerSatisfactionSurvey> query)
+    private static PropertyInfo? ResolveProperty<T>(string columnName)
+    {
+        if (string.IsNullOrWhiteSpace(columnName)) return null;
+        var name = columnName.Trim();
+
+        var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        foreach (var p in props)
+        {
+            if (p.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase)) return p;
+
+            var jsonName = p.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
+            if (!string.IsNullOrWhiteSpace(jsonName) &&
+                jsonName.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return p;
+            }
+
+            var colAttr = p.GetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.ColumnAttribute>()?.Name;
+            if (!string.IsNullOrWhiteSpace(colAttr) &&
+                colAttr.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
+    private static object? CoerceStringToType(string raw, System.Type targetType)
+    {
+        var t = System.Nullable.GetUnderlyingType(targetType) ?? targetType;
+        var s = (raw ?? "").Trim();
+
+        if (t == typeof(string)) return s;
+        if (t == typeof(int)) return int.TryParse(s, out var v) ? v : null;
+        if (t == typeof(long)) return long.TryParse(s, out var v) ? v : null;
+        if (t == typeof(double)) return double.TryParse(s, out var v) ? v : null;
+        if (t == typeof(float)) return float.TryParse(s, out var v) ? v : null;
+        if (t == typeof(decimal)) return decimal.TryParse(s, out var v) ? v : null;
+        if (t == typeof(bool))
+        {
+            if (bool.TryParse(s, out var bv)) return bv;
+            if (s == "1") return true;
+            if (s == "0") return false;
+            return null;
+        }
+        if (t == typeof(System.DateTime))
+        {
+            return System.DateTime.TryParse(s, out var dt) ? dt : null;
+        }
+
+        try
+        {
+            return System.Convert.ChangeType(s, t);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static Expression BuildBinary(Expression left, string op, Expression right)
+    {
+        return op.ToLowerInvariant() switch
+        {
+            "eq" or "=" => Expression.Equal(left, right),
+            "ne" or "!=" => Expression.NotEqual(left, right),
+            "gt" or ">" => Expression.GreaterThan(left, right),
+            "ge" or ">=" => Expression.GreaterThanOrEqual(left, right),
+            "lt" or "<" => Expression.LessThan(left, right),
+            "le" or "<=" => Expression.LessThanOrEqual(left, right),
+            _ => throw new System.NotSupportedException($"Unsupported operator: {op}")
+        };
+    }
+
+    public static IQueryable<T> ApplyFilterGeneric<T>(string filter, IQueryable<T> query)
+    {
+        if (string.IsNullOrWhiteSpace(filter)) return query;
+
+        // Supports:
+        // - comparisons: col (eq|ne|gt|ge|lt|le|=|!=|>|>=|<|<=) literal
+        // - boolean operators: and/or
+        // - parentheses: ( ... )
+        // - string literals in single quotes (supports OData-style escaping: '' inside string)
+        //
+        // Fail-fast on unknown columns/operators to avoid silent no-op filters.
+        var tokenizer = new FilterTokenizer(filter);
+        var tokens = tokenizer.Tokenize();
+        var parser = new FilterParser(tokens);
+        var ast = parser.ParseExpression();
+        parser.ExpectEnd();
+
+        var param = Expression.Parameter(typeof(T), "x");
+        var expr = BuildFilterExpression<T>(ast, param);
+
+        var lambda = Expression.Lambda<System.Func<T, bool>>(expr, param);
+        return query.Where(lambda);
+    }
+
+    private static Expression BuildFilterExpression<T>(FilterNode node, ParameterExpression param)
+    {
+        return node switch
+        {
+            FilterLogicalNode ln => ln.Op == "or"
+                ? Expression.OrElse(BuildFilterExpression<T>(ln.Left, param), BuildFilterExpression<T>(ln.Right, param))
+                : Expression.AndAlso(BuildFilterExpression<T>(ln.Left, param), BuildFilterExpression<T>(ln.Right, param)),
+            FilterComparisonNode cn => BuildComparisonExpression<T>(cn, param),
+            _ => throw new System.NotSupportedException("Unsupported filter AST node.")
+        };
+    }
+
+    private static Expression BuildComparisonExpression<T>(FilterComparisonNode node, ParameterExpression param)
+    {
+        var prop = ResolveProperty<T>(node.Column);
+        if (prop is null)
+        {
+            throw new System.ArgumentException($"Unknown filter column: {node.Column}");
+        }
+
+        var left = Expression.Property(param, prop);
+
+        if (node.IsNullLiteral)
+        {
+            var nullConst = Expression.Constant(null, prop.PropertyType);
+            return BuildBinary(left, node.Operator, nullConst);
+        }
+
+        var coerced = CoerceStringToType(node.RawValue, prop.PropertyType);
+        if (coerced is null)
+        {
+            throw new System.ArgumentException(
+                $"Could not parse value '{node.RawValue}' for column '{node.Column}'."
+            );
+        }
+
+        var underlying = System.Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+        var right = Expression.Constant(coerced, underlying);
+
+        if (System.Nullable.GetUnderlyingType(prop.PropertyType) is not null)
+        {
+            if (!(node.Operator.Equals("eq", System.StringComparison.OrdinalIgnoreCase) || node.Operator == "="
+                  || node.Operator.Equals("ne", System.StringComparison.OrdinalIgnoreCase) || node.Operator == "!="))
+            {
+                var hasValue = Expression.Property(left, "HasValue");
+                var value = Expression.Property(left, "Value");
+                var inner = BuildBinary(value, node.Operator, right);
+                return Expression.AndAlso(hasValue, inner);
+            }
+            return BuildBinary(left, node.Operator, Expression.Convert(right, prop.PropertyType));
+        }
+
+        return BuildBinary(left, node.Operator, right);
+    }
+
+    private enum FilterTokenKind
+    {
+        Identifier,
+        Operator,
+        String,
+        Number,
+        Null,
+        And,
+        Or,
+        LParen,
+        RParen,
+        End
+    }
+
+    private readonly record struct FilterToken(FilterTokenKind Kind, string Value);
+
+    private abstract record FilterNode;
+
+    private sealed record FilterLogicalNode(string Op, FilterNode Left, FilterNode Right) : FilterNode;
+
+    private sealed record FilterComparisonNode(string Column, string Operator, string RawValue, bool IsNullLiteral) : FilterNode;
+
+    private sealed class FilterTokenizer
+    {
+        private readonly string _s;
+        private int _i;
+
+        public FilterTokenizer(string s)
+        {
+            _s = s ?? "";
+            _i = 0;
+        }
+
+        public List<FilterToken> Tokenize()
+        {
+            var tokens = new List<FilterToken>();
+            while (true)
+            {
+                SkipWs();
+                if (_i >= _s.Length)
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.End, ""));
+                    return tokens;
+                }
+
+                var ch = _s[_i];
+                if (ch == '(')
+                {
+                    _i++;
+                    tokens.Add(new FilterToken(FilterTokenKind.LParen, "("));
+                    continue;
+                }
+                if (ch == ')')
+                {
+                    _i++;
+                    tokens.Add(new FilterToken(FilterTokenKind.RParen, ")"));
+                    continue;
+                }
+
+                if (ch == '\'')
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.String, ReadQuotedString()));
+                    continue;
+                }
+
+                // Operators: >= <= != = > <
+                if (ch is '>' or '<' or '!' or '=')
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.Operator, ReadSymbolOperator()));
+                    continue;
+                }
+
+                if (IsIdentStart(ch))
+                {
+                    var ident = ReadIdentifier();
+                    var lower = ident.ToLowerInvariant();
+                    if (lower == "and") tokens.Add(new FilterToken(FilterTokenKind.And, "and"));
+                    else if (lower == "or") tokens.Add(new FilterToken(FilterTokenKind.Or, "or"));
+                    else if (lower == "null") tokens.Add(new FilterToken(FilterTokenKind.Null, "null"));
+                    else if (IsWordOperator(lower)) tokens.Add(new FilterToken(FilterTokenKind.Operator, lower));
+                    else tokens.Add(new FilterToken(FilterTokenKind.Identifier, ident));
+                    continue;
+                }
+
+                if (char.IsDigit(ch) || (ch == '-' && _i + 1 < _s.Length && char.IsDigit(_s[_i + 1])))
+                {
+                    tokens.Add(new FilterToken(FilterTokenKind.Number, ReadNumber()));
+                    continue;
+                }
+
+                throw new System.ArgumentException($"Unexpected character in $filter: '{ch}'");
+            }
+        }
+
+        private static bool IsWordOperator(string lower) =>
+            lower is "eq" or "ne" or "gt" or "ge" or "lt" or "le";
+
+        private static bool IsIdentStart(char ch) =>
+            char.IsLetter(ch) || ch == '_' || ch == '$';
+
+        private static bool IsIdentChar(char ch) =>
+            char.IsLetterOrDigit(ch) || ch == '_' || ch == '$';
+
+        private void SkipWs()
+        {
+            while (_i < _s.Length && char.IsWhiteSpace(_s[_i])) _i++;
+        }
+
+        private string ReadIdentifier()
+        {
+            var start = _i;
+            while (_i < _s.Length && IsIdentChar(_s[_i])) _i++;
+            return _s.Substring(start, _i - start);
+        }
+
+        private string ReadNumber()
+        {
+            var start = _i;
+            if (_s[_i] == '-') _i++;
+            while (_i < _s.Length && char.IsDigit(_s[_i])) _i++;
+            if (_i < _s.Length && _s[_i] == '.')
+            {
+                _i++;
+                while (_i < _s.Length && char.IsDigit(_s[_i])) _i++;
+            }
+            return _s.Substring(start, _i - start);
+        }
+
+        private string ReadSymbolOperator()
+        {
+            var ch = _s[_i];
+            if (_i + 1 < _s.Length)
+            {
+                var two = _s.Substring(_i, 2);
+                if (two is ">=" or "<=" or "!=")
+                {
+                    _i += 2;
+                    return two;
+                }
+            }
+            _i++;
+            return ch.ToString();
+        }
+
+        private string ReadQuotedString()
+        {
+            // Reads OData-style single-quoted string with '' escape.
+            // Returns the unescaped raw string value (no surrounding quotes).
+            _i++; // consume opening '
+            var sb = new System.Text.StringBuilder();
+            while (_i < _s.Length)
+            {
+                var ch = _s[_i];
+                if (ch == '\'')
+                {
+                    if (_i + 1 < _s.Length && _s[_i + 1] == '\'')
+                    {
+                        sb.Append('\'');
+                        _i += 2;
+                        continue;
+                    }
+                    _i++; // closing '
+                    return sb.ToString();
+                }
+                sb.Append(ch);
+                _i++;
+            }
+            throw new System.ArgumentException("Unterminated string literal in $filter.");
+        }
+    }
+
+    private sealed class FilterParser
+    {
+        private readonly List<FilterToken> _tokens;
+        private int _pos;
+
+        public FilterParser(List<FilterToken> tokens)
+        {
+            _tokens = tokens;
+            _pos = 0;
+        }
+
+        private FilterToken Peek() => _tokens[_pos];
+        private FilterToken Next() => _tokens[_pos++];
+
+        public FilterNode ParseExpression() => ParseOr();
+
+        private FilterNode ParseOr()
+        {
+            var left = ParseAnd();
+            while (Peek().Kind == FilterTokenKind.Or)
+            {
+                Next();
+                var right = ParseAnd();
+                left = new FilterLogicalNode("or", left, right);
+            }
+            return left;
+        }
+
+        private FilterNode ParseAnd()
+        {
+            var left = ParsePrimary();
+            while (Peek().Kind == FilterTokenKind.And)
+            {
+                Next();
+                var right = ParsePrimary();
+                left = new FilterLogicalNode("and", left, right);
+            }
+            return left;
+        }
+
+        private FilterNode ParsePrimary()
+        {
+            if (Peek().Kind == FilterTokenKind.LParen)
+            {
+                Next();
+                var inner = ParseExpression();
+                if (Peek().Kind != FilterTokenKind.RParen)
+                {
+                    throw new System.ArgumentException("Missing ')' in $filter.");
+                }
+                Next();
+                return inner;
+            }
+
+            return ParseComparison();
+        }
+
+        private FilterNode ParseComparison()
+        {
+            var col = Next();
+            if (col.Kind != FilterTokenKind.Identifier)
+            {
+                throw new System.ArgumentException("Expected column name in $filter.");
+            }
+
+            var op = Next();
+            if (op.Kind != FilterTokenKind.Operator)
+            {
+                throw new System.ArgumentException("Expected operator in $filter.");
+            }
+
+            var val = Next();
+            if (val.Kind is not (FilterTokenKind.String or FilterTokenKind.Number or FilterTokenKind.Null or FilterTokenKind.Identifier))
+            {
+                throw new System.ArgumentException("Expected literal value in $filter.");
+            }
+
+            if (val.Kind == FilterTokenKind.Null || val.Value.Equals("null", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return new FilterComparisonNode(col.Value, op.Value, "null", true);
+            }
+
+            return new FilterComparisonNode(col.Value, op.Value, val.Value, false);
+        }
+
+        public void ExpectEnd()
+        {
+            if (Peek().Kind != FilterTokenKind.End)
+            {
+                throw new System.ArgumentException("Unexpected token at end of $filter.");
+            }
+        }
+    }
+
+    public static IQueryable<T> ApplyOrderByGeneric<T>(string orderBy, IQueryable<T> query)
+    {
+        if (string.IsNullOrWhiteSpace(orderBy)) return query;
+        var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
+
+        var isFirst = true;
+        foreach (var part in parts)
+        {
+            var tokens = part.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length == 0) continue;
+            var col = tokens[0];
+            var desc = tokens.Length > 1 && tokens[1].Equals("desc", System.StringComparison.OrdinalIgnoreCase);
+
+            var prop = ResolveProperty<T>(col);
+            if (prop is null)
+            {
+                throw new System.ArgumentException($"Unknown orderby column: {col}");
+            }
+
+            var param = Expression.Parameter(typeof(T), "x");
+            var body = Expression.Property(param, prop);
+            var lambda = Expression.Lambda(body, param);
+
+            var method = isFirst
+                ? (desc ? "OrderByDescending" : "OrderBy")
+                : (desc ? "ThenByDescending" : "ThenBy");
+
+            query = (IQueryable<T>)typeof(Queryable).GetMethods()
+                .Single(m => m.Name == method && m.GetParameters().Length == 2)
+                .MakeGenericMethod(typeof(T), prop.PropertyType)
+                .Invoke(null, new object[] { query, lambda })!;
+
+            isFirst = false;
+        }
+
+        return query;
+    }
+
+    public static IEnumerable<dynamic> ApplySelectGeneric<T>(string? select, IEnumerable<T> items)
+    {
+        if (string.IsNullOrWhiteSpace(select)) return items.Cast<dynamic>();
+
+        var cols = select.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries)
+            .Select(c => c.Trim())
+            .ToList();
+
+        var props = cols.Select(c => (col: c, prop: ResolveProperty<T>(c))).ToList();
+        var bad = props.FirstOrDefault(p => p.prop is null).col;
+        if (!string.IsNullOrWhiteSpace(bad))
+        {
+            throw new System.ArgumentException($"Unknown $select column: {bad}");
+        }
+
+        return items.Select(i =>
+        {
+            var dict = new Dictionary<string, object?>(System.StringComparer.OrdinalIgnoreCase);
+            foreach (var (col, prop) in props)
+            {
+                dict[col] = prop!.GetValue(i);
+            }
+            return dict;
+        });
+    }
+
+    public static async Task<IResult> ApplyGroupByGeneric<T>(string apply, IQueryable<T> query)
+    {
+        // Supports: $apply=groupby((field))
+        var match = Regex.Match(apply.Trim(), @"^groupby\(\(\s*([a-zA-Z0-9_]+)\s*\)\)\s*$", RegexOptions.IgnoreCase);
+        if (!match.Success)
+        {
+            return Results.BadRequest("Unsupported $apply. Only groupby((field)) is supported.");
+        }
+
+        var field = match.Groups[1].Value.Trim();
+        var prop = ResolveProperty<T>(field);
+        if (prop is null)
+        {
+            return Results.BadRequest($"Unknown groupby column: {field}");
+        }
+
+        // Use EF.Property<T> for strong translation, then shape to dictionaries in-memory
+        // so JSON uses the requested field name.
+        var list = await GroupByToDictAsync(query, prop, field);
+        return Results.Ok(list);
+    }
+
+    private static Task<List<Dictionary<string, object?>>> GroupByToDictAsync<T>(
+        IQueryable<T> query,
+        PropertyInfo prop,
+        string requestedFieldName)
+    {
+        var method = typeof(ApiHelpers)
+            .GetMethod(nameof(GroupByToDictAsyncImpl), BindingFlags.NonPublic | BindingFlags.Static)!
+            .MakeGenericMethod(typeof(T), prop.PropertyType);
+        return (Task<List<Dictionary<string, object?>>>)method.Invoke(
+            null,
+            new object[] { query, prop.Name, requestedFieldName }
+        )!;
+    }
+
+    private static async Task<List<Dictionary<string, object?>>> GroupByToDictAsyncImpl<T, TKey>(
+        IQueryable<T> query,
+        string propertyName,
+        string requestedFieldName)
+    {
+        var grouped = await query
+            .GroupBy(x => EF.Property<TKey>(x!, propertyName))
+            .Select(g => new { Key = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        return grouped
+            .Select(x => new Dictionary<string, object?>
+            {
+                [requestedFieldName] = x.Key,
+                ["count"] = x.Count
+            })
+            .ToList();
+    }
+
+    public static IQueryable<NycOpenData311CustomerSatisfactionSurvey> ApplyFilter(string filter, IQueryable<NycOpenData311CustomerSatisfactionSurvey> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
         var parts = filter.Split(" and ", System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
@@ -49,7 +590,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IQueryable<CustomerSatisfactionSurvey> ApplyOrderBy(string orderBy, IQueryable<CustomerSatisfactionSurvey> query)
+    public static IQueryable<NycOpenData311CustomerSatisfactionSurvey> ApplyOrderBy(string orderBy, IQueryable<NycOpenData311CustomerSatisfactionSurvey> query)
     {
         var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts.Reverse())
@@ -68,7 +609,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IEnumerable<dynamic> ApplySelect(string? select, IEnumerable<CustomerSatisfactionSurvey> items)
+    public static IEnumerable<dynamic> ApplySelect(string? select, IEnumerable<NycOpenData311CustomerSatisfactionSurvey> items)
     {
         if (string.IsNullOrWhiteSpace(select))
         {
@@ -96,7 +637,7 @@ internal static class ApiHelpers
         }.Where(kv => cols.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value));
     }
 
-    public static async Task<IResult> ApplyGroupBy(string apply, IQueryable<CustomerSatisfactionSurvey> query)
+    public static async Task<IResult> ApplyGroupBy(string apply, IQueryable<NycOpenData311CustomerSatisfactionSurvey> query)
     {
         // support $apply=groupby((field))
         var match = Regex.Match(apply, @"groupby\(\(([^)]+)\)\)", RegexOptions.IgnoreCase);
@@ -118,7 +659,7 @@ internal static class ApiHelpers
         return Results.BadRequest("Unsupported groupby field");
     }
 
-    public static IQueryable<CallCenterInquiry> ApplyFilterCall(string filter, IQueryable<CallCenterInquiry> query)
+    public static IQueryable<NycOpenData311CallCenterInquiry> ApplyFilterCall(string filter, IQueryable<NycOpenData311CallCenterInquiry> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
         var parts = filter.Split(" and ", System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
@@ -151,7 +692,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IQueryable<CallCenterInquiry> ApplyOrderByCall(string orderBy, IQueryable<CallCenterInquiry> query)
+    public static IQueryable<NycOpenData311CallCenterInquiry> ApplyOrderByCall(string orderBy, IQueryable<NycOpenData311CallCenterInquiry> query)
     {
         var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts.Reverse())
@@ -173,7 +714,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IEnumerable<dynamic> ApplySelectCall(string? select, IEnumerable<CallCenterInquiry> items)
+    public static IEnumerable<dynamic> ApplySelectCall(string? select, IEnumerable<NycOpenData311CallCenterInquiry> items)
     {
         if (string.IsNullOrWhiteSpace(select))
         {
@@ -197,7 +738,7 @@ internal static class ApiHelpers
         }.Where(kv => cols.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value));
     }
 
-    public static IQueryable<ServiceRequest> ApplyFilterService(string filter, IQueryable<ServiceRequest> query)
+    public static IQueryable<NycOpenData311ServiceRequests> ApplyFilterService(string filter, IQueryable<NycOpenData311ServiceRequests> query)
     {
         if (string.IsNullOrWhiteSpace(filter)) return query;
         var parts = filter.Split(" and ", System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
@@ -232,7 +773,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IQueryable<ServiceRequest> ApplyOrderByService(string orderBy, IQueryable<ServiceRequest> query)
+    public static IQueryable<NycOpenData311ServiceRequests> ApplyOrderByService(string orderBy, IQueryable<NycOpenData311ServiceRequests> query)
     {
         var parts = orderBy.Split(',', System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var part in parts.Reverse())
@@ -251,7 +792,7 @@ internal static class ApiHelpers
         return query;
     }
 
-    public static IEnumerable<dynamic> ApplySelectService(string? select, IEnumerable<ServiceRequest> items)
+    public static IEnumerable<dynamic> ApplySelectService(string? select, IEnumerable<NycOpenData311ServiceRequests> items)
     {
         if (string.IsNullOrWhiteSpace(select))
         {
@@ -276,7 +817,7 @@ internal static class ApiHelpers
         }.Where(kv => cols.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value));
     }
 
-    public static void CopyFields(CustomerSatisfactionSurvey target, CustomerSatisfactionSurvey source)
+    public static void CopyFields(NycOpenData311CustomerSatisfactionSurvey target, NycOpenData311CustomerSatisfactionSurvey source)
     {
         target.HbcUniqueKey = source.HbcUniqueKey;
         target.Year = source.Year;
@@ -294,7 +835,7 @@ internal static class ApiHelpers
         target.Nps = source.Nps;
     }
 
-    public static void CopyFieldsCall(CallCenterInquiry target, CallCenterInquiry source)
+    public static void CopyFieldsCall(NycOpenData311CallCenterInquiry target, NycOpenData311CallCenterInquiry source)
     {
         target.HbcUniqueKey = source.HbcUniqueKey;
         target.UniqueId = source.UniqueId;
@@ -308,7 +849,7 @@ internal static class ApiHelpers
         target.CallResolution = source.CallResolution;
     }
 
-    public static void CopyFieldsService(ServiceRequest target, ServiceRequest source)
+    public static void CopyFieldsService(NycOpenData311ServiceRequests target, NycOpenData311ServiceRequests source)
     {
         target.HbcUniqueKey = source.HbcUniqueKey;
         target.UniqueKey = source.UniqueKey;
