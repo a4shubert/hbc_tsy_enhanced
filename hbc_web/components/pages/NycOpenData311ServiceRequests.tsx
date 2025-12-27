@@ -2,7 +2,7 @@
 "use client"
 
 import type { ColDef } from "ag-grid-community"
-import type { FilterChangedEvent, IFilterModel } from "ag-grid-community"
+import type { FilterChangedEvent, FilterModel } from "ag-grid-community"
 import type { GridApi, GridReadyEvent } from "ag-grid-community"
 import type { SelectionChangedEvent } from "ag-grid-community"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -97,7 +97,7 @@ function ChevronsRightIcon() {
 
 export default function NycOpenData311ServiceRequests() {
   const [currentPage, setCurrentPage] = useState(1)
-  const [filterModel, setFilterModel] = useState<IFilterModel>({})
+  const [filterModel, setFilterModel] = useState<FilterModel>({})
   const [filterOData, setFilterOData] = useState<string | undefined>(undefined)
   const [filterLabel, setFilterLabel] = useState<string | undefined>(undefined)
   const filterDebounceRef = useRef<number | null>(null)
@@ -131,7 +131,7 @@ export default function NycOpenData311ServiceRequests() {
     return value.replace(/'/g, "''")
   }
 
-  function filterModelToOData(model: IFilterModel | null | undefined) {
+  function filterModelToOData(model: FilterModel | null | undefined) {
     if (!model) return undefined
 
     const parts: string[] = []

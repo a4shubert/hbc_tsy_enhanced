@@ -28,21 +28,27 @@ Hybrid data pipeline that pulls NYC 311 datasets from Socrata, validates/normali
 - `scripts`: Shared helpers (`env.sh` for env vars) and build/run utilities under `scripts/linux` and `scripts/win`.
 
 # Installation
+
 **Prerequisites**: Python 3.10+, .NET 8 SDK, and optionally Miniconda/conda if you prefer conda-based environments.
 
 1.  Clone and enter the repo:
+
 ```bash
 git clone https://github.com/a4shubert/hbc_tsy_enhanced.git
 cd hbc_tsy_enhanced
 ```
+
 2. One-shot setup:
+
 ```bash
 # macOS/Linux
 ./scripts/linux/install.sh
 # Windows (PowerShell)
 .\scripts\win\install.ps1
 ```
-3. Run everything (REST API + demo notebook) in new terminals:
+
+3. Run everything (REST API + Web Portal + demo notebook) in new terminals:
+
 ```bash
 # macOS/Linux
 ./scripts/linux/run_all.sh
@@ -50,7 +56,20 @@ cd hbc_tsy_enhanced
 .\scripts\win\run_all.ps1
 ```
 
-4. Run jobs from command line:
+4. Run Web Portal
+
+```bash
+# macOS/Linux (prod)
+./scripts/linux/web_build.sh
+./scripts/linux/web_start_prod.sh
+
+# Windows (PowerShell) (prod)
+.\scripts\win\web_build.ps1
+.\scripts\win\web_start_prod.ps1
+```
+
+5. Run jobs from command line:
+
 ```bash
 # macOS/Linux
 source scripts/linux/activate_venv.sh
@@ -64,7 +83,8 @@ python -m hbc.jobs.dispatch \
   --as-of=20091231
 ```
 
-5. Run py-tests from command line:
+6. Run py-tests from command line:
+
 ```bash
 # macOS/Linux
 source scripts/linux/activate_venv.sh
@@ -77,13 +97,15 @@ $env:HBC_INTEGRATION = 1   # set only if you want live integration tests
 pytest -vv -s
 ```
 
-6. Run C# tests from command line:
+7. Run C# tests from command line:
+
 ```bash
 cd hbc_rest/HbcRest.Tests
 dotnet test
 ```
 
 ## Scripts
+
 - `scripts/linux/install.sh` / `scripts/win/install.ps1`: set up env, venv, install `hbc_py` (no servers started).
 - `scripts/linux/run_all.sh` / `scripts/win/run_all.ps1`: start REST API (published build) + demo notebook; keeps your main shell free.
 - `scripts/linux/rest_start_prod.sh` / `scripts/win/rest_start_prod.ps1`: run published REST API.
@@ -368,8 +390,17 @@ classDiagram
 - Logging middleware traces every request; DELETE is available for test data cleanup.
 - Environment vars: `HBC_DB_PATH` (SQLite file), `HBC_API_URL` & `ASPNETCORE_URLS` (listener), `ASPNETCORE_ENVIRONMENT` (Dev/Production).
 
+![REST API Swagger](img/RestAPISwagger.png)
+
+
 ## hbc_web (Next.js)
 
 - Next.js 14 (app router) + Tailwind UI shell.
 - Sticky header with live world clocks (NY/London/Dubai/HK) and quick links to API (Swagger) and docs.
-- Footer with copyright; main area ready for dashboard content.
+- Dashboard page renders a reusable `HbcAgTable` (AG Grid Community, Quartz dark theme) with:
+  - Paging controls (first/prev/next/last), reset-filters, and clear-selection actions.
+  - Server-backed filtering: changing AG Grid filters re-queries the REST endpoint and refreshes the table.
+  - Multiple selectable and sortable columns.
+- Uses a `/backend/*` rewrite proxy (configured via `HBC_API_URL`) to call the REST API without browser CORS issues.
+
+![Dashboard](img/Dashboard.png)
