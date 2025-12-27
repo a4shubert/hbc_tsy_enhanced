@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "HBC Data Portal",
+  title: "HBC TSY Analytical Dashboard",
   description: "Frontend for HBC REST API datasets.",
 };
 

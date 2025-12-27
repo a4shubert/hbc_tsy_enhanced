@@ -25,11 +25,18 @@
   --hbc-header-h: 112px;
 }
 
+
 /* HBC theme override */
 :root[data-theme="hbc"] {
   color-scheme: dark;
+  
+  --color-bg-gradient:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.00) 38%),
+    linear-gradient(240deg, rgba(122, 162, 247, 0.07) 0%, rgba(122, 162, 247, 0.00) 44%),
+    linear-gradient(200deg, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0.00) 48%),
+    linear-gradient(180deg, #141c34 0%, #0f1630 55%, #070b1d 100%);
 
-  --color-bg: #141c34;
+  --color-bg: var(--color-bg-gradient);
   --color-card: #192244;
   --color-border: #24305a;
 
@@ -44,15 +51,6 @@
   --color-link-surface-hover: var(--color-card);
 
   /* Background gradient (linear-only): keep within bg -> darker range */
---color-bg-gradient:
-  radial-gradient(1400px 900px at 50% -10%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.00) 55%),
-  radial-gradient(1000px 650px at 15% 85%, rgba(122, 162, 247, 0.08) 0%, rgba(122, 162, 247, 0.00) 62%),
-  radial-gradient(1000px 650px at 85% 85%, rgba(99, 102, 241, 0.07) 0%, rgba(99, 102, 241, 0.00) 62%),
-  linear-gradient(180deg, #141c34 0%, #0f1630 55%, #070b1d 100%);
-
-
-
-
 
 
   --hbc-header-h: 112px;
