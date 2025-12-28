@@ -47,13 +47,13 @@ cd hbc_tsy_enhanced
 .\scripts\win\install.ps1
 ```
 
-3. Run everything (REST API + Web Portal + demo notebook) in new terminals:
+3. Launch everything (REST API + Web Portal + demo notebook) in new terminals:
 
 ```bash
 # macOS/Linux
-./scripts/linux/run_all.sh
+./scripts/linux/launch.sh
 # Windows (PowerShell)
-.\scripts\win\run_all.ps1
+.\scripts\win\launch.ps1
 ```
 
 4. Run Web Portal
@@ -107,7 +107,7 @@ dotnet test
 ## Scripts
 
 - `scripts/linux/install.sh` / `scripts/win/install.ps1`: set up env, venv, install `hbc_py` (no servers started).
-- `scripts/linux/run_all.sh` / `scripts/win/run_all.ps1`: start REST API (published build) + demo notebook; keeps your main shell free.
+- `scripts/linux/launch.sh` / `scripts/win/launch.ps1`: start REST API + web portal + demo notebook; keeps your main shell free.
 - `scripts/linux/rest_start_prod.sh` / `scripts/win/rest_start_prod.ps1`: run published REST API.
 - `scripts/linux/rest_start_dev.sh` / `scripts/win/rest_start_dev.ps1`: run REST API in Development profile.
 - `scripts/linux/rest_build.sh` / `scripts/win/rest_build.ps1`: clean/restore/migrate/publish REST API.
@@ -392,7 +392,6 @@ classDiagram
 
 ![REST API Swagger](img/RestAPISwagger.png)
 
-
 ## hbc_web (Next.js)
 
 - Next.js 14 (app router) + Tailwind UI shell.
@@ -402,5 +401,7 @@ classDiagram
   - Server-backed filtering: changing AG Grid filters re-queries the REST endpoint and refreshes the table.
   - Multiple selectable and sortable columns.
 - Uses a `/backend/*` rewrite proxy (configured via `HBC_API_URL`) to call the REST API without browser CORS issues.
+
+- The main table is optimized for fast exploration: single-click focuses a cell for standard copy (Cmd+C on macOS, Ctrl+C on Windows/Linux), double-click toggles selecting the whole row (clearable via the X button), and filters support case-insensitive “contains” (debounced backend refresh, with a minimum character threshold) so typing `brook` matches `BROOKLYN`. Pagination and an always-visible horizontal scrollbar make it easy to navigate wide datasets.
 
 ![Dashboard](img/Dashboard.png)
