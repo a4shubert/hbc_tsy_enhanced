@@ -11,14 +11,24 @@ $RepoRoot = (Resolve-Path "$PSScriptRoot\..\..").Path
 # Load env defaults
 . "$PSScriptRoot\env.ps1"
 
-# Check for optional tools.
+# Check prerequisites (do not proceed if missing).
+$Missing = $false
+
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Host "[install] Warning: dotnet SDK not found. Install .NET 8 SDK if you plan to run the REST API:"
+    Write-Host "[install] Missing required dependency: .NET SDK (8.x)."
     Write-Host "  https://dotnet.microsoft.com/en-us/download/dotnet/8.0"
+    $Missing = $true
 }
 
+if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+    Write-Host "[install] Missing required dependency: npm (Node.js)."
+    Write-Host "  https://nodejs.org/en/download"
+    $Missing = $true
+}
+
+# Optional tools.
 if (-not (Get-Command conda -ErrorAction SilentlyContinue)) {
-    Write-Host "[install] Warning: conda/miniconda not found. If you prefer conda, install Miniconda:"
+    Write-Host "[install] Note: conda/miniconda not found. If you prefer conda, install Miniconda:"
     Write-Host "  https://docs.conda.io/en/latest/miniconda.html"
 }
 
@@ -28,7 +38,13 @@ if ($Env:PYTHON) { $PythonCandidates += $Env:PYTHON }
 $PythonCandidates += @("python", "py", "python3")
 $Python = $PythonCandidates | Where-Object { (Get-Command $_ -ErrorAction SilentlyContinue) } | Select-Object -First 1
 if (-not $Python) {
-    Write-Host "[install] Python not found on PATH. Install Python 3.10+ and retry."
+    Write-Host "[install] Missing required dependency: python (3.10+ recommended)."
+    Write-Host "  https://www.python.org/downloads/"
+    $Missing = $true
+}
+
+if ($Missing) {
+    Write-Host "[install] Aborting: install missing dependencies and retry."
     exit 1
 }
 
