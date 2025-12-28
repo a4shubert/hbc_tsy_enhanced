@@ -34,7 +34,7 @@ Write-Host "[run_all] Starting web app (prod) in new window..."
 Start-Process -FilePath "powershell" -ArgumentList "-NoExit","-NoProfile","-ExecutionPolicy","Bypass","-Command", $webScript -WindowStyle Normal | Out-Null
 
 if ($Env:HBC_WEB_URL) {
-    Start-Sleep -Seconds 18
+    Start-Sleep -Seconds 3
     Write-Host "[run_all] Opening browser at $Env:HBC_WEB_URL..."
     Start-Process $Env:HBC_WEB_URL | Out-Null
 }
