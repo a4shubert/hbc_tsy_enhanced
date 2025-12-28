@@ -120,8 +120,50 @@ internal static class ApiHelpers
                 ? Expression.OrElse(BuildFilterExpression<T>(ln.Left, param), BuildFilterExpression<T>(ln.Right, param))
                 : Expression.AndAlso(BuildFilterExpression<T>(ln.Left, param), BuildFilterExpression<T>(ln.Right, param)),
             FilterComparisonNode cn => BuildComparisonExpression<T>(cn, param),
+            FilterFunctionNode fn => BuildFunctionExpression<T>(fn, param),
             _ => throw new System.NotSupportedException("Unsupported filter AST node.")
         };
+    }
+
+    private static Expression BuildFunctionExpression<T>(FilterFunctionNode node, ParameterExpression param)
+    {
+        var name = node.Name.ToLowerInvariant();
+        if (name != "contains")
+        {
+            throw new System.NotSupportedException($"Unsupported function in $filter: {node.Name}");
+        }
+
+        if (node.Args.Count != 2)
+        {
+            throw new System.ArgumentException("contains() requires exactly 2 arguments: contains(column,'value')");
+        }
+
+        if (node.Args[0] is not FilterIdentifierNode ident)
+        {
+            throw new System.ArgumentException("contains() first argument must be a column name.");
+        }
+
+        if (node.Args[1] is not FilterLiteralNode lit || lit.Kind != FilterTokenKind.String)
+        {
+            throw new System.ArgumentException("contains() second argument must be a string literal.");
+        }
+
+        var prop = ResolveProperty<T>(ident.Name);
+        if (prop is null)
+        {
+            throw new System.ArgumentException($"Unknown filter column: {ident.Name}");
+        }
+
+        if (prop.PropertyType != typeof(string))
+        {
+            throw new System.ArgumentException($"contains() is only supported on string columns. '{ident.Name}' is {prop.PropertyType.Name}.");
+        }
+
+        var left = Expression.Property(param, prop);
+        var notNull = Expression.NotEqual(left, Expression.Constant(null, typeof(string)));
+        var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
+        var call = Expression.Call(left, containsMethod, Expression.Constant(lit.RawValue, typeof(string)));
+        return Expression.AndAlso(notNull, call);
     }
 
     private static Expression BuildComparisonExpression<T>(FilterComparisonNode node, ParameterExpression param)
@@ -178,6 +220,7 @@ internal static class ApiHelpers
         Or,
         LParen,
         RParen,
+        Comma,
         End
     }
 
@@ -188,6 +231,12 @@ internal static class ApiHelpers
     private sealed record FilterLogicalNode(string Op, FilterNode Left, FilterNode Right) : FilterNode;
 
     private sealed record FilterComparisonNode(string Column, string Operator, string RawValue, bool IsNullLiteral) : FilterNode;
+
+    private sealed record FilterIdentifierNode(string Name) : FilterNode;
+
+    private sealed record FilterLiteralNode(string RawValue, FilterTokenKind Kind) : FilterNode;
+
+    private sealed record FilterFunctionNode(string Name, List<FilterNode> Args) : FilterNode;
 
     private sealed class FilterTokenizer
     {
@@ -223,6 +272,12 @@ internal static class ApiHelpers
                 {
                     _i++;
                     tokens.Add(new FilterToken(FilterTokenKind.RParen, ")"));
+                    continue;
+                }
+                if (ch == ',')
+                {
+                    _i++;
+                    tokens.Add(new FilterToken(FilterTokenKind.Comma, ","));
                     continue;
                 }
 
@@ -392,15 +447,20 @@ internal static class ApiHelpers
                 return inner;
             }
 
-            return ParseComparison();
+            return ParseFunctionOrComparison();
         }
 
-        private FilterNode ParseComparison()
+        private FilterNode ParseFunctionOrComparison()
         {
-            var col = Next();
-            if (col.Kind != FilterTokenKind.Identifier)
+            var head = Next();
+            if (head.Kind != FilterTokenKind.Identifier)
             {
-                throw new System.ArgumentException("Expected column name in $filter.");
+                throw new System.ArgumentException("Expected column name or function name in $filter.");
+            }
+
+            if (Peek().Kind == FilterTokenKind.LParen)
+            {
+                return ParseFunctionCall(head.Value);
             }
 
             var op = Next();
@@ -417,10 +477,50 @@ internal static class ApiHelpers
 
             if (val.Kind == FilterTokenKind.Null || val.Value.Equals("null", System.StringComparison.OrdinalIgnoreCase))
             {
-                return new FilterComparisonNode(col.Value, op.Value, "null", true);
+                return new FilterComparisonNode(head.Value, op.Value, "null", true);
             }
 
-            return new FilterComparisonNode(col.Value, op.Value, val.Value, false);
+            return new FilterComparisonNode(head.Value, op.Value, val.Value, false);
+        }
+
+        private FilterNode ParseFunctionCall(string name)
+        {
+            Next(); // (
+            var args = new List<FilterNode>();
+
+            if (Peek().Kind == FilterTokenKind.RParen)
+            {
+                Next();
+                return new FilterFunctionNode(name, args);
+            }
+
+            while (true)
+            {
+                var t = Peek();
+                if (t.Kind == FilterTokenKind.Identifier) args.Add(new FilterIdentifierNode(Next().Value));
+                else if (t.Kind == FilterTokenKind.String) args.Add(new FilterLiteralNode(Next().Value, FilterTokenKind.String));
+                else if (t.Kind == FilterTokenKind.Number) args.Add(new FilterLiteralNode(Next().Value, FilterTokenKind.Number));
+                else if (t.Kind == FilterTokenKind.Null)
+                {
+                    Next();
+                    args.Add(new FilterLiteralNode("null", FilterTokenKind.Null));
+                }
+                else throw new System.ArgumentException("Expected function argument in $filter.");
+
+                if (Peek().Kind == FilterTokenKind.Comma)
+                {
+                    Next();
+                    continue;
+                }
+                if (Peek().Kind == FilterTokenKind.RParen)
+                {
+                    Next();
+                    break;
+                }
+                throw new System.ArgumentException("Expected ',' or ')' in function call.");
+            }
+
+            return new FilterFunctionNode(name, args);
         }
 
         public void ExpectEnd()

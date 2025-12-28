@@ -115,7 +115,19 @@ export default function NycOpenData311ServiceRequests() {
               field.endsWith("_coordinate_state_plane_")
             ? "agNumberColumnFilter"
             : "agTextColumnFilter",
-        filterParams: { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 },
+        filterParams: field.includes("date")
+          ? { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 }
+          : field === "latitude" ||
+              field === "longitude" ||
+              field.endsWith("_coordinate_state_plane_")
+            ? { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 }
+            : {
+                filterOptions: ["contains", "equals"],
+                defaultOption: "contains",
+                debounceMs: 500,
+                buttons: ["apply", "reset"],
+                closeOnApply: true,
+              },
       })),
     []
   )
@@ -142,11 +154,13 @@ export default function NycOpenData311ServiceRequests() {
       if (!m) continue
 
       const type = String(m.type || "").toLowerCase()
-      if (type && type !== "equals") continue
+      if (type && type !== "equals" && type !== "contains") continue
 
       if (typeof m.filter === "string") {
         const v = escapeOdataString(m.filter.trim())
-        if (v) parts.push(`${f} eq '${v}'`)
+        if (!v) continue
+        if (type === "contains") parts.push(`contains(${f},'${v}')`)
+        else parts.push(`${f} eq '${v}'`)
         continue
       }
 
