@@ -3,7 +3,7 @@ import { Clocks } from "./Clocks"
 
 export function Header() {
   return (
-    <div className="w-full bg-[var(--color-bg)] px-[5vw] py-4">
+    <div className="w-full [background:var(--color-bg)] px-[5vw] py-4">
       <div className="grid w-full grid-cols-1 items-center gap-4 py-4 2xl:grid-cols-[auto_minmax(0,1fr)_auto]">
         {/* Only show at >= 1920px (2xl) */}
         <div className="hidden items-center justify-start 2xl:flex">
