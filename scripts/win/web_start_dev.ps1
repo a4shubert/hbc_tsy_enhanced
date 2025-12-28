@@ -6,6 +6,10 @@ $ScriptDir = $PSScriptRoot
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 $WebDir = Join-Path $RepoRoot "hbc_web"
 
+# Load env defaults (HBC_API_URL used by Next.js rewrites).
+$EnvScript = Join-Path $ScriptDir "env.ps1"
+if (Test-Path $EnvScript) { . $EnvScript }
+
 if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
     Write-Host "[web_start_dev] npm not found. Please install Node.js/npm first."
     exit 1

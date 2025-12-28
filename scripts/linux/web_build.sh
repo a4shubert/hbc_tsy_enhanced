@@ -7,6 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 WEB_DIR="${REPO_ROOT}/hbc_web"
 
+# Load env defaults (HBC_API_URL is used by Next.js rewrites at build time).
+if [[ -f "${SCRIPT_DIR}/env.sh" ]]; then
+  # shellcheck source=/dev/null
+  source "${SCRIPT_DIR}/env.sh"
+fi
+
 if ! command -v npm >/dev/null 2>&1; then
   echo "[web_build] npm not found. Please install Node.js/npm first."
   exit 1
