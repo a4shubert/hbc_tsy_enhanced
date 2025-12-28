@@ -4,7 +4,7 @@ import NycOpenData311ServiceRequests from "@/components/pages/NycOpenData311Serv
 
 export default function Home() {
   return (
-    <div className="w-full rounded-lg border-2 border-[color:var(--color-accent)] bg-[color:var(--color-bg)] p-3 text-[color:var(--color-text)]">
+    <div className="w-full rounded-lg border-0 border-[color:var(--color-accent)] bg-[color:var(--color-bg)] p-3 text-[color:var(--color-text)]">
       <div className="flex flex-col gap-6">
         <NycOpenData311ServiceRequests />
         <NycOpenData311CustomerSatisfactionSurvey />

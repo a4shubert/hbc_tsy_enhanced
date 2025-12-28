@@ -23,7 +23,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={dmSans.variable} data-theme="hbc">
-      <body className="antialiased border-2 [background:var(--color-bg)] text-[var(--color-text)] overflow-hidden">
+      <body className="antialiased border-0 [background:var(--color-bg)] text-[var(--color-text)] overflow-hidden">
         <div id="app-scroll" className="flex min-h-[100dvh] flex-col">
           <header className="sticky top-0 z-50 w-full [background:var(--color-bg)] border-b border-[color:var(--color-border)]">
             <Header />
