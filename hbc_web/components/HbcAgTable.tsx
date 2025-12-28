@@ -12,6 +12,7 @@ import type { CellKeyDownEvent } from "ag-grid-community"
 import type { FilterChangedEvent, GridReadyEvent, SortChangedEvent } from "ag-grid-community"
 import type { SelectionChangedEvent } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
+import type { KeyboardEvent as ReactKeyboardEvent } from "react"
 import { useMemo, useRef } from "react"
 
 let agGridRegistered = false
@@ -96,6 +97,112 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     void copyText(text)
   }
 
+  function findFloatingFilterColumnId(target: EventTarget | null): string | null {
+    if (!target || !(target instanceof HTMLElement)) return null
+    const direct = target.closest("[col-id]")?.getAttribute("col-id")
+    if (direct && direct.length) return direct
+
+    const floating = target.closest(".ag-floating-filter")
+    if (!floating) return null
+
+    const headerCell = target.closest(".ag-header-cell")
+    const colId = headerCell?.getAttribute("col-id")
+    return colId && colId.length ? colId : null
+  }
+
+  function setEqualsForTextFilter(colId: string, filterText?: string) {
+    const api = gridApiRef.current
+    if (!api) return
+
+    const model = (api.getFilterModel() as Record<string, any>) ?? {}
+    const existing = model[colId]
+    const nextText = typeof filterText === "string" ? filterText : existing?.filter
+    if (typeof nextText !== "string") return
+    const trimmed = nextText.trim()
+    if (!trimmed) return
+
+    if (existing?.type && String(existing.type).toLowerCase() === "equals") return
+
+    api.setFilterModel({
+      ...model,
+      [colId]: {
+        ...(existing ?? {}),
+        filterType: (existing?.filterType as string | undefined) ?? "text",
+        type: "equals",
+        filter: trimmed,
+      },
+    })
+    api.onFilterChanged?.()
+  }
+
+  function handleKeyDownCapture(ev: ReactKeyboardEvent) {
+    const key = ev.key?.toLowerCase()
+    const isCopy = (ev.metaKey || ev.ctrlKey) && key === "c" && !ev.shiftKey && !ev.altKey
+    const isPaste = (ev.metaKey || ev.ctrlKey) && key === "v" && !ev.shiftKey && !ev.altKey
+    const isEnter = key === "enter"
+
+    if (!isCopy && !isPaste && !isEnter) return
+
+    const colId = findFloatingFilterColumnId(ev.target)
+    if (!colId) {
+      // Normal grid copy from focused cell (works on macOS Cmd+C too).
+      if (isCopy) {
+        const text = getFocusedCellText()
+        if (!text) return
+        ev.preventDefault()
+        void copyText(text)
+      }
+      return
+    }
+
+    // Enter: treat as "finished typing" -> promote contains to equals for this column.
+    if (isEnter) {
+      const model = (gridApiRef.current?.getFilterModel() as Record<string, any>) ?? {}
+      const existing = model[colId]
+      const type = String(existing?.type ?? "").toLowerCase()
+      if (type === "contains") {
+        ev.preventDefault()
+        setEqualsForTextFilter(colId)
+      }
+      return
+    }
+
+    // Paste: when pasting a cell value into the floating filter input, force equals.
+    if (isPaste) {
+      window.setTimeout(() => {
+        const el = ev.target
+        if (!(el instanceof HTMLInputElement) && !(el instanceof HTMLTextAreaElement)) {
+          setEqualsForTextFilter(colId)
+          return
+        }
+        setEqualsForTextFilter(colId, el.value)
+      }, 40)
+      return
+    }
+
+    // Copy: if the focused cell exists, copy it (fallback for meta combos not caught by AG Grid).
+    if (isCopy) {
+      const text = getFocusedCellText()
+      if (!text) return
+      ev.preventDefault()
+      void copyText(text)
+    }
+  }
+
+  function handlePasteCapture(ev: React.ClipboardEvent) {
+    const colId = findFloatingFilterColumnId(ev.target)
+    if (!colId) return
+
+    window.setTimeout(() => {
+      const el = ev.target
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        setEqualsForTextFilter(colId, el.value)
+      } else {
+        setEqualsForTextFilter(colId)
+      }
+    }, 40)
+  }
+
   function getFocusedCellText(): string | null {
     const api = gridApiRef.current
     if (!api) return null
@@ -112,17 +219,6 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     return typeof value === "string" ? value : String(value)
   }
 
-  function handleKeyDownCapture(ev: React.KeyboardEvent) {
-    const key = ev.key?.toLowerCase()
-    const isCopy = (ev.metaKey || ev.ctrlKey) && key === "c" && !ev.shiftKey && !ev.altKey
-    if (!isCopy) return
-
-    const text = getFocusedCellText()
-    if (!text) return
-
-    ev.preventDefault()
-    void copyText(text)
-  }
   const autoColumnDefs = useMemo<ColDef<T>[]>(() => {
     if (columnDefs && columnDefs.length) return columnDefs
     const keys = Object.keys(rowData?.[0] ?? {})
@@ -169,7 +265,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     .join(" ")
 
   return (
-    <div className="w-full" onKeyDownCapture={handleKeyDownCapture}>
+    <div className="w-full" onKeyDownCapture={handleKeyDownCapture} onPasteCapture={handlePasteCapture}>
       {error ? (
         <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}

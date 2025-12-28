@@ -9,6 +9,7 @@ import type { SelectionChangedEvent } from "ag-grid-community"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { HbcAgTable } from "@/components/HbcAgTable"
+import { HbcHelpTooltip } from "@/components/HbcHelpTooltip"
 import {
   NYC_OPEN_DATA_311_SERVICE_REQUESTS_COLUMNS,
   parseNycOpenData311ServiceRequests,
@@ -94,20 +95,6 @@ function ChevronsRightIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
-  )
-}
-
-function InfoIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path d="M12 10v7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M12 7h.01" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   )
 }
@@ -277,30 +264,16 @@ export default function NycOpenData311ServiceRequests() {
           <h1 className="text-xl font-medium text-[color:var(--color-accent)]">
             NYC Open Data 311 Service Requests:
           </h1>
-          <div className="relative inline-flex items-center">
-            <button
-              type="button"
-              aria-label="Grid help"
-              className="peer inline-flex items-center justify-center rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-1 text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:border-[color:var(--color-accent)]"
-            >
-              <InfoIcon />
-            </button>
-            <div className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-[420px] rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-card)] p-3 text-sm text-[color:var(--color-text)] shadow-lg peer-hover:block">
-              <div className="font-medium text-[color:var(--color-accent)]">Grid shortcuts</div>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-[color:var(--color-muted)]">
-                <li>Single click focuses a cell; copy with Cmd+C (macOS) or Ctrl+C (Windows/Linux).</li>
-                <li>Double click a cell to toggle selecting its entire row.</li>
-                <li>
-                  Use the X button to clear any selected rows (de-select all).
-                </li>
-                <li>Use the filter-reset button to clear all column filters.</li>
-                <li>
-                  Pagination buttons move between pages (first/prev/next/last); filters affect the
-                  server-side results and paging.
-                </li>
-              </ul>
-            </div>
-          </div>
+          <HbcHelpTooltip
+            items={[
+              "Single click focuses a cell; copy with Cmd+C (macOS) or Ctrl+C (Windows/Linux).",
+              "Double click a cell to toggle selecting its entire row.",
+              "After typing in a filter, press Enter to switch from contains → equals.",
+              "Use the X button to clear any selected rows (de-select all).",
+              "Use the filter-reset button to clear all column filters.",
+              "Pagination buttons move between pages (first/prev/next/last); filters affect server-side results and paging.",
+            ]}
+          />
         </div>
         {issues.length ? (
           <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">
