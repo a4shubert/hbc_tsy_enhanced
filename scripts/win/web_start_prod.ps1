@@ -57,8 +57,16 @@ if (-not $NeedBuild) {
 }
 
 if ($NeedBuild) {
-    Write-Host "[web_start_prod] Running build..."
-    npm run build
+    if ($Env:HBC_WEB_REBUILD -eq "1") {
+        Write-Host "[web_start_prod] Running build (HBC_WEB_REBUILD=1)..."
+        npm run build
+    } else {
+        Write-Host "[web_start_prod] .next not found or stale. This repo expects a committed production build for end users."
+        Write-Host "[web_start_prod] If you're developing locally, run:"
+        Write-Host "  cd $WebDir; npm install; npm run build"
+        Write-Host "[web_start_prod] Or set HBC_WEB_REBUILD=1 to build automatically."
+        exit 1
+    }
 }
 
 Write-Host "[web_start_prod] Starting Next.js production server..."

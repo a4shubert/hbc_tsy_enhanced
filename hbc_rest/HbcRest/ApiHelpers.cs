@@ -161,8 +161,14 @@ internal static class ApiHelpers
 
         var left = Expression.Property(param, prop);
         var notNull = Expression.NotEqual(left, Expression.Constant(null, typeof(string)));
+        var toLower = typeof(string).GetMethod(nameof(string.ToLower), System.Type.EmptyTypes)!;
         var containsMethod = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
-        var call = Expression.Call(left, containsMethod, Expression.Constant(lit.RawValue, typeof(string)));
+        var leftLower = Expression.Call(left, toLower);
+        var call = Expression.Call(
+            leftLower,
+            containsMethod,
+            Expression.Constant(lit.RawValue.ToLowerInvariant(), typeof(string))
+        );
         return Expression.AndAlso(notNull, call);
     }
 
@@ -188,6 +194,28 @@ internal static class ApiHelpers
             throw new System.ArgumentException(
                 $"Could not parse value '{node.RawValue}' for column '{node.Column}'."
             );
+        }
+
+        // Case-insensitive string comparisons (so "brook" matches "BROOKLYN")
+        // Implemented via ToLower() for broad EF translation support.
+        if (prop.PropertyType == typeof(string) && coerced is string stringValue)
+        {
+            var op = node.Operator.ToLowerInvariant();
+            if (op is "eq" or "=" or "ne" or "!=")
+            {
+                var toLower = typeof(string).GetMethod(nameof(string.ToLower), System.Type.EmptyTypes)!;
+                var leftLower = Expression.Call(left, toLower);
+                var rightLower = Expression.Constant(stringValue.ToLowerInvariant(), typeof(string));
+                var leftIsNull = Expression.Equal(left, Expression.Constant(null, typeof(string)));
+
+                if (op is "eq" or "=")
+                {
+                    return Expression.AndAlso(Expression.Not(leftIsNull), Expression.Equal(leftLower, rightLower));
+                }
+
+                // ne / != : treat null as "not equal" to any non-null literal
+                return Expression.OrElse(leftIsNull, Expression.NotEqual(leftLower, rightLower));
+            }
         }
 
         var underlying = System.Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
