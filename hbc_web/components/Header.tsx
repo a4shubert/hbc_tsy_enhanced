@@ -26,12 +26,16 @@ export function Header() {
         <nav className="hidden items-center justify-end gap-4 text-xl font-normal 2xl:flex">
           <a
             href="/backend/swagger/index.html"
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-md bg-[color:var(--color-link-surface)] px-3 py-2 text-2xl text-[color:var(--color-text)] transition-[text-decoration-color] hover:underline hover:decoration-2 hover:underline-offset-4 hover:decoration-[var(--color-accent)]"
           >
             API (Swagger)
           </a>
           <a
             href="https://github.com/a4shubert/hbc_tsy_enhanced"
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-md bg-[color:var(--color-link-surface)] px-3 py-2 text-2xl text-[color:var(--color-text)] transition-[text-decoration-color] hover:underline hover:decoration-2 hover:underline-offset-4 hover:decoration-[var(--color-accent)]"
           >
             Documentation
