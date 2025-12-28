@@ -16,6 +16,8 @@ import {
 
 const TABLE = "nyc_open_data_311_service_requests"
 const PAGE_SIZE = 50
+const CONTAINS_MIN_CHARS = 3
+const BACKEND_FILTER_DEBOUNCE_MS = 900
 
 type PageResult = {
   rows: NycOpenData311ServiceRequest[]
@@ -124,9 +126,7 @@ export default function NycOpenData311ServiceRequests() {
             : {
                 filterOptions: ["contains", "equals"],
                 defaultOption: "contains",
-                debounceMs: 500,
-                buttons: ["apply", "reset"],
-                closeOnApply: true,
+                debounceMs: 150,
               },
       })),
     []
@@ -157,8 +157,12 @@ export default function NycOpenData311ServiceRequests() {
       if (type && type !== "equals" && type !== "contains") continue
 
       if (typeof m.filter === "string") {
-        const v = escapeOdataString(m.filter.trim())
+        const raw = m.filter.trim()
+        if (type === "contains" && raw.length < CONTAINS_MIN_CHARS) continue
+
+        const v = escapeOdataString(raw)
         if (!v) continue
+
         if (type === "contains") parts.push(`contains(${f},'${v}')`)
         else parts.push(`${f} eq '${v}'`)
         continue
@@ -284,15 +288,16 @@ export default function NycOpenData311ServiceRequests() {
             setSelectedCount(e.api.getSelectedNodes().length)
           }}
           onFilterChanged={(e: FilterChangedEvent<NycOpenData311ServiceRequest>) => {
+            const next = e.api.getFilterModel()
+            setFilterModel(next)
+
             if (filterDebounceRef.current) window.clearTimeout(filterDebounceRef.current)
             filterDebounceRef.current = window.setTimeout(() => {
-              const next = e.api.getFilterModel()
               const odata = filterModelToOData(next)
-              setFilterModel(next)
               setFilterOData(odata)
               setFilterLabel(odata)
               setCurrentPage(1)
-            }, 250)
+            }, BACKEND_FILTER_DEBOUNCE_MS)
           }}
           gridOptions={{
             rowSelection: {
