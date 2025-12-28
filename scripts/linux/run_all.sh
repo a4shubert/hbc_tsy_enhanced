@@ -45,7 +45,7 @@ APPLESCRIPT
 web_url="${HBC_WEB_URL:-http://localhost:3000}"
 echo "[run_all] Opening browser at ${web_url}..."
 (
-  sleep 3
+  sleep 7
   if command -v open >/dev/null 2>&1; then
     open "${web_url}"
   elif command -v xdg-open >/dev/null 2>&1; then

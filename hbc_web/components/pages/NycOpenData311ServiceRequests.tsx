@@ -2,6 +2,7 @@
 "use client"
 
 import type { ColDef } from "ag-grid-community"
+import type { CellDoubleClickedEvent } from "ag-grid-community"
 import type { FilterChangedEvent, FilterModel } from "ag-grid-community"
 import type { GridApi, GridReadyEvent } from "ag-grid-community"
 import type { SelectionChangedEvent } from "ag-grid-community"
@@ -287,6 +288,11 @@ export default function NycOpenData311ServiceRequests() {
           onSelectionChanged={(e: SelectionChangedEvent<NycOpenData311ServiceRequest>) => {
             setSelectedCount(e.api.getSelectedNodes().length)
           }}
+          onCellDoubleClicked={(e: CellDoubleClickedEvent<NycOpenData311ServiceRequest>) => {
+            if (!e.node) return
+            e.node.setSelected(!e.node.isSelected())
+            setSelectedCount(e.api.getSelectedNodes().length)
+          }}
           onFilterChanged={(e: FilterChangedEvent<NycOpenData311ServiceRequest>) => {
             const next = e.api.getFilterModel()
             setFilterModel(next)
@@ -303,7 +309,7 @@ export default function NycOpenData311ServiceRequests() {
             rowSelection: {
               mode: "multiRow",
               enableSelectionWithoutKeys: true,
-              enableClickSelection: true,
+              enableClickSelection: false,
               checkboxes: false,
               headerCheckbox: false,
             },
