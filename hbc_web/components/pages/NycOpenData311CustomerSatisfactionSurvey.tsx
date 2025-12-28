@@ -126,32 +126,32 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
             : field === "start_time" || field === "completion_time"
               ? { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 }
               : {
-                  filterOptions: ["contains", "equals"],
-                  defaultOption: "contains",
-                  debounceMs: 150,
-                  textMatcher: ({
-                    value,
-                    filterText,
-                    filterOption,
-                  }: {
-                    value: unknown
-                    filterText?: string | null
-                    filterOption?: string
-                  }) => {
-                    if (disableClientFilteringRef.current) return true
-                    const cell = (value ?? "").toString().toLowerCase()
-                    const ft = (filterText ?? "").toString().trim().toLowerCase()
-                    if (!ft) return true
+                filterOptions: ["contains", "equals"],
+                defaultOption: "contains",
+                debounceMs: 150,
+                textMatcher: ({
+                  value,
+                  filterText,
+                  filterOption,
+                }: {
+                  value: unknown
+                  filterText?: string | null
+                  filterOption?: string
+                }) => {
+                  if (disableClientFilteringRef.current) return true
+                  const cell = (value ?? "").toString().toLowerCase()
+                  const ft = (filterText ?? "").toString().trim().toLowerCase()
+                  if (!ft) return true
 
-                    if (filterOption === "contains") {
-                      if (ft.length < CLIENT_CONTAINS_MIN_CHARS) return true
-                      return cell.includes(ft)
-                    }
+                  if (filterOption === "contains") {
+                    if (ft.length < CLIENT_CONTAINS_MIN_CHARS) return true
+                    return cell.includes(ft)
+                  }
 
-                    if (filterOption === "equals") return cell === ft
-                    return true
-                  },
+                  if (filterOption === "equals") return cell === ft
+                  return true
                 },
+              },
       })),
     []
   )
@@ -242,9 +242,9 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
 
         const totalCount =
           typeof json === "object" &&
-          json !== null &&
-          "count" in (json as any) &&
-          typeof (json as any).count === "number"
+            json !== null &&
+            "count" in (json as any) &&
+            typeof (json as any).count === "number"
             ? ((json as any).count as number)
             : undefined
 
@@ -284,7 +284,7 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
   const hasFilters = !!filterOData || Object.keys(filterModel).length > 0
 
   return (
-    <div className="w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
+    <div className="min-w-0 flex-1 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-medium text-[color:var(--color-accent)]">

@@ -28,9 +28,7 @@ export default function RootLayout({
           <header className="sticky top-0 z-50 w-full bg-[var(--color-bg)] border-b border-[color:var(--color-border)]">
             <Header />
           </header>
-
           <main className="flex-1 px-[5vw] py-5">{children}</main>
-
           <Footer />
         </div>
       </body>
