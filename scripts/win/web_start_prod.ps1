@@ -22,8 +22,42 @@ if (-not (Test-Path "node_modules")) {
     npm install
 }
 
-if (-not (Test-Path ".next")) {
-    Write-Host "[web_start_prod] .next not found. Running build first..."
+$NeedBuild = $false
+if (-not (Test-Path ".next")) { $NeedBuild = $true }
+if ($Env:HBC_WEB_REBUILD -eq "1") { $NeedBuild = $true }
+
+if (-not $NeedBuild) {
+    $BuildMarker = Join-Path $WebDir ".next/BUILD_ID"
+    if (-not (Test-Path $BuildMarker)) {
+        $NeedBuild = $true
+    } else {
+        $BuildTime = (Get-Item $BuildMarker).LastWriteTimeUtc
+        $Paths = @(
+            (Join-Path $WebDir "app"),
+            (Join-Path $WebDir "components"),
+            (Join-Path $WebDir "lib"),
+            (Join-Path $WebDir "next.config.js"),
+            (Join-Path $WebDir "package.json"),
+            (Join-Path $WebDir "tsconfig.json")
+        ) | Where-Object { Test-Path $_ }
+
+        $Latest = $BuildTime
+        foreach ($p in $Paths) {
+            if (Test-Path $p -PathType Leaf) {
+                $t = (Get-Item $p).LastWriteTimeUtc
+                if ($t -gt $Latest) { $Latest = $t }
+            } else {
+                $t = Get-ChildItem -Recurse -File $p | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+                if ($t -and $t.LastWriteTimeUtc -gt $Latest) { $Latest = $t.LastWriteTimeUtc }
+            }
+        }
+
+        if ($Latest -gt $BuildTime) { $NeedBuild = $true }
+    }
+}
+
+if ($NeedBuild) {
+    Write-Host "[web_start_prod] Running build..."
     npm run build
 }
 
