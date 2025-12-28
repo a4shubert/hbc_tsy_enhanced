@@ -37,6 +37,7 @@ export type HbcAgTableProps<T extends Record<string, unknown>> = {
   onCellClicked?: (event: CellClickedEvent<T>) => void
   onCellDoubleClicked?: (event: CellDoubleClickedEvent<T>) => void
   onCellKeyDown?: (event: CellKeyDownEvent<T>) => void
+  onFilterPaste?: (colId: string) => void
 }
 
 export function HbcAgTable<T extends Record<string, unknown>>({
@@ -55,6 +56,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
   onCellClicked,
   onCellDoubleClicked,
   onCellKeyDown,
+  onFilterPaste,
 }: HbcAgTableProps<T>) {
   const gridApiRef = useRef<GridApi<T> | null>(null)
 
@@ -169,6 +171,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
 
     // Paste: when pasting a cell value into the floating filter input, force equals.
     if (isPaste) {
+      onFilterPaste?.(colId)
       window.setTimeout(() => {
         const el = ev.target
         if (!(el instanceof HTMLInputElement) && !(el instanceof HTMLTextAreaElement)) {
@@ -193,6 +196,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     const colId = findFloatingFilterColumnId(ev.target)
     if (!colId) return
 
+    onFilterPaste?.(colId)
     window.setTimeout(() => {
       const el = ev.target
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {

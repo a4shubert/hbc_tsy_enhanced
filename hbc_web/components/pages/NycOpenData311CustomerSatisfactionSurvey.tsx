@@ -18,7 +18,8 @@ import {
 
 const TABLE = "nyc_open_data_311_customer_satisfaction_survey"
 const PAGE_SIZE = 50
-const CONTAINS_MIN_CHARS = 3
+const CLIENT_CONTAINS_MIN_CHARS = 4
+const SERVER_CONTAINS_MIN_CHARS = 3
 const BACKEND_FILTER_DEBOUNCE_MS = 900
 
 type PageResult = {
@@ -105,6 +106,7 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
   const [filterOData, setFilterOData] = useState<string | undefined>(undefined)
   const [filterLabel, setFilterLabel] = useState<string | undefined>(undefined)
   const filterDebounceRef = useRef<number | null>(null)
+  const disableClientFilteringRef = useRef(false)
   const gridApiRef = useRef<GridApi<NycOpenData311CustomerSatisfactionSurvey> | null>(null)
   const [selectedCount, setSelectedCount] = useState(0)
 
@@ -127,6 +129,28 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
                   filterOptions: ["contains", "equals"],
                   defaultOption: "contains",
                   debounceMs: 150,
+                  textMatcher: ({
+                    value,
+                    filterText,
+                    filterOption,
+                  }: {
+                    value: unknown
+                    filterText?: string | null
+                    filterOption?: string
+                  }) => {
+                    if (disableClientFilteringRef.current) return true
+                    const cell = (value ?? "").toString().toLowerCase()
+                    const ft = (filterText ?? "").toString().trim().toLowerCase()
+                    if (!ft) return true
+
+                    if (filterOption === "contains") {
+                      if (ft.length < CLIENT_CONTAINS_MIN_CHARS) return true
+                      return cell.includes(ft)
+                    }
+
+                    if (filterOption === "equals") return cell === ft
+                    return true
+                  },
                 },
       })),
     []
@@ -158,7 +182,7 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
 
       if (typeof m.filter === "string") {
         const rawValue = m.filter.trim()
-        if (type === "contains" && rawValue.length < CONTAINS_MIN_CHARS) continue
+        if (type === "contains" && rawValue.length < SERVER_CONTAINS_MIN_CHARS) continue
 
         const v = escapeOdataString(rawValue)
         if (!v) continue
@@ -242,6 +266,10 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
     return () => controller.abort()
   }, [currentPage, filterOData])
 
+  useEffect(() => {
+    if (!loading) disableClientFilteringRef.current = false
+  }, [loading])
+
   const { rows, invalidCount, issues, error, totalCount } = result
 
   const hasPrev = currentPage > 1
@@ -298,6 +326,9 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
           }}
           onSelectionChanged={(e: SelectionChangedEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
             setSelectedCount(e.api.getSelectedNodes().length)
+          }}
+          onFilterPaste={() => {
+            disableClientFilteringRef.current = true
           }}
           onCellDoubleClicked={(e: CellDoubleClickedEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
             if (!e.node) return
