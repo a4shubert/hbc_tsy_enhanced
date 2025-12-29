@@ -395,3 +395,7 @@ classDiagram
 ## hbc_web (Next.js)
 
 ![Dashboard](img/Dashboard.png)
+readme, 
+
+ types in models,
+ remove duplicated function 

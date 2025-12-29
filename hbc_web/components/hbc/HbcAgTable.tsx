@@ -11,6 +11,7 @@ import type { CellKeyDownEvent } from "ag-grid-community"
 import type { FilterChangedEvent, GridReadyEvent, SortChangedEvent } from "ag-grid-community"
 import type { SelectionChangedEvent } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
+import type { CSSProperties } from "react"
 import type { KeyboardEvent as ReactKeyboardEvent } from "react"
 import { useMemo, useRef } from "react"
 
@@ -58,6 +59,15 @@ export function HbcAgTable<T extends Record<string, unknown>>({
   onFilterPaste,
 }: HbcAgTableProps<T>) {
   const gridApiRef = useRef<GridApi<T> | null>(null)
+  const columnFilterTypeByColId = useMemo(() => {
+    const map = new Map<string, unknown>()
+    for (const def of columnDefs ?? []) {
+      const colId = (def.colId ?? def.field) as string | undefined
+      if (!colId) continue
+      map.set(colId, def.filter)
+    }
+    return map
+  }, [columnDefs])
 
   async function copyText(text: string) {
     try {
@@ -122,7 +132,9 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     const trimmed = nextText.trim()
     if (!trimmed) return
 
-    if (existing?.type && String(existing.type).toLowerCase() === "equals") return
+    const existingType = existing?.type ? String(existing.type).toLowerCase() : ""
+    const existingValue = typeof existing?.filter === "string" ? existing.filter.trim() : ""
+    if (existingType === "equals" && existingValue === trimmed) return
 
     api.setFilterModel({
       ...model,
@@ -134,6 +146,65 @@ export function HbcAgTable<T extends Record<string, unknown>>({
       },
     })
     api.onFilterChanged?.()
+  }
+
+  function parseDateFromText(input: string) {
+    const text = input.trim()
+    if (!text) return null
+
+    const isoMatch = /^(\d{4}-\d{2}-\d{2})/.exec(text)
+    if (isoMatch) return isoMatch[1]
+
+    const ms = Date.parse(text)
+    if (!Number.isFinite(ms)) return null
+
+    const d = new Date(ms)
+    const yyyy = String(d.getFullYear()).padStart(4, "0")
+    const mm = String(d.getMonth() + 1).padStart(2, "0")
+    const dd = String(d.getDate()).padStart(2, "0")
+    return `${yyyy}-${mm}-${dd}`
+  }
+
+  function setEqualsForDateFilter(colId: string, filterText?: string) {
+    const api = gridApiRef.current
+    if (!api) return
+
+    const model = (api.getFilterModel() as Record<string, any>) ?? {}
+    const existing = model[colId]
+
+    const nextText = typeof filterText === "string" ? filterText : existing?.dateFrom
+    if (typeof nextText !== "string") return
+
+    const dateFrom = parseDateFromText(nextText)
+    if (!dateFrom) return
+
+    const existingType = existing?.type ? String(existing.type).toLowerCase() : ""
+    const existingDateFrom = typeof existing?.dateFrom === "string" ? existing.dateFrom.trim() : ""
+    if (existingType === "equals" && existingDateFrom === dateFrom) return
+
+    api.setFilterModel({
+      ...model,
+      [colId]: {
+        ...(existing ?? {}),
+        filterType: "date",
+        type: "equals",
+        dateFrom,
+      },
+    })
+    api.onFilterChanged?.()
+  }
+
+  function getPreferredFilterType(colId: string) {
+    const api = gridApiRef.current
+    const model = (api?.getFilterModel() as Record<string, any>) ?? {}
+    const existing = model[colId]
+    const existingFilterType = typeof existing?.filterType === "string" ? existing.filterType : undefined
+    if (existingFilterType) return existingFilterType
+
+    const colFilter = columnFilterTypeByColId.get(colId)
+    if (colFilter === "agDateColumnFilter") return "date"
+    if (colFilter === "agNumberColumnFilter") return "number"
+    return "text"
   }
 
   function handleKeyDownCapture(ev: ReactKeyboardEvent) {
@@ -158,11 +229,14 @@ export function HbcAgTable<T extends Record<string, unknown>>({
       onFilterPaste?.(colId)
       window.setTimeout(() => {
         const el = ev.target
-        if (!(el instanceof HTMLInputElement) && !(el instanceof HTMLTextAreaElement)) {
-          setEqualsForTextFilter(colId)
+        const value =
+          el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : undefined
+        const filterType = getPreferredFilterType(colId)
+        if (filterType === "date") {
+          setEqualsForDateFilter(colId, value)
           return
         }
-        setEqualsForTextFilter(colId, el.value)
+        setEqualsForTextFilter(colId, value)
       }, 40)
       return
     }
@@ -182,11 +256,13 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     onFilterPaste?.(colId)
     window.setTimeout(() => {
       const el = ev.target
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-        setEqualsForTextFilter(colId, el.value)
-      } else {
-        setEqualsForTextFilter(colId)
+      const value = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : undefined
+      const filterType = getPreferredFilterType(colId)
+      if (filterType === "date") {
+        setEqualsForDateFilter(colId, value)
+        return
       }
+      setEqualsForTextFilter(colId, value)
     }, 40)
   }
 
@@ -215,11 +291,12 @@ export function HbcAgTable<T extends Record<string, unknown>>({
   const defaultColDef = useMemo<ColDef<T>>(
     () => ({
       resizable: true,
+      suppressMovable: false,
       sortable: true,
       unSortIcon: true,
       filter: true,
       floatingFilter: true,
-      minWidth: 140,
+      minWidth: 90,
     }),
     []
   )
@@ -232,6 +309,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
       suppressCellFocus: false,
       pagination: false,
 
+      suppressMovableColumns: false,
       alwaysShowHorizontalScroll: true,
       suppressHorizontalScroll: false,
       suppressRowClickSelection: true,
@@ -250,6 +328,17 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     .filter(Boolean)
     .join(" ")
 
+  const gridContainerStyle = useMemo(() => {
+    return {
+      height: "100%",
+      "--ag-border-color": "rgba(255, 255, 255, 0.16)",
+      "--ag-secondary-border-color": "rgba(255, 255, 255, 0.12)",
+      "--ag-header-column-resize-handle-color": "rgba(255, 255, 255, 0.65)",
+      "--ag-header-column-resize-handle-width": "4px",
+      "--ag-header-column-resize-handle-height": "60%",
+    } as CSSProperties
+  }, [])
+
   return (
     <div
       className="w-full"
@@ -263,7 +352,15 @@ export function HbcAgTable<T extends Record<string, unknown>>({
         </div>
       ) : null}
 
-      <div className={finalClassName} style={{ height: "100%" }}>
+      <div className={finalClassName} style={gridContainerStyle}>
+        <style jsx global>{`
+          .hbc-ag-grid .ag-header-cell-resize {
+            cursor: col-resize;
+          }
+          .hbc-ag-grid .ag-header-cell-resize::after {
+            cursor: col-resize;
+          }
+        `}</style>
         <AgGridReact<T>
           rowData={rowData}
           columnDefs={autoColumnDefs}

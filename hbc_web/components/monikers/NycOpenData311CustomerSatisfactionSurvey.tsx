@@ -5,6 +5,11 @@ import type { MutableRefObject } from "react"
 
 import { HbcMonikerGridPage } from "@/components/hbc/HbcMonikerGridPage"
 import {
+  dateOnlyFromText,
+  formatDateTime,
+  normalizeIsoishDateTime,
+} from "@/components/hbc/dateTime"
+import {
   NYC_OPEN_DATA_311_CUSTOMER_SATISFACTION_SURVEY_COLUMNS,
   parseNycOpenData311CustomerSatisfactionSurvey,
   type NycOpenData311CustomerSatisfactionSurvey,
@@ -22,13 +27,41 @@ function buildColumnDefs(
       field === "nps"
         ? "agNumberColumnFilter"
         : field === "start_time" || field === "completion_time"
-          ? "agDateColumnFilter"
+          ? "agTextColumnFilter"
           : "agTextColumnFilter",
     filterParams:
       field === "nps"
         ? { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 }
         : field === "start_time" || field === "completion_time"
-          ? { filterOptions: ["equals"], defaultOption: "equals", debounceMs: 300 }
+          ? {
+              filterOptions: ["equals"],
+              defaultOption: "equals",
+              debounceMs: 300,
+              textMatcher: ({
+                value,
+                filterText,
+              }: {
+                value: unknown
+                filterText?: string | null
+              }) => {
+                if (disableClientFilteringRef.current) return true
+
+                const ft = (filterText ?? "").toString().trim()
+                if (!ft) return true
+
+                const filterDateTime = normalizeIsoishDateTime(ft)
+                if (filterDateTime) {
+                  const cellDt = normalizeIsoishDateTime((value ?? "").toString())
+                  return cellDt ? cellDt === filterDateTime : true
+                }
+
+                const filterDate = dateOnlyFromText(ft)
+                if (!filterDate) return true
+
+                const cellDate = dateOnlyFromText((value ?? "").toString())
+                return cellDate ? cellDate === filterDate : true
+              },
+            }
           : {
               filterOptions: ["contains", "equals"],
               defaultOption: "contains",
@@ -57,6 +90,9 @@ function buildColumnDefs(
                 return true
               },
             },
+    ...(field === "start_time" || field === "completion_time"
+      ? { valueFormatter: ({ value }) => formatDateTime(value) }
+      : {}),
   }))
 }
 
@@ -66,6 +102,7 @@ export default function NycOpenData311CustomerSatisfactionSurvey({ docUrl }: { d
       title="NYC Open Data 311 Customer Satisfaction Survey:"
       table={TABLE}
       docUrl={docUrl}
+      dateTimeFields={["start_time", "completion_time"]}
       rowIdField="hbc_unique_key"
       buildColumnDefs={buildColumnDefs}
       parseRows={parseNycOpenData311CustomerSatisfactionSurvey}

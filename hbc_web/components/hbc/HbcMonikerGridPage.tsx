@@ -38,13 +38,56 @@ export type HbcMonikerGridPageProps<T extends Record<string, unknown>> = {
   parseRows: (payload: unknown) => ParsedRows<T>
   pageSize?: number
   helpItems?: string[]
+  dateFields?: string[]
+  dateTimeFields?: string[]
 }
 
 function escapeOdataString(value: string) {
   return value.replace(/'/g, "''")
 }
 
-function filterModelToOData(model: FilterModel | null | undefined) {
+function dateOnlyFromText(text: string) {
+  const isoMatch = /^(\d{4}-\d{2}-\d{2})/.exec(text)
+  if (isoMatch) return isoMatch[1]
+
+  const ms = Date.parse(text)
+  if (!Number.isFinite(ms)) return null
+  const d = new Date(ms)
+
+  const yyyy = String(d.getUTCFullYear()).padStart(4, "0")
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0")
+  const dd = String(d.getUTCDate()).padStart(2, "0")
+  return `${yyyy}-${mm}-${dd}`
+}
+
+function normalizeIsoishDateTime(text: string) {
+  const trimmed = text.trim()
+  if (!trimmed) return null
+  const normalized = trimmed.includes(" ") && !trimmed.includes("T") ? trimmed.replace(" ", "T") : trimmed
+  const isoish = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})?$/
+  return isoish.test(normalized) ? normalized : null
+}
+
+function pushDayRange(parts: string[], field: string, dateOnly: string) {
+  const start = `${dateOnly}T00:00:00`
+  const base = Date.parse(`${dateOnly}T00:00:00Z`)
+  if (Number.isFinite(base)) {
+    const next = new Date(base + 24 * 60 * 60 * 1000)
+    const yyyy = String(next.getUTCFullYear()).padStart(4, "0")
+    const mm = String(next.getUTCMonth() + 1).padStart(2, "0")
+    const dd = String(next.getUTCDate()).padStart(2, "0")
+    const end = `${yyyy}-${mm}-${dd}T00:00:00`
+    parts.push(`(${field} ge '${start}' and ${field} lt '${end}')`)
+  } else {
+    parts.push(`${field} eq '${start}'`)
+  }
+}
+
+function filterModelToOData(
+  model: FilterModel | null | undefined,
+  dateFields?: Set<string>,
+  dateTimeFields?: Set<string>
+) {
   if (!model) return undefined
 
   const parts: string[] = []
@@ -64,6 +107,20 @@ function filterModelToOData(model: FilterModel | null | undefined) {
       const v = escapeOdataString(rawValue)
       if (!v) continue
 
+      if (type === "equals" && (dateFields?.has(f) || dateTimeFields?.has(f))) {
+        const maybeDateTime = normalizeIsoishDateTime(rawValue)
+        if (maybeDateTime && dateTimeFields?.has(f)) {
+          parts.push(`${f} eq '${escapeOdataString(maybeDateTime)}'`)
+          continue
+        }
+
+        const dateOnly = dateOnlyFromText(rawValue)
+        if (dateOnly) {
+          pushDayRange(parts, f, dateOnly)
+        }
+        continue
+      }
+
       if (type === "contains") parts.push(`contains(${f},'${v}')`)
       else parts.push(`${f} eq '${v}'`)
       continue
@@ -75,8 +132,11 @@ function filterModelToOData(model: FilterModel | null | undefined) {
     }
 
     if (typeof m.dateFrom === "string" && m.dateFrom.trim()) {
-      const v = `${m.dateFrom.trim()}T00:00:00`
-      parts.push(`${f} eq '${v}'`)
+      const raw = m.dateFrom.trim()
+      const dateOnlyMatch = /^(\d{4}-\d{2}-\d{2})/.exec(raw)
+      const dateOnly = dateOnlyMatch ? dateOnlyMatch[1] : raw
+
+      pushDayRange(parts, f, dateOnly)
       continue
     }
   }
@@ -120,6 +180,8 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
   buildColumnDefs,
   parseRows,
   pageSize = DEFAULT_PAGE_SIZE,
+  dateFields,
+  dateTimeFields,
   helpItems = [
     "Single click focuses a cell; copy with Cmd+C (macOS) or Ctrl+C (Windows/Linux).",
     "Double click a cell to toggle selecting its entire row.",
@@ -134,6 +196,13 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
   const [filterLabel, setFilterLabel] = useState<string | undefined>(undefined)
   const filterDebounceRef = useRef<number | null>(null)
   const disableClientFilteringRef = useRef(false)
+  const dateFieldSet = useMemo(() => new Set((dateFields ?? []).map((x) => x.trim()).filter(Boolean)), [
+    dateFields,
+  ])
+  const dateTimeFieldSet = useMemo(
+    () => new Set((dateTimeFields ?? []).map((x) => x.trim()).filter(Boolean)),
+    [dateTimeFields]
+  )
 
   const gridApiRef = useRef<GridApi<T> | null>(null)
   const [selectedCount, setSelectedCount] = useState(0)
@@ -348,7 +417,11 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
 
               if (filterDebounceRef.current) window.clearTimeout(filterDebounceRef.current)
               filterDebounceRef.current = window.setTimeout(() => {
-                const odata = filterModelToOData(next)
+                const odata = filterModelToOData(
+                  next,
+                  dateFieldSet.size ? dateFieldSet : undefined,
+                  dateTimeFieldSet.size ? dateTimeFieldSet : undefined
+                )
                 setFilterOData(odata)
                 setFilterLabel(odata)
                 setCurrentPage(1)
@@ -555,4 +628,3 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
     </div>
   )
 }
-
