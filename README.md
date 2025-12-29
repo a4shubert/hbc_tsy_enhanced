@@ -394,6 +394,25 @@ classDiagram
 
 ## hbc_web (Next.js)
 
-![Dashboard](img/Dashboard.png)
-remove duplicated function 
-readme, 
+`hbc_web` is a Next.js 14 (App Router) portal that provides an interactive, dark-themed dashboard for browsing HBC datasets (monikers) through the `hbc_rest` API.
+
+- Architecture (high level)
+
+  - _Frontend_: Next.js + React + Tailwind UI.
+  - _Data Grid_: AG Grid Community (Quartz dark theme overrides).
+  - _Backend proxy_: the UI always calls `GET /backend/...` (relative path). `hbc_web/next.config.js` rewrites that to the REST API host (defaults to local REST API), avoiding hard-coded API URLs in the client.
+  - _Validation_: the UI validates/normalizes responses per moniker using Zod (`hbc_web/lib/models/*`) and surfaces invalid row counts and sample validation issues.
+
+- Models and schema alignment
+
+  - The frontend data models in `hbc_web/lib/models/*` are cross-referenced to their YAML schema definitions in `hbc_configs/*`:
+    - Each model exports a `*_COLUMN_TYPES` map derived from the YAML `schema`.
+    - Zod preprocessors normalize:
+      - `text` → trimmed string (nullable/optional)
+      - `number` → numeric (nullable/optional)
+      - `date` → date-only string (`YYYY-MM-DD`)
+      - `datetime` → ISO-ish datetime string (`YYYY-MM-DDTHH:mm:ss...`)
+  - This keeps UI validation consistent with the schema used by the Python loader and the REST API.
+
+- Dashboard screenshot
+  - ![Dashboard](img/Dashboard.png)

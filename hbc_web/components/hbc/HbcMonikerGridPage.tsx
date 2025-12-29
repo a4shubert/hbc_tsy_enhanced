@@ -9,7 +9,7 @@ import type {
   GridReadyEvent,
   SelectionChangedEvent,
 } from "ag-grid-community"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { HbcAgTable } from "@/components/hbc/HbcAgTable"
 import { HbcHelpTooltip } from "@/components/hbc/HbcHelpTooltip"
@@ -164,6 +164,7 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
   helpItems = [
     "Single click focuses a cell; copy with Cmd+C (macOS) or Ctrl+C (Windows/Linux).",
     "Double click a cell to toggle selecting its entire row.",
+    "Press Esc to clear all column filters.",
     "Use the X button to clear any selected rows (de-select all).",
     "Use the filter-reset button to clear all column filters.",
     "Pagination buttons move between pages (first/prev/next/last); filters affect server-side results and paging.",
@@ -300,7 +301,7 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
     api?.autoSizeColumns?.(colIds, true)
   }
 
-  function handleResetFilters() {
+  const handleResetFilters = useCallback(() => {
     const api = gridApiRef.current
     if (!api) return
     api.setFilterModel(null)
@@ -309,7 +310,19 @@ export function HbcMonikerGridPage<T extends Record<string, unknown>>({
     setFilterOData(undefined)
     setFilterLabel(undefined)
     setCurrentPage(1)
-  }
+  }, [])
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Escape") return
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      if (!hasFilters) return
+      handleResetFilters()
+    }
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [handleResetFilters, hasFilters])
 
   function handleClearSelection() {
     gridApiRef.current?.deselectAll()
