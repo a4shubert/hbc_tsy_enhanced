@@ -31,14 +31,15 @@ function SidebarContent<K extends string>({
   datasets,
   selected,
   onSelect,
+  groupName,
 }: {
   datasets: DatasetSidebarItem<K>[]
   selected: K
   onSelect: (key: K) => void
+  groupName: string
 }) {
   return (
     <div className="flex h-full flex-col gap-4 p-4 [background:var(--color-bg)]">
-      <div className="text-lg font-medium text-[color:var(--color-accent)]">DataSets</div>
       <div className="flex flex-col gap-3">
         {datasets.map((d) => (
           <label
@@ -47,7 +48,7 @@ function SidebarContent<K extends string>({
           >
             <input
               type="radio"
-              name="dataset"
+              name={groupName}
               value={d.key}
               checked={selected === d.key}
               onChange={() => onSelect(d.key)}
@@ -55,7 +56,9 @@ function SidebarContent<K extends string>({
             />
             <span className="min-w-0">
               <div className="text-sm font-medium">{d.label}</div>
-              <div className="text-xs text-[color:var(--color-muted)]">{d.moniker}</div>
+              <div className="text-xs leading-snug text-[color:var(--color-muted)] break-words whitespace-normal">
+                {d.moniker}
+              </div>
             </span>
           </label>
         ))}
@@ -79,7 +82,7 @@ export function DatasetSidebar<K extends string>({
     <>
       {/* Static sidebar for >=1920px */}
       <aside className="hbc-dataset-sidebar-static h-full w-[15vw] shrink-0 rounded-lg border border-[color:var(--color-border)] [background:var(--color-card)]">
-        <SidebarContent datasets={datasets} selected={selected} onSelect={onSelect} />
+        <SidebarContent datasets={datasets} selected={selected} onSelect={onSelect} groupName="dataset-static" />
       </aside>
 
       {/* Hamburger / drawer for <1920px */}
@@ -102,8 +105,7 @@ export function DatasetSidebar<K extends string>({
               className="absolute inset-0 cursor-default bg-black/50"
             />
             <div className="absolute left-0 top-0 h-full w-[15vw] min-w-[260px] border-r border-[color:var(--color-border)] [background:var(--color-card)]">
-              <div className="flex items-center justify-between border-b border-[color:var(--color-border)] p-3">
-                <div className="text-sm font-medium text-[color:var(--color-accent)]">DataSets</div>
+              <div className="flex items-center justify-end border-b border-[color:var(--color-border)] p-3">
                 <button
                   type="button"
                   aria-label="Close"
@@ -118,8 +120,8 @@ export function DatasetSidebar<K extends string>({
                 selected={selected}
                 onSelect={(k) => {
                   onSelect(k)
-                  setDrawerOpen(false)
                 }}
+                groupName="dataset-drawer"
               />
             </div>
           </div>

@@ -702,6 +702,9 @@ video {
   overflow-wrap: normal;
   word-break: normal;
 }
+.break-words {
+  overflow-wrap: break-word;
+}
 .rounded-lg {
   border-radius: 0.5rem;
 }
@@ -847,6 +850,9 @@ video {
 .tabular-nums {
   --tw-numeric-spacing: tabular-nums;
   font-variant-numeric: var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction);
+}
+.leading-snug {
+  line-height: 1.375;
 }
 .text-\[color\:var\(--color-accent\)\] {
   color: var(--color-accent);
