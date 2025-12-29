@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { HbcAgTable } from "@/components/hbc/HbcAgTable"
 import { HbcHelpTooltip } from "@/components/hbc/HbcHelpTooltip"
+import { dateOnlyFromText, normalizeIsoishDateTime } from "@/components/hbc/dateTime"
 
 const DEFAULT_PAGE_SIZE = 50
 const SERVER_CONTAINS_MIN_CHARS = 3
@@ -44,28 +45,6 @@ export type HbcMonikerGridPageProps<T extends Record<string, unknown>> = {
 
 function escapeOdataString(value: string) {
   return value.replace(/'/g, "''")
-}
-
-function dateOnlyFromText(text: string) {
-  const isoMatch = /^(\d{4}-\d{2}-\d{2})/.exec(text)
-  if (isoMatch) return isoMatch[1]
-
-  const ms = Date.parse(text)
-  if (!Number.isFinite(ms)) return null
-  const d = new Date(ms)
-
-  const yyyy = String(d.getUTCFullYear()).padStart(4, "0")
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0")
-  const dd = String(d.getUTCDate()).padStart(2, "0")
-  return `${yyyy}-${mm}-${dd}`
-}
-
-function normalizeIsoishDateTime(text: string) {
-  const trimmed = text.trim()
-  if (!trimmed) return null
-  const normalized = trimmed.includes(" ") && !trimmed.includes("T") ? trimmed.replace(" ", "T") : trimmed
-  const isoish = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})?$/
-  return isoish.test(normalized) ? normalized : null
 }
 
 function pushDayRange(parts: string[], field: string, dateOnly: string) {

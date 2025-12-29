@@ -17,7 +17,6 @@ function MenuIcon() {
     </svg>
   )
 }
-
 function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -136,4 +135,3 @@ export function DatasetSidebar<K extends string>({
     </>
   )
 }
-

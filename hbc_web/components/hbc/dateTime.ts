@@ -45,4 +45,3 @@ export function formatDateTime(value: unknown) {
   const time = iso.includes("T") ? iso.slice(11, 19) : ""
   return time ? `${date} ${time}` : date
 }
-
