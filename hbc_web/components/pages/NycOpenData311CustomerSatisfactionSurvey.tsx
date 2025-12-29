@@ -284,7 +284,7 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
   const hasFilters = !!filterOData || Object.keys(filterModel).length > 0
 
   return (
-    <div className="min-w-0 flex-1 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
+    <div className="flex h-full min-h-0 min-w-0 flex-col rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-medium text-[color:var(--color-accent)]">
@@ -313,50 +313,56 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
         ) : null}
       </div>
 
-      <div className="mt-4">
-        <HbcAgTable<NycOpenData311CustomerSatisfactionSurvey>
-          rowData={rows}
-          columnDefs={columnDefs}
-          error={error ?? null}
-          rowIdField="hbc_unique_key"
-          height={"50vh"}
-          loading={loading}
-          onGridReady={(e: GridReadyEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
-            gridApiRef.current = e.api
-          }}
-          onSelectionChanged={(e: SelectionChangedEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
-            setSelectedCount(e.api.getSelectedNodes().length)
-          }}
-          onFilterPaste={() => {
-            disableClientFilteringRef.current = true
-          }}
-          onCellDoubleClicked={(e: CellDoubleClickedEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
-            if (!e.node) return
-            e.node.setSelected(!e.node.isSelected())
-            setSelectedCount(e.api.getSelectedNodes().length)
-          }}
-          onFilterChanged={(e: FilterChangedEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
-            const next = e.api.getFilterModel()
-            setFilterModel(next)
+      <div className="mt-4 flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1">
+          <HbcAgTable<NycOpenData311CustomerSatisfactionSurvey>
+            rowData={rows}
+            columnDefs={columnDefs}
+            error={error ?? null}
+            rowIdField="hbc_unique_key"
+            height="100%"
+            loading={loading}
+            onGridReady={(e: GridReadyEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
+              gridApiRef.current = e.api
+            }}
+            onSelectionChanged={(
+              e: SelectionChangedEvent<NycOpenData311CustomerSatisfactionSurvey>
+            ) => {
+              setSelectedCount(e.api.getSelectedNodes().length)
+            }}
+            onFilterPaste={() => {
+              disableClientFilteringRef.current = true
+            }}
+            onCellDoubleClicked={(
+              e: CellDoubleClickedEvent<NycOpenData311CustomerSatisfactionSurvey>
+            ) => {
+              if (!e.node) return
+              e.node.setSelected(!e.node.isSelected())
+              setSelectedCount(e.api.getSelectedNodes().length)
+            }}
+            onFilterChanged={(e: FilterChangedEvent<NycOpenData311CustomerSatisfactionSurvey>) => {
+              const next = e.api.getFilterModel()
+              setFilterModel(next)
 
-            if (filterDebounceRef.current) window.clearTimeout(filterDebounceRef.current)
-            filterDebounceRef.current = window.setTimeout(() => {
-              const odata = filterModelToOData(next)
-              setFilterOData(odata)
-              setFilterLabel(odata)
-              setCurrentPage(1)
-            }, BACKEND_FILTER_DEBOUNCE_MS)
-          }}
-          gridOptions={{
-            rowSelection: {
-              mode: "multiRow",
-              enableSelectionWithoutKeys: true,
-              enableClickSelection: false,
-              checkboxes: false,
-              headerCheckbox: false,
-            },
-          }}
-        />
+              if (filterDebounceRef.current) window.clearTimeout(filterDebounceRef.current)
+              filterDebounceRef.current = window.setTimeout(() => {
+                const odata = filterModelToOData(next)
+                setFilterOData(odata)
+                setFilterLabel(odata)
+                setCurrentPage(1)
+              }, BACKEND_FILTER_DEBOUNCE_MS)
+            }}
+            gridOptions={{
+              rowSelection: {
+                mode: "multiRow",
+                enableSelectionWithoutKeys: true,
+                enableClickSelection: false,
+                checkboxes: false,
+                headerCheckbox: false,
+              },
+            }}
+          />
+        </div>
 
         <div className="mt-3 flex items-center justify-between gap-3">
           <div className="text-sm text-[color:var(--color-muted)]">

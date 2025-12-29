@@ -3,7 +3,6 @@
 
 import "ag-grid-community/styles/ag-grid.css"
 import "ag-grid-community/styles/ag-theme-quartz.css"
-import "./HbcAgTable.theme.css"
 
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community"
 import type { ColDef, GridApi, GridOptions } from "ag-grid-community"
@@ -44,7 +43,7 @@ export function HbcAgTable<T extends Record<string, unknown>>({
   rowData,
   columnDefs,
   className,
-  height = "70vh",
+  height = "100%",
   loading,
   error,
   gridOptions,
@@ -269,14 +268,19 @@ export function HbcAgTable<T extends Record<string, unknown>>({
     .join(" ")
 
   return (
-    <div className="w-full" onKeyDownCapture={handleKeyDownCapture} onPasteCapture={handlePasteCapture}>
+    <div
+      className="w-full"
+      style={{ height }}
+      onKeyDownCapture={handleKeyDownCapture}
+      onPasteCapture={handlePasteCapture}
+    >
       {error ? (
         <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}
         </div>
       ) : null}
 
-      <div className={finalClassName} style={{ height }}>
+      <div className={finalClassName} style={{ height: "100%" }}>
         <AgGridReact<T>
           rowData={rowData}
           columnDefs={autoColumnDefs}
