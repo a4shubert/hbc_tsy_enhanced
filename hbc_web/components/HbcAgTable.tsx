@@ -3,7 +3,6 @@
 
 import "ag-grid-community/styles/ag-grid.css"
 import "ag-grid-community/styles/ag-theme-quartz.css"
-import "./HbcAgTable.theme.css"
 
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community"
 import type { ColDef, GridApi, GridOptions } from "ag-grid-community"

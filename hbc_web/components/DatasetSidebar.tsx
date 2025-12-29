@@ -2,7 +2,11 @@
 
 import { useState } from "react"
 
-import type { DatasetDef, DatasetKey } from "@/components/DatasetDashboard.types"
+type DatasetSidebarItem<K extends string> = {
+  key: K
+  label: string
+  moniker: string
+}
 
 function MenuIcon() {
   return (
@@ -23,14 +27,14 @@ function CloseIcon() {
   )
 }
 
-function SidebarContent({
+function SidebarContent<K extends string>({
   datasets,
   selected,
   onSelect,
 }: {
-  datasets: DatasetDef[]
-  selected: DatasetKey
-  onSelect: (key: DatasetKey) => void
+  datasets: DatasetSidebarItem<K>[]
+  selected: K
+  onSelect: (key: K) => void
 }) {
   return (
     <div className="flex h-full flex-col gap-4 p-4 [background:var(--color-bg)]">
@@ -60,26 +64,26 @@ function SidebarContent({
   )
 }
 
-export function DatasetSidebar({
+export function DatasetSidebar<K extends string>({
   datasets,
   selected,
   onSelect,
 }: {
-  datasets: DatasetDef[]
-  selected: DatasetKey
-  onSelect: (key: DatasetKey) => void
+  datasets: DatasetSidebarItem<K>[]
+  selected: K
+  onSelect: (key: K) => void
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
     <>
       {/* Static sidebar for >=1920px */}
-      <aside className="hidden h-full w-[15vw] shrink-0 rounded-lg border border-[color:var(--color-border)] [background:var(--color-card)] [@media(min-width:1920px)]:block">
+      <aside className="hbc-dataset-sidebar-static h-full w-[15vw] shrink-0 rounded-lg border border-[color:var(--color-border)] [background:var(--color-card)]">
         <SidebarContent datasets={datasets} selected={selected} onSelect={onSelect} />
       </aside>
 
       {/* Hamburger / drawer for <1920px */}
-      <div className="block [@media(min-width:1920px)]:hidden">
+      <div className="hbc-dataset-sidebar-hamburger">
         <button
           type="button"
           aria-label="Open dataset menu"
@@ -124,4 +128,3 @@ export function DatasetSidebar({
     </>
   )
 }
-
