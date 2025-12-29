@@ -18,4 +18,3 @@ test("applies height style to wrapper", () => {
   const wrapper = container.querySelector("div.w-full")
   expect(wrapper).toHaveStyle({ height: "123px" })
 })
-
