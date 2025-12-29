@@ -40,6 +40,7 @@ function SidebarContent<K extends string>({
 }) {
   return (
     <div className="flex h-full flex-col gap-4 p-4 [background:var(--color-bg)]">
+      <div className="text-2xl font-medium text-[color:var(--color-accent)]">DataSets:</div>
       <div className="flex flex-col gap-3">
         {datasets.map((d) => (
           <label
@@ -55,8 +56,8 @@ function SidebarContent<K extends string>({
               className="mt-1 accent-[color:var(--color-accent)]"
             />
             <span className="min-w-0">
-              <div className="text-sm font-medium">{d.label}</div>
-              <div className="text-xs leading-snug text-[color:var(--color-muted)] break-words whitespace-normal">
+              <div className="text-lg font-medium">{d.label}</div>
+              <div className="text-m leading-snug text-[color:var(--color-muted)] break-words whitespace-normal">
                 {d.moniker}
               </div>
             </span>
