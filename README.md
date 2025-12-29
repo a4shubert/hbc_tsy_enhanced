@@ -394,14 +394,4 @@ classDiagram
 
 ## hbc_web (Next.js)
 
-- Next.js 14 (app router) + Tailwind UI shell.
-- Sticky header with live world clocks (NY/London/Dubai/HK) and quick links to API (Swagger) and docs.
-- Dashboard page renders a reusable `HbcAgTable` (AG Grid Community, Quartz dark theme) with:
-  - Paging controls (first/prev/next/last), reset-filters, and clear-selection actions.
-  - Server-backed filtering: changing AG Grid filters re-queries the REST endpoint and refreshes the table.
-  - Multiple selectable and sortable columns.
-- Uses a `/backend/*` rewrite proxy (configured via `HBC_API_URL`) to call the REST API without browser CORS issues.
-
-- The main table is optimized for fast exploration: single-click focuses a cell for standard copy (Cmd+C on macOS, Ctrl+C on Windows/Linux), double-click toggles selecting the whole row (clearable via the X button), and filters support case-insensitive “contains” (debounced backend refresh, with a minimum character threshold) so typing `brook` matches `BROOKLYN`. Pagination and an always-visible horizontal scrollbar make it easy to navigate wide datasets.
-
 ![Dashboard](img/Dashboard.png)
