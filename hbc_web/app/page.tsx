@@ -7,12 +7,14 @@ import NycOpenData311CallCenterInquiry from "@/components/pages/NycOpenData311Ca
 import NycOpenData311CustomerSatisfactionSurvey from "@/components/pages/NycOpenData311CustomerSatisfactionSurvey"
 import NycOpenData311ServiceRequests from "@/components/pages/NycOpenData311ServiceRequests"
 
-type DatasetKey = "service_requests" | "customer_satisfaction_survey" | "call_center_inquiry"
+type DatasetKey =
+  | "nyc_open_data_311_service_requests"
+  | "nyc_open_data_311_customer_satisfaction_survey"
+  | "nyc_open_data_311_call_center_inquiry"
 
 type DatasetDef = {
   key: DatasetKey
   label: string
-  moniker: string
   render: () => React.ReactNode
 }
 
@@ -20,31 +22,30 @@ export default function Home() {
   const datasets = useMemo<DatasetDef[]>(
     () => [
       {
-        key: "service_requests",
+        key: "nyc_open_data_311_service_requests",
         label: "NYC 311 Service Requests",
-        moniker: "nyc_open_data_311_service_requests",
         render: () => <NycOpenData311ServiceRequests />,
       },
       {
-        key: "customer_satisfaction_survey",
+        key: "nyc_open_data_311_customer_satisfaction_survey",
         label: "NYC 311 Customer Satisfaction Survey",
-        moniker: "nyc_open_data_311_customer_satisfaction_survey",
         render: () => <NycOpenData311CustomerSatisfactionSurvey />,
       },
       {
-        key: "call_center_inquiry",
+        key: "nyc_open_data_311_call_center_inquiry",
         label: "NYC 311 Call Center Inquiry",
-        moniker: "nyc_open_data_311_call_center_inquiry",
         render: () => <NycOpenData311CallCenterInquiry />,
       },
     ],
     []
   )
 
-  const [selected, setSelected] = useState<DatasetKey>(datasets[0]?.key ?? "service_requests")
+  const [selected, setSelected] = useState<DatasetKey>(
+    datasets[0]?.key ?? "nyc_open_data_311_service_requests"
+  )
 
   const sidebarDatasets = useMemo(
-    () => datasets.map(({ key, label, moniker }) => ({ key, label, moniker })),
+    () => datasets.map(({ key, label }) => ({ key, label, moniker: key })),
     [datasets]
   )
 
