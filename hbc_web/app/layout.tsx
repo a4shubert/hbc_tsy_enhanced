@@ -24,11 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmSans.variable} data-theme="hbc">
       <body className="antialiased border-0 [background:var(--color-bg)] text-[var(--color-text)] overflow-hidden">
-        <div id="app-scroll" className="flex min-h-[100dvh] flex-col">
+        <div id="app-scroll" className="flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
           <header className="sticky top-0 z-50 w-full [background:var(--color-bg)] border-b border-[color:var(--color-border)]">
             <Header />
           </header>
-          <main className="flex-1 px-[5vw] py-5">{children}</main>
+          <main className="flex-1 min-h-0 overflow-auto p-[5vw] py-5">{children}</main>
           <Footer />
         </div>
       </body>
