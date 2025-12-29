@@ -26,24 +26,24 @@ type DatasetDef = {
 export default function Home() {
   const datasets = useMemo<DatasetDef[]>(
     () => [
-      {
-        key: "nyc_open_data_311_service_requests",
-        label: "NYC 311 Service Requests",
-        docUrl: "https://data.cityofnewyork.us/Social-Services/311-Service-Requests-for-2009/3rfa-3xsf/about_data",
-        Component: NycOpenData311ServiceRequests,
-      },
-      {
+       {
         key: "nyc_open_data_311_customer_satisfaction_survey",
         label: "NYC 311 Customer Satisfaction Survey",
         docUrl: "https://data.cityofnewyork.us/City-Government/311-Customer-Satisfaction-Survey/kizp-4dfk/about_data",
         Component: NycOpenData311CustomerSatisfactionSurvey,
-      },
+      },     
       {
         key: "nyc_open_data_311_call_center_inquiry",
         label: "NYC 311 Call Center Inquiry",
         docUrl: "https://data.cityofnewyork.us/City-Government/311-Call-Center-Inquiry/wewp-mm3p/about_data",
         Component: NycOpenData311CallCenterInquiry,
       },
+      {
+        key: "nyc_open_data_311_service_requests",
+        label: "NYC 311 Service Requests",
+        docUrl: "https://data.cityofnewyork.us/Social-Services/311-Service-Requests-for-2009/3rfa-3xsf/about_data",
+        Component: NycOpenData311ServiceRequests,
+      }, 
     ],
     []
   )
