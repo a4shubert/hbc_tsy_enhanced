@@ -58,3 +58,38 @@ def test_fetcher_returns_expected_rows(monkeypatch, moniker):
     actual = actual[expected.columns].fillna("")
 
     pdt.assert_frame_equal(actual, expected, check_like=True, check_dtype=False)
+
+
+@pytest.mark.parametrize(
+    "moniker",
+    [
+        "nyc_open_data_311_service_requests",
+        "nyc_open_data_311_call_center_inquiry",
+        "nyc_open_data_311_customer_satisfaction_survey",
+    ],
+)
+def test_fetcher_naked_get_does_not_add_select(monkeypatch, moniker):
+    baseline = _load_baseline(moniker)
+    config = ul.get_config(moniker)
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            self.calls = []
+
+        def get(self, dataset, **kwargs):
+            self.calls.append(("get", dataset, kwargs))
+            return baseline.to_dict(orient="records")
+
+        def get_all(self, dataset, **kwargs):
+            self.calls.append(("get_all", dataset, kwargs))
+            return baseline.to_dict(orient="records")
+
+    client = FakeClient()
+    monkeypatch.setattr(fetch_nycopen, "Socrata", lambda *args, **kwargs: client)
+
+    FetcherNYCOpenData.fetch(config, query=None)
+
+    assert client.calls, "Expected Socrata client to be called"
+    _, _, kwargs = client.calls[0]
+    assert "select" not in kwargs
+    assert "$select" not in kwargs

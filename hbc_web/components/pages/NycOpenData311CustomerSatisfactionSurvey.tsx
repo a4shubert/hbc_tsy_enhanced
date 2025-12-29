@@ -100,7 +100,7 @@ function ChevronsRightIcon() {
   )
 }
 
-export default function NycOpenData311CustomerSatisfactionSurvey() {
+export default function NycOpenData311CustomerSatisfactionSurvey({ docUrl }: { docUrl: string }) {
   const [currentPage, setCurrentPage] = useState(1)
   const [filterModel, setFilterModel] = useState<FilterModel>({})
   const [filterOData, setFilterOData] = useState<string | undefined>(undefined)
@@ -284,22 +284,94 @@ export default function NycOpenData311CustomerSatisfactionSurvey() {
   const hasFilters = !!filterOData || Object.keys(filterModel).length > 0
 
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-col rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6 text-[color:var(--color-text)]">
+    <div className="flex h-full min-h-0 min-w-0 flex-col rounded-lg border border-[color:var(--color-border)] [background:var(--color-bg)] p-6 text-[color:var(--color-text)]">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-medium text-[color:var(--color-accent)]">
-            NYC Open Data 311 Customer Satisfaction Survey:
-          </h1>
-          <HbcHelpTooltip
-            items={[
-              "Single click focuses a cell; copy with Cmd+C (macOS) or Ctrl+C (Windows/Linux).",
-              "Double click a cell to toggle selecting its entire row.",
-              "After typing in a filter, press Enter to switch from contains → equals.",
-              "Use the X button to clear any selected rows (de-select all).",
-              "Use the filter-reset button to clear all column filters.",
-              "Pagination buttons move between pages (first/prev/next/last); filters affect server-side results and paging.",
-            ]}
-          />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="min-w-0 text-xl font-medium text-[color:var(--color-accent)]">
+              NYC Open Data 311 Customer Satisfaction Survey:
+            </h1>
+            <a
+              href={docUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open dataset docs in new window"
+              className="inline-flex shrink-0 items-center justify-center rounded-md border border-transparent p-1.5 text-[color:var(--color-muted)] hover:border-[color:var(--color-border)] hover:text-[color:var(--color-accent)]"
+              title="Dataset description"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M14 5h5v5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M10 14L19 5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M19 14v5H5V5h5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </a>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const api = gridApiRef.current as any
+                const cols = (api?.getAllGridColumns?.() ?? api?.getAllColumns?.() ?? []) as any[]
+                const widths = cols
+                  .map((c) => {
+                    const colId = c.getColId?.()
+                    const def = c.getColDef?.() ?? {}
+                    const label = String(def.headerName ?? def.field ?? colId ?? "")
+                    if (!colId) return null
+                    const approx = Math.ceil(label.length * 9 + 80)
+                    const newWidth = Math.max(140, Math.min(900, approx))
+                    return { key: colId, newWidth }
+                  })
+                  .filter(Boolean)
+                api?.setColumnWidths?.(widths, true)
+              }}
+              className="inline-flex shrink-0 items-center justify-center rounded-md border border-transparent px-2 py-1 text-sm text-[color:var(--color-muted)] hover:border-[color:var(--color-border)] hover:text-[color:var(--color-accent)]"
+              title="Fit columns to header"
+            >
+              Fit Columns
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const api = gridApiRef.current as any
+                const cols = (api?.getAllGridColumns?.() ?? api?.getAllColumns?.() ?? []) as any[]
+                const colIds = cols.map((c) => c.getColId?.()).filter(Boolean)
+                api?.autoSizeColumns?.(colIds, true)
+              }}
+              className="inline-flex shrink-0 items-center justify-center rounded-md border border-transparent px-2 py-1 text-sm text-[color:var(--color-muted)] hover:border-[color:var(--color-border)] hover:text-[color:var(--color-accent)]"
+              title="Auto-size columns to content"
+            >
+              Fit Data
+            </button>
+            <HbcHelpTooltip
+              items={[
+                "Single click focuses a cell; copy with Cmd+C (macOS) or Ctrl+C (Windows/Linux).",
+                "Double click a cell to toggle selecting its entire row.",
+                "After typing in a filter, press Enter to switch from contains → equals.",
+                "Use the X button to clear any selected rows (de-select all).",
+                "Use the filter-reset button to clear all column filters.",
+                "Pagination buttons move between pages (first/prev/next/last); filters affect server-side results and paging.",
+              ]}
+            />
+          </div>
         </div>
         {issues.length ? (
           <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">

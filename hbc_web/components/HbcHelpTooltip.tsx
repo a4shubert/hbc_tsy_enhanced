@@ -33,17 +33,17 @@ export function HbcHelpTooltip({
       <button
         type="button"
         aria-label={ariaLabel}
-        className="peer inline-flex items-center justify-center rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-1 text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:border-[color:var(--color-accent)]"
+        className="peer inline-flex items-center justify-center rounded-md border border-transparent bg-transparent p-1 text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
       >
         <InfoIcon />
       </button>
       <div
         className={[
-          "pointer-events-none absolute left-0 top-full z-20 mt-2 hidden rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-card)] p-3 text-sm text-[color:var(--color-text)] shadow-lg peer-hover:block",
+          "pointer-events-none absolute right-full top-full z-20 mr-2 mt-2 hidden rounded-md border border-[color:var(--color-accent)] [background:var(--color-card)] p-3 text-sm text-[color:var(--color-text)] shadow-lg peer-hover:block",
           widthClassName,
         ].join(" ")}
       >
-        <div className="font-medium text-[color:var(--color-accent)]">{title}</div>
+        <div className="font-semibold text-[color:var(--color-accent)]">{title}</div>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-[color:var(--color-muted)]">
           {items.map((x) => (
             <li key={x}>{x}</li>

@@ -36,6 +36,7 @@ def _load_baseline(moniker: str) -> pd.DataFrame:
 )
 def test_persistence_roundtrip(monkeypatch, moniker, query):
     baseline = _load_baseline(moniker)
+    monkeypatch.setenv("HBC_API_URL", "http://test")
 
     # Patch Socrata client to return the baseline deterministically.
     class FakeClient:

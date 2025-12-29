@@ -34,8 +34,14 @@ class FetcherNYCOpenData(Fetcher):
 
         query_params = cls._parse_query(query)
 
-        # If no explicit select provided, request all schema columns from config.
-        if "select" not in query_params and "$select" not in query_params:
+        # Optional: request all schema columns when no explicit select provided.
+        # This is opt-in because for "naked" fetches (dc.get() / no query), we
+        # want to avoid building a large select clause by default.
+        if (
+            config.get("default_select_schema_cols")
+            and "select" not in query_params
+            and "$select" not in query_params
+        ):
             schema_cols = []
             for item in config.get("schema", []):
                 if isinstance(item, dict):
