@@ -1,15 +1,38 @@
 import { z } from "zod"
 
+// Cross-referenced with `hbc_configs/nyc_open_data_311_call_center_inquiry.yaml`
+export const NYC_OPEN_DATA_311_CALL_CENTER_INQUIRY_COLUMN_TYPES = {
+  unique_id: "text",
+  date: "date",
+  time: "text",
+  date_time: "datetime",
+  agency: "text",
+  agency_name: "text",
+  inquiry_name: "text",
+  brief_description: "text",
+  call_resolution: "text",
+} as const satisfies Record<string, "text" | "number" | "date" | "datetime">
+
 const nullableString = z.string().trim().min(1).nullable().optional()
 
-const nullableDateString = z.preprocess((v) => {
+const nullableDateOnlyString = z.preprocess((v) => {
+  if (v === "" || v === null || v === undefined) return null
+  if (typeof v !== "string") return null
+  const s = v.trim()
+  if (!s) return null
+  const ms = Date.parse(s.includes(" ") ? s.replace(" ", "T") : s)
+  if (Number.isNaN(ms)) return s
+  return new Date(ms).toISOString().slice(0, 10)
+}, z.string().nullable().optional())
+
+const nullableDateTimeString = z.preprocess((v) => {
   if (v === "" || v === null || v === undefined) return null
   if (typeof v !== "string") return null
   const s = v.trim()
   if (!s) return null
   const isoish = s.includes(" ") ? s.replace(" ", "T") : s
   const ms = Date.parse(isoish)
-  return Number.isNaN(ms) ? s : s
+  return Number.isNaN(ms) ? s : isoish
 }, z.string().nullable().optional())
 
 export const NycOpenData311CallCenterInquirySchema = z
@@ -17,9 +40,9 @@ export const NycOpenData311CallCenterInquirySchema = z
     hbc_unique_key: z.string().min(1).optional(),
 
     unique_id: nullableString,
-    date: nullableDateString,
+    date: nullableDateOnlyString,
     time: nullableString,
-    date_time: nullableDateString,
+    date_time: nullableDateTimeString,
     agency: nullableString,
     agency_name: nullableString,
     inquiry_name: nullableString,

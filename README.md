@@ -394,14 +394,25 @@ classDiagram
 
 ## hbc_web (Next.js)
 
-- Next.js 14 (app router) + Tailwind UI shell.
-- Sticky header with live world clocks (NY/London/Dubai/HK) and quick links to API (Swagger) and docs.
-- Dashboard page renders a reusable `HbcAgTable` (AG Grid Community, Quartz dark theme) with:
-  - Paging controls (first/prev/next/last), reset-filters, and clear-selection actions.
-  - Server-backed filtering: changing AG Grid filters re-queries the REST endpoint and refreshes the table.
-  - Multiple selectable and sortable columns.
-- Uses a `/backend/*` rewrite proxy (configured via `HBC_API_URL`) to call the REST API without browser CORS issues.
+`hbc_web` is a Next.js 14 (App Router) portal that provides an interactive, dark-themed dashboard for browsing HBC datasets (monikers) through the `hbc_rest` API.
 
-- The main table is optimized for fast exploration: single-click focuses a cell for standard copy (Cmd+C on macOS, Ctrl+C on Windows/Linux), double-click toggles selecting the whole row (clearable via the X button), and filters support case-insensitive “contains” (debounced backend refresh, with a minimum character threshold) so typing `brook` matches `BROOKLYN`. Pagination and an always-visible horizontal scrollbar make it easy to navigate wide datasets.
+- Architecture (high level)
 
-![Dashboard](img/Dashboard.png)
+  - _Frontend_: Next.js + React + Tailwind UI.
+  - _Data Grid_: AG Grid Community (Quartz dark theme overrides).
+  - _Backend proxy_: the UI always calls `GET /backend/...` (relative path). `hbc_web/next.config.js` rewrites that to the REST API host (defaults to local REST API), avoiding hard-coded API URLs in the client.
+  - _Validation_: the UI validates/normalizes responses per moniker using Zod (`hbc_web/lib/models/*`) and surfaces invalid row counts and sample validation issues.
+
+- Models and schema alignment
+
+  - The frontend data models in `hbc_web/lib/models/*` are cross-referenced to their YAML schema definitions in `hbc_configs/*`:
+    - Each model exports a `*_COLUMN_TYPES` map derived from the YAML `schema`.
+    - Zod preprocessors normalize:
+      - `text` → trimmed string (nullable/optional)
+      - `number` → numeric (nullable/optional)
+      - `date` → date-only string (`YYYY-MM-DD`)
+      - `datetime` → ISO-ish datetime string (`YYYY-MM-DDTHH:mm:ss...`)
+  - This keeps UI validation consistent with the schema used by the Python loader and the REST API.
+
+- Dashboard screenshot
+  - ![Dashboard](img/Dashboard.png)

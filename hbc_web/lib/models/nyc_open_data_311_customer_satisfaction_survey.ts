@@ -1,5 +1,22 @@
 import { z } from "zod"
 
+// Cross-referenced with `hbc_configs/nyc_open_data_311_customer_satisfaction_survey.yaml`
+export const NYC_OPEN_DATA_311_CUSTOMER_SATISFACTION_SURVEY_COLUMN_TYPES = {
+  year: "text",
+  campaign: "text",
+  channel: "text",
+  survey_type: "text",
+  start_time: "datetime",
+  completion_time: "datetime",
+  survey_language: "text",
+  overall_satisfaction: "text",
+  wait_time: "text",
+  agent_customer_service: "text",
+  agent_job_knowledge: "text",
+  answer_satisfaction: "text",
+  nps: "number",
+} as const satisfies Record<string, "text" | "number" | "date" | "datetime">
+
 const nullableString = z.string().trim().min(1).nullable().optional()
 
 const nullableNumber = z.preprocess((v) => {
@@ -12,14 +29,14 @@ const nullableNumber = z.preprocess((v) => {
   return null
 }, z.number().nullable().optional())
 
-const nullableDateString = z.preprocess((v) => {
+const nullableDateTimeString = z.preprocess((v) => {
   if (v === "" || v === null || v === undefined) return null
   if (typeof v !== "string") return null
   const s = v.trim()
   if (!s) return null
   const isoish = s.includes(" ") ? s.replace(" ", "T") : s
   const ms = Date.parse(isoish)
-  return Number.isNaN(ms) ? s : s
+  return Number.isNaN(ms) ? s : isoish
 }, z.string().nullable().optional())
 
 export const NycOpenData311CustomerSatisfactionSurveySchema = z
@@ -30,8 +47,8 @@ export const NycOpenData311CustomerSatisfactionSurveySchema = z
     campaign: nullableString,
     channel: nullableString,
     survey_type: nullableString,
-    start_time: nullableDateString,
-    completion_time: nullableDateString,
+    start_time: nullableDateTimeString,
+    completion_time: nullableDateTimeString,
     survey_language: nullableString,
     overall_satisfaction: nullableString,
     wait_time: nullableString,

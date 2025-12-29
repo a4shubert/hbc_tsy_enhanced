@@ -2,7 +2,7 @@
 
 import { render, screen } from "@testing-library/react"
 
-import { HbcAgTable } from "@/components/HbcAgTable"
+import { HbcAgTable } from "@/components/hbc/HbcAgTable"
 
 jest.mock("ag-grid-react", () => ({
   AgGridReact: () => <div data-testid="ag-grid-react" />,
